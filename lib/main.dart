@@ -1,7 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
+// Link widget is web-only helper; import it when available.
+import 'package:url_launcher/link.dart' if (dart.library.html) 'package:url_launcher/link.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  //Initialize Supabase
+  await Supabase.initialize(
+    url: 'https://iquyvtssulidxvqthmvl.supabase.co',
+    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlxdXl2dHNzdWxpZHh2cXRobXZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkzNzU2MzMsImV4cCI6MjA3NDk1MTYzM30.kl4TsT3jJrkvE2sHuYmVV-e6_fDhuQFttaT_Zb6Ehu0',
+  );
   runApp(const MyApp());
+}
+
+final supabase = Supabase.instance.client;
+Future<List<Map<String,dynamic>>> getLocations() async {
+  final response = await supabase.from('locations').select().order('name');
+  return List<Map<String,dynamic>>.from(response);
 }
 
 class MyApp extends StatelessWidget {
@@ -54,18 +70,17 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
+  Future<bool> _openUrl(String urlString) async {
+    if (urlString.isEmpty) return false;
+    final uri = Uri.tryParse(urlString);
+    if (uri == null) return false;
+    try {
+      return await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } catch (e) {
+      return false;
+    }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -85,38 +100,96 @@ class _MyHomePageState extends State<MyHomePage> {
         // the App.build method, and use it to set our appbar title.
         title: Text(widget.title),
       ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text('You have pushed the button this many times:'),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
-        ),
+      body: FutureBuilder<List<Map<String,dynamic>>>(
+        future: getLocations(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return const Center(child: Text('No locations found'));
+          } else {
+            final locations = snapshot.data!;
+            return ListView.builder(
+              itemCount: locations.length,
+              itemBuilder: (context, index) {
+                final location = locations[index];
+                return ListTile(
+                  title: Text(location['name'] ?? 'Unknown'),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(location['description'] ?? 'No description'),
+                      Text(location['town'] ?? ''),
+                      Text(location['hours'] ?? ''),
+                      // map_link is kept hidden behind the 'Open map' control below
+                      Text(location['building_connection'] ?? ''),
+                      // Show a clickable placeholder if map_link exists, otherwise show nothing
+                      if ((location['map_link'] ?? '').toString().isNotEmpty)
+                        // Use Link widget on web (if available) for opening in new tab; fallback to TextButton that calls _openUrl.
+                        Builder(builder: (context) {
+                          final url = location['map_link'].toString();
+                          // On web, the Link widget will be available and can be used directly in the tree.
+                          // If Link isn't available at runtime, we still provide the TextButton fallback.
+                          try {
+                            return Link(
+                              uri: Uri.parse(url),
+                              target: LinkTarget.blank,
+                              builder: (context, followLink) => TextButton.icon(
+                                style: TextButton.styleFrom(
+                                  padding: EdgeInsets.zero,
+                                  minimumSize: const Size(0, 0),
+                                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                ),
+                                onPressed: followLink,
+                                icon: const Icon(Icons.map, size: 16, color: Colors.blue),
+                                label: const Text(
+                                  'Open map',
+                                  style: TextStyle(
+                                    decoration: TextDecoration.underline,
+                                    color: Colors.blue,
+                                  ),
+                                ),
+                              ),
+                            );
+                          } catch (_) {
+                            return TextButton.icon(
+                              style: TextButton.styleFrom(
+                                padding: EdgeInsets.zero,
+                                minimumSize: const Size(0, 0),
+                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                              ),
+                              onPressed: () async {
+                                  final messenger = ScaffoldMessenger.of(context);
+                                  final ok = await _openUrl(url);
+                                  if (!ok) {
+                                    messenger.showSnackBar(
+                                      const SnackBar(content: Text('Could not open link')),
+                                    );
+                                  }
+                                },
+                              icon: const Icon(Icons.map, size: 16, color: Colors.blue),
+                              label: const Text(
+                                'Open map',
+                                style: TextStyle(
+                                  decoration: TextDecoration.underline,
+                                  color: Colors.blue,
+                                ),
+                              ),
+                            );
+                          }
+                        }),
+                    ],
+                  ),
+                  isThreeLine: true,
+                );
+              },
+            );
+          }
+        },
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }
