@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 // Link widget is web-only helper; import it when available.
 import 'package:url_launcher/link.dart' if (dart.library.html) 'package:url_launcher/link.dart';
 
@@ -11,6 +12,9 @@ Future<void> main() async {
     url: 'https://iquyvtssulidxvqthmvl.supabase.co',
     anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlxdXl2dHNzdWxpZHh2cXRobXZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkzNzU2MzMsImV4cCI6MjA3NDk1MTYzM30.kl4TsT3jJrkvE2sHuYmVV-e6_fDhuQFttaT_Zb6Ehu0',
   );
+  await Hive.initFlutter();
+  await Hive.openBox('userPreferences');
+  await Hive.openBox('locationCache');
   runApp(const MyApp());
 }
 
