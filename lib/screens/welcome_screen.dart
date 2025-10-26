@@ -101,13 +101,16 @@ class _welcome_screenState extends State<welcome_screen>
             colors: isDark
                 ? [const Color(0xFF101820), const Color(0xFF1E2A38)]
                 : [const Color(0xFFF9FAFB), const Color(0xFFE8EEF4)],
-          )
+          ),
         ),
         child: FadeTransition(
           opacity: _fadeIn,
           child: SafeArea(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 24.0,
+                vertical: 32,
+              ),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -115,13 +118,11 @@ class _welcome_screenState extends State<welcome_screen>
                   ScaleTransition(
                     scale: Tween<double>(begin: 0.9, end: 1.0).animate(
                       CurvedAnimation(
-                        parent: _controller, curve: Curves.easeOutBack
-                        ),
+                        parent: _controller,
+                        curve: Curves.easeOutBack,
+                      ),
                     ),
-                    child: Image.asset(
-                      'lib/assets/logo.png',
-                      height: 200,
-                    ),
+                    child: Image.asset('lib/assets/logo.png', height: 200),
                   ),
                   const SizedBox(height: 30),
                   Text(
@@ -160,7 +161,7 @@ class _welcome_screenState extends State<welcome_screen>
                         borderRadius: BorderRadius.circular(30),
                       ),
                       elevation: 5,
-                      shadowColor: primaryColor.withValues(alpha: 0.3),
+                      shadowColor: primaryColor.withOpacity(0.3),
                     ),
                     child: const Text(
                       'Get Started',
@@ -186,14 +187,28 @@ class _welcome_screenState extends State<welcome_screen>
                   const SizedBox(height: 24),
                   TextButton(
                     onPressed: () async {
-                      await userPreferences.delete( 'hasProgress');
-                      await userPreferences.delete('progressData');
+                      final messenger = ScaffoldMessenger.of(context);
+                      try {
+                        await userPreferences.delete('hasProgress');
+                        await userPreferences.delete('progressData');
+                      } catch (e) {
+                        if (!mounted) return;
+                        messenger.showSnackBar(
+                          SnackBar(
+                            content: Text('Failed to reset progress: $e'),
+                          ),
+                        );
+                        return;
+                      }
+                      if (!mounted) return;
                       setState(() {
                         hasProgress = false;
                       });
-                      ScaffoldMessenger.of(context).showSnackBar(
+                      messenger.showSnackBar(
                         const SnackBar(
-                          content: Text('Progress reset. You can start fresh now.'),
+                          content: Text(
+                            'Progress reset. You can start fresh now.',
+                          ),
                           duration: Duration(seconds: 2),
                         ),
                       );
