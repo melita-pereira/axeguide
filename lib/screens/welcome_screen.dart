@@ -158,6 +158,26 @@ class _welcome_screenState extends State<welcome_screen>
                     style: TextStyle(fontSize: 15),
                   ),
                 ),
+                const SizedBox(height: 24),
+                TextButton(
+                  onPressed: () async {
+                    await userPreferences.delete( 'hasProgress');
+                    await userPreferences.delete('progressData');
+                    setState(() {
+                      hasProgress = false;
+                    });
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Progress reset. You can start fresh now.'),
+                        duration: Duration(seconds: 2),
+                      ),
+                    );
+                  },
+                  child: const Text(
+                    'Reset Progress',
+                    style: TextStyle(fontSize: 15, color: Colors.redAccent),
+                  ),
+                ),
               ],
             ),
           ),
