@@ -102,7 +102,10 @@ class _welcome_screenState extends State<welcome_screen>
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Icon(Icons.map_rounded, size: 100, color: primaryColor),
+                Image.asset(
+                  'lib/assets/logo.png',
+                  height: 200,
+                ),
                 const SizedBox(height: 30),
                 Text(
                   'Welcome to The AxeGuide',
