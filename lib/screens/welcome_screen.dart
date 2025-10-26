@@ -19,7 +19,7 @@ class _welcome_screenState extends State<welcome_screen>
   @override
   void initState() {
     super.initState();
-    hasProgress = userPreferences.get('hasProgress', defaultValue: false);
+    hasProgress = userBox.get('hasProgress', defaultValue: false);
     _controller = AnimationController(
       duration: const Duration(milliseconds: 800),
       vsync: this,
@@ -76,8 +76,8 @@ class _welcome_screenState extends State<welcome_screen>
 
   void _goToLocations({bool resume = false}) {
     if (!resume) {
-      userPreferences.put('hasProgress', true);
-      userPreferences.put('progressData', {});
+      userBox.put('hasProgress', true);
+      userBox.put('progressData', {});
     }
     Navigator.pushReplacement(
       context,
@@ -189,8 +189,8 @@ class _welcome_screenState extends State<welcome_screen>
                     onPressed: () async {
                       final messenger = ScaffoldMessenger.of(context);
                       try {
-                        await userPreferences.delete('hasProgress');
-                        await userPreferences.delete('progressData');
+                        await userBox.delete('hasProgress');
+                        await userBox.delete('progressData');
                       } catch (e) {
                         if (!mounted) return;
                         messenger.showSnackBar(
