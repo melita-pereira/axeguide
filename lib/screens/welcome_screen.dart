@@ -1,7 +1,7 @@
 import 'package:axeguide/screens/location_screen.dart';
 import 'package:flutter/material.dart';
 
-import '../utils/hive_boxes.dart';
+import 'package:axeguide/utils/hive_boxes.dart';
 
 class welcome_screen extends StatefulWidget {
   const welcome_screen({super.key});

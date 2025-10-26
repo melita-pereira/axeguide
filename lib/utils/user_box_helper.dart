@@ -1,4 +1,4 @@
-import 'hive_boxes.dart';
+import 'package:axeguide/utils/hive_boxes.dart';
 
 class UserBoxHelper {
   static const String keyHasProgress = 'hasProgress';
@@ -12,7 +12,9 @@ class UserBoxHelper {
   }
 
   static T? read<T>(String key, {T? defaultValue}) {
-    return userBox.get(key, defaultValue: defaultValue) as T;
+    final val = userBox.get(key, defaultValue: defaultValue);
+    if (val is T) return val;
+    return defaultValue;
   }
 
   static Future<void> remove(String key) async {
@@ -23,18 +25,25 @@ class UserBoxHelper {
     await userBox.clear();
   }
 
-  static bool get hasProgress => read<bool>(keyHasProgress, defaultValue: false) ?? false;
-  static set hasProgress(bool value) => write(keyHasProgress, value);
+  static bool get hasProgress =>
+      read<bool>(keyHasProgress, defaultValue: false) ?? false;
+
+  // Async setters: prefer awaiting these so callers know when writes complete.
+  static Future<void> setHasProgress(bool value) =>
+      write(keyHasProgress, value);
 
   static String? get userMode => read<String>(keyUserMode);
-  static set userMode(String? value) => write(keyUserMode, value);
+  static Future<void> setUserMode(String? value) => write(keyUserMode, value);
 
   static String? get userLocation => read<String>(keyUserLocation);
-  static set userLocation(String? value) => write(keyUserLocation, value);
+  static Future<void> setUserLocation(String? value) =>
+      write(keyUserLocation, value);
 
   static String? get navPreference => read<String>(keyNavPreference);
-  static set navPreference(String? value) => write(keyNavPreference, value);
+  static Future<void> setNavPreference(String? value) =>
+      write(keyNavPreference, value);
 
   static dynamic get progressData => read<dynamic>(keyProgressData);
-  static set progressData(dynamic value) => write(keyProgressData, value);
+  static Future<void> setProgressData(dynamic value) =>
+      write(keyProgressData, value);
 }
