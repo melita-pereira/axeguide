@@ -9,7 +9,9 @@ class welcome_screen extends StatefulWidget {
   @override
   State<welcome_screen> createState() => _welcome_screenState();
 }
-class _welcome_screenState extends State<welcome_screen> with SingleTickerProviderStateMixin {
+
+class _welcome_screenState extends State<welcome_screen>
+    with SingleTickerProviderStateMixin {
   bool hasProgress = false;
   late AnimationController _controller;
   late Animation<double> _fadeIn;
@@ -22,10 +24,7 @@ class _welcome_screenState extends State<welcome_screen> with SingleTickerProvid
       duration: const Duration(milliseconds: 800),
       vsync: this,
     );
-    _fadeIn = CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeIn,
-    );
+    _fadeIn = CurvedAnimation(parent: _controller, curve: Curves.easeIn);
     _controller.forward();
   }
 
@@ -40,11 +39,14 @@ class _welcome_screenState extends State<welcome_screen> with SingleTickerProvid
       context: context,
       barrierDismissible: true,
       builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text(
+          'Continue Previous Progress?',
+          style: TextStyle(fontWeight: FontWeight.bold),
         ),
-        title: const Text('Continue Previous Progress?', style: TextStyle(fontWeight: FontWeight.bold),),
-        content: const Text('You have existing progress saved. Would you like to continue where you left off or start fresh?'),
+        content: const Text(
+          'You have existing progress saved. Would you like to continue where you left off or start fresh?',
+        ),
         actions: [
           TextButton(
             onPressed: () {
@@ -95,63 +97,66 @@ class _welcome_screenState extends State<welcome_screen> with SingleTickerProvid
         opacity: _fadeIn,
         child: SafeArea(
           child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Icon(Icons.map_rounded, size: 100, color: primaryColor),
-              const SizedBox(height: 30),
-              Text(
-                'Welcome to The AxeGuide',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                  color: primaryColor,
-                ),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'Discover locations, learn about local places, and personalize your journey.',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.grey[700],
-                  height: 1.4,
-                ),
-              ),
-              const SizedBox(height: 60),
-              ElevatedButton(
-                onPressed: () {
-                  if (hasProgress) {
-                    _showContinueDialog();
-                  } else {
-                    _goToLocations(resume: false);
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: accentColor,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
+            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Icon(Icons.map_rounded, size: 100, color: primaryColor),
+                const SizedBox(height: 30),
+                Text(
+                  'Welcome to The AxeGuide',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                    color: primaryColor,
                   ),
-                  elevation: 4,
                 ),
+                const SizedBox(height: 16),
+                Text(
+                  'Discover locations, learn about local places, and personalize your journey.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.grey[700],
+                    height: 1.4,
+                  ),
+                ),
+                const SizedBox(height: 60),
+                ElevatedButton(
+                  onPressed: () {
+                    if (hasProgress) {
+                      _showContinueDialog();
+                    } else {
+                      _goToLocations(resume: false);
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: accentColor,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                    elevation: 4,
+                  ),
                   child: const Text(
                     'Get Started',
                     style: TextStyle(
                       fontSize: 18,
                       color: Colors.white,
-                      fontWeight: FontWeight.bold
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
-                
+
                 const SizedBox(height: 16),
                 TextButton(
                   onPressed: () => _goToLocations(resume: false),
-                  child: const Text('Skip Personalization', style: TextStyle(fontSize: 15),),
+                  child: const Text(
+                    'Skip Personalization',
+                    style: TextStyle(fontSize: 15),
+                  ),
                 ),
               ],
             ),
