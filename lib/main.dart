@@ -14,8 +14,8 @@ Future<void> main() async {
     anonKey: dotenv.env['SUPABASE_ANON_KEY']!,
   );
   await Hive.initFlutter();
-  await Hive.openBox('userPreferences');
   await Hive.openBox('locationCache');
+  await Hive.openBox('userBox');
   runApp(const MyApp());
 }
 
