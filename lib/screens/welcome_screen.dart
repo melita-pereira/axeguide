@@ -90,98 +90,121 @@ class _welcome_screenState extends State<welcome_screen>
     final theme = Theme.of(context);
     final primaryColor = theme.colorScheme.primary;
     final accentColor = theme.colorScheme.secondary;
+    final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: FadeTransition(
-        opacity: _fadeIn,
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Image.asset(
-                  'lib/assets/logo.png',
-                  height: 200,
-                ),
-                const SizedBox(height: 30),
-                Text(
-                  'Welcome to The AxeGuide',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: primaryColor,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  'Discover locations, learn about local places, and personalize your journey.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.grey[700],
-                    height: 1.4,
-                  ),
-                ),
-                const SizedBox(height: 60),
-                ElevatedButton(
-                  onPressed: () {
-                    if (hasProgress) {
-                      _showContinueDialog();
-                    } else {
-                      _goToLocations(resume: false);
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: accentColor,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: isDark
+                ? [const Color(0xFF101820), const Color(0xFF1E2A38)]
+                : [const Color(0xFFF9FAFB), const Color(0xFFE8EEF4)],
+          )
+        ),
+        child: FadeTransition(
+          opacity: _fadeIn,
+          child: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  ScaleTransition(
+                    scale: Tween<double>(begin: 0.9, end: 1.0).animate(
+                      CurvedAnimation(
+                        parent: _controller, curve: Curves.easeOutBack
+                        ),
                     ),
-                    elevation: 4,
+                    child: Image.asset(
+                      'lib/assets/logo.png',
+                      height: 200,
+                    ),
                   ),
-                  child: const Text(
-                    'Get Started',
+                  const SizedBox(height: 30),
+                  Text(
+                    'Welcome to The AxeGuide',
+                    textAlign: TextAlign.center,
                     style: TextStyle(
-                      fontSize: 18,
-                      color: Colors.white,
+                      fontSize: 28,
                       fontWeight: FontWeight.bold,
+                      color: primaryColor,
                     ),
                   ),
-                ),
-
-                const SizedBox(height: 16),
-                TextButton(
-                  onPressed: () => _goToLocations(resume: false),
-                  child: const Text(
-                    'Skip Personalization',
-                    style: TextStyle(fontSize: 15),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Discover locations, learn about local places, and personalize your journey.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.grey[700],
+                      height: 1.4,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 24),
-                TextButton(
-                  onPressed: () async {
-                    await userPreferences.delete( 'hasProgress');
-                    await userPreferences.delete('progressData');
-                    setState(() {
-                      hasProgress = false;
-                    });
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Progress reset. You can start fresh now.'),
-                        duration: Duration(seconds: 2),
+                  const SizedBox(height: 60),
+                  ElevatedButton(
+                    onPressed: () {
+                      if (hasProgress) {
+                        _showContinueDialog();
+                      } else {
+                        _goToLocations(resume: false);
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: primaryColor,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30),
                       ),
-                    );
-                  },
-                  child: const Text(
-                    'Reset Progress',
-                    style: TextStyle(fontSize: 15, color: Colors.redAccent),
+                      elevation: 5,
+                      shadowColor: primaryColor.withValues(alpha: 0.3),
+                    ),
+                    child: const Text(
+                      'Get Started',
+                      style: TextStyle(
+                        fontSize: 18,
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
-                ),
-              ],
+
+                  const SizedBox(height: 16),
+                  TextButton(
+                    onPressed: () => _goToLocations(resume: false),
+                    style: TextButton.styleFrom(
+                      foregroundColor: Colors.grey[700],
+                    ),
+                    child: const Text(
+                      'Skip Personalization',
+                      style: TextStyle(fontSize: 15),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  TextButton(
+                    onPressed: () async {
+                      await userPreferences.delete( 'hasProgress');
+                      await userPreferences.delete('progressData');
+                      setState(() {
+                        hasProgress = false;
+                      });
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Progress reset. You can start fresh now.'),
+                          duration: Duration(seconds: 2),
+                        ),
+                      );
+                    },
+                    child: const Text(
+                      'Reset Progress',
+                      style: TextStyle(fontSize: 15, color: Colors.redAccent),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
