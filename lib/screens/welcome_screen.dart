@@ -4,14 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:axeguide/utils/hive_boxes.dart';
 import 'package:axeguide/utils/user_box_helper.dart';
 
-class welcome_screen extends StatefulWidget {
-  const welcome_screen({super.key});
+class WelcomeScreen extends StatefulWidget {
+  const WelcomeScreen({super.key});
 
   @override
-  State<welcome_screen> createState() => _welcome_screenState();
+  State<WelcomeScreen> createState() => _WelcomeScreenState();
 }
 
-class _welcome_screenState extends State<welcome_screen>
+class _WelcomeScreenState extends State<WelcomeScreen>
     with SingleTickerProviderStateMixin {
   bool hasProgress = false;
   late AnimationController _controller;
@@ -36,10 +36,11 @@ class _welcome_screenState extends State<welcome_screen>
   }
 
   void _showContinueDialog() {
+    final parentContext = context;
     showDialog(
-      context: context,
+      context: parentContext,
       barrierDismissible: true,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: const Text(
           'Continue Previous Progress?',
@@ -50,11 +51,16 @@ class _welcome_screenState extends State<welcome_screen>
         ),
         actions: [
           TextButton(
-            onPressed: () async {
-              await UserBoxHelper.setHasSeenWelcome(true);
+            onPressed: () {
+              // Fire-and-forget the persistence, then navigate.
+              Navigator.pop(dialogContext);
+              UserBoxHelper.setHasSeenWelcome(true);
+              if (!mounted) return;
               Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => const personalization_screen())
+                parentContext,
+                MaterialPageRoute(
+                  builder: (context) => const PersonalizationScreen(),
+                ),
               );
             },
             child: const Text('Start New Journey'),
@@ -87,7 +93,7 @@ class _welcome_screenState extends State<welcome_screen>
     if (!mounted) return;
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => const personalization_screen()),
+      MaterialPageRoute(builder: (context) => const PersonalizationScreen()),
     );
   }
 
@@ -95,7 +101,6 @@ class _welcome_screenState extends State<welcome_screen>
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final primaryColor = theme.colorScheme.primary;
-    final accentColor = theme.colorScheme.secondary;
     final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
@@ -197,6 +202,8 @@ class _welcome_screenState extends State<welcome_screen>
                       try {
                         await UserBoxHelper.clearCheckpoint();
                         await UserBoxHelper.setHasProgress(false);
+                        // Also clear any stored progress data to avoid stale state.
+                        await UserBoxHelper.setProgressData({});
                       } catch (e) {
                         if (!mounted) return;
                         messenger.showSnackBar(

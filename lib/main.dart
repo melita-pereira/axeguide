@@ -28,14 +28,14 @@ Future<void> main() async {
   Widget startScreen;
   try {
     if (!UserBoxHelper.hasSeenWelcome) {
-      startScreen = const welcome_screen();
+      startScreen = const WelcomeScreen();
     } else if (UserBoxHelper.needsPersonalization) {
-      startScreen = const personalization_screen();
+      startScreen = const PersonalizationScreen();
     } else {
-      startScreen = const home_screen();
+      startScreen = const HomeScreen();
     }
   } catch (e) {
-    startScreen = const welcome_screen();
+    startScreen = const WelcomeScreen();
   }
 
   runApp(MyApp(startScreen: startScreen));

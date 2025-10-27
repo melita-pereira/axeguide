@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:axeguide/utils/user_box_helper.dart';
 import 'home_screen.dart';
 
-class personalization_screen extends StatefulWidget {
-  const personalization_screen({super.key});
+class PersonalizationScreen extends StatefulWidget {
+  const PersonalizationScreen({super.key});
 
   @override
-  State<personalization_screen> createState() => _personalization_screenState();
+  State<PersonalizationScreen> createState() => _PersonalizationScreenState();
 }
 
-class _personalization_screenState extends State<personalization_screen> {
+class _PersonalizationScreenState extends State<PersonalizationScreen> {
   String? selectedLocation;
   bool saving = false;
 
@@ -35,7 +35,7 @@ class _personalization_screenState extends State<personalization_screen> {
     // Navigate to the welcome screen after saving
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => const home_screen()),
+      MaterialPageRoute(builder: (context) => const HomeScreen()),
     );
   }
 

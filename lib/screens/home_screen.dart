@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:axeguide/utils/user_box_helper.dart';
 import 'welcome_screen.dart';
 
-class home_screen extends StatefulWidget {
-  const home_screen({super.key});
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
 
   @override
-  State<home_screen> createState() => _home_screenState();
+  State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _home_screenState extends State<home_screen> {
+class _HomeScreenState extends State<HomeScreen> {
   String? userLocation;
   String? userMode;
 
@@ -33,7 +33,7 @@ class _home_screenState extends State<home_screen> {
     if (!mounted) return;
     Navigator.pushAndRemoveUntil(
       context,
-      MaterialPageRoute(builder: (context) => const welcome_screen()),
+      MaterialPageRoute(builder: (context) => const WelcomeScreen()),
       (route) => false,
     );
     ScaffoldMessenger.of(context).showSnackBar(
@@ -50,17 +50,18 @@ class _home_screenState extends State<home_screen> {
     final color = theme.colorScheme.primary;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('The AxeGuide Home'),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: const Text('The AxeGuide Home'), centerTitle: true),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.map_outlined, size: 90, color: Color(0xFF013A6E)),
+              const Icon(
+                Icons.map_outlined,
+                size: 90,
+                color: Color(0xFF013A6E),
+              ),
               const SizedBox(height: 24),
               Text(
                 'Welcome Back!',
@@ -87,7 +88,10 @@ class _home_screenState extends State<home_screen> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.redAccent,
                   foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 14,
+                  ),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
