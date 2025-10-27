@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:axeguide/utils/user_box_helper.dart';
-import 'welcome_screen.dart';
+import 'home_screen.dart';
 
 class personalization_screen extends StatefulWidget {
   const personalization_screen({super.key});
@@ -27,13 +27,15 @@ class _personalization_screenState extends State<personalization_screen> {
     setState(() => saving = true);
     await UserBoxHelper.setUserLocation(selectedLocation);
     await UserBoxHelper.setHasProgress(true);
+    await UserBoxHelper.setHasSeenWelcome(true);
+    await UserBoxHelper.updateLastActive();
     // Save to Hive or any persistent storage here
     setState(() => saving = false);
     if (!mounted) return;
     // Navigate to the welcome screen after saving
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => const welcome_screen()),
+      MaterialPageRoute(builder: (context) => const home_screen()),
     );
   }
 

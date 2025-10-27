@@ -1,7 +1,8 @@
-import 'package:axeguide/screens/location_screen.dart';
+import 'package:axeguide/screens/personalization_screen.dart';
 import 'package:flutter/material.dart';
 
 import 'package:axeguide/utils/hive_boxes.dart';
+import 'package:axeguide/utils/user_box_helper.dart';
 
 class welcome_screen extends StatefulWidget {
   const welcome_screen({super.key});
@@ -49,16 +50,19 @@ class _welcome_screenState extends State<welcome_screen>
         ),
         actions: [
           TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              _goToLocations(resume: false);
+            onPressed: () async {
+              await UserBoxHelper.setHasSeenWelcome(true);
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => const personalization_screen())
+              );
             },
             child: const Text('Start New Journey'),
           ),
           ElevatedButton(
             onPressed: () {
               Navigator.pop(context);
-              _goToLocations(resume: true);
+              _goToPersonalization(resume: true);
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Color(0xFF013A6E),
@@ -74,14 +78,16 @@ class _welcome_screenState extends State<welcome_screen>
     );
   }
 
-  void _goToLocations({bool resume = false}) {
+  Future<void> _goToPersonalization({bool resume = false}) async {
+    await UserBoxHelper.setHasSeenWelcome(true);
     if (!resume) {
       userBox.put('hasProgress', true);
       userBox.put('progressData', {});
     }
+    if (!mounted) return;
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => const location_screen()),
+      MaterialPageRoute(builder: (context) => const personalization_screen()),
     );
   }
 
@@ -150,7 +156,7 @@ class _welcome_screenState extends State<welcome_screen>
                       if (hasProgress) {
                         _showContinueDialog();
                       } else {
-                        _goToLocations(resume: false);
+                        _goToPersonalization(resume: false);
                       }
                     },
                     style: ElevatedButton.styleFrom(
@@ -175,7 +181,7 @@ class _welcome_screenState extends State<welcome_screen>
 
                   const SizedBox(height: 16),
                   TextButton(
-                    onPressed: () => _goToLocations(resume: false),
+                    onPressed: () => _goToPersonalization(resume: false),
                     style: TextButton.styleFrom(
                       foregroundColor: Colors.grey[700],
                     ),
@@ -189,8 +195,8 @@ class _welcome_screenState extends State<welcome_screen>
                     onPressed: () async {
                       final messenger = ScaffoldMessenger.of(context);
                       try {
-                        await userBox.delete('hasProgress');
-                        await userBox.delete('progressData');
+                        await UserBoxHelper.clearCheckpoint();
+                        await UserBoxHelper.setHasProgress(false);
                       } catch (e) {
                         if (!mounted) return;
                         messenger.showSnackBar(

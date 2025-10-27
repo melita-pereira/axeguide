@@ -8,6 +8,7 @@ class UserBoxHelper {
   static const String keyProgressData = 'progressData';
   static const String keyLastStep = 'lastStep';
   static const String keyLastActive = 'lastActive';
+  static const String keyHasSeenWelcome = 'hasSeenWelcome';
 
   static Future<void> write(String key, dynamic value) async {
     await userBox.put(key, value);
@@ -71,6 +72,12 @@ class UserBoxHelper {
     final location = userLocation;
     return location == null || needsReconfirm;
   }
+
+  static bool get hasSeenWelcome =>
+      read<bool>(keyHasSeenWelcome, defaultValue: false) ?? false;
+
+  static Future<void> setHasSeenWelcome(bool value) =>
+      write(keyHasSeenWelcome, value);
 
   static bool get hasProgress =>
       read<bool>(keyHasProgress, defaultValue: false) ?? false;

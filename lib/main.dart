@@ -6,6 +6,7 @@ import 'package:axeguide/utils/user_box_helper.dart';
 
 import 'screens/welcome_screen.dart';
 import 'screens/personalization_screen.dart';
+import 'screens/home_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -26,14 +27,14 @@ Future<void> main() async {
   // crash at startup.
   Widget startScreen;
   try {
-    startScreen = UserBoxHelper.needsPersonalization
-        ? const personalization_screen()
-        : const welcome_screen();
-  } catch (e, st) {
-    // Log the error to console and proceed with welcome screen.
-    // In production you might report this to a crash-reporting service.
-    // ignore: avoid_print
-    print('Failed to determine start screen: $e\n$st');
+    if (!UserBoxHelper.hasSeenWelcome) {
+      startScreen = const welcome_screen();
+    } else if (UserBoxHelper.needsPersonalization) {
+      startScreen = const personalization_screen();
+    } else {
+      startScreen = const home_screen();
+    }
+  } catch (e) {
     startScreen = const welcome_screen();
   }
 
