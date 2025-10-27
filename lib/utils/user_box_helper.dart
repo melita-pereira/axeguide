@@ -7,6 +7,8 @@ class UserBoxHelper {
   static const String keyNavPreference = 'navPreference';
   static const String keyProgressData = 'progressData';
   static const String keyLastStep = 'lastStep';
+  static const String keyLastActive = 'lastActive';
+  static const String keyHasSeenWelcome = 'hasSeenWelcome';
 
   static Future<void> write(String key, dynamic value) async {
     await userBox.put(key, value);
@@ -31,7 +33,7 @@ class UserBoxHelper {
     await userBox.clear();
   }
 
-  static  Future<String?> setCheckpoint(String stepId) async {
+  static Future<String?> setCheckpoint(String stepId) async {
     await userBox.put(keyLastStep, stepId);
     await userBox.put(keyHasProgress, true);
     // Read back the persisted value to ensure correct stored type/value.
@@ -47,6 +49,35 @@ class UserBoxHelper {
     await userBox.delete(keyLastStep);
     return hasCheckpoint;
   }
+
+  static Future<void> updateLastActive() async {
+    await write(keyLastActive, DateTime.now().toIso8601String());
+  }
+
+  static DateTime? get lastActive {
+    final str = read<String>(keyLastActive);
+    return str != null ? DateTime.tryParse(str) : null;
+  }
+
+  static bool get needsReconfirm {
+    // Use the parsed `lastActive` value (stored as ISO string) instead of
+    // incorrectly casting the `keyLastActive` constant.
+    final lastActive = UserBoxHelper.lastActive;
+    if (lastActive == null) return false;
+    final diff = DateTime.now().difference(lastActive).inDays;
+    return diff >= 30;
+  }
+
+  static bool get needsPersonalization {
+    final location = userLocation;
+    return location == null || needsReconfirm;
+  }
+
+  static bool get hasSeenWelcome =>
+      read<bool>(keyHasSeenWelcome, defaultValue: false) ?? false;
+
+  static Future<void> setHasSeenWelcome(bool value) =>
+      write(keyHasSeenWelcome, value);
 
   static bool get hasProgress =>
       read<bool>(keyHasProgress, defaultValue: false) ?? false;
