@@ -83,8 +83,9 @@ class UserBoxHelper {
       read<bool>(keyHasProgress, defaultValue: false) ?? false;
 
   // Async setters: prefer awaiting these so callers know when writes complete.
-  static Future<void> setHasProgress(bool value) =>
-      write(keyHasProgress, value);
+  static Future<void> setHasProgress(bool value) async {
+    await write(keyHasProgress, value);
+  }
 
   static String? get userMode => read<String>(keyUserMode);
   static Future<void> setUserMode(String? value) => write(keyUserMode, value);

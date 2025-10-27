@@ -1,4 +1,4 @@
-import 'package:axeguide/screens/personalization_screen.dart';
+import 'package:axeguide/screens/personalization_loc_screen.dart';
 import 'package:flutter/material.dart';
 
 import 'package:axeguide/utils/hive_boxes.dart';
