@@ -31,7 +31,7 @@ class UserBoxHelper {
     await userBox.clear();
   }
 
-  static  Future<void> setCheckpoint(String stepId) async {
+  static  Future<String?> setCheckpoint(String stepId) async {
     await userBox.put(keyLastStep, stepId);
     await userBox.put(keyHasProgress, true);
     return stepId;
@@ -41,10 +41,10 @@ class UserBoxHelper {
     return userBox.get(keyLastStep);
   }
 
-  static Future<void> clearCheckpoint() async {
-    final hadCheckpoint = userBox.containsKey(keyLastStep);
+  static Future<bool> clearCheckpoint() async {
+    final hasCheckpoint = userBox.containsKey(keyLastStep);
     await userBox.delete(keyLastStep);
-    return hadCheckpoint;
+    return hasCheckpoint;
   }
 
   static bool get hasProgress =>
