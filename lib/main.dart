@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:axeguide/utils/user_box_helper.dart';
 
 import 'screens/welcome_screen.dart';
+import 'screens/personalization_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -16,11 +18,18 @@ Future<void> main() async {
   await Hive.initFlutter();
   await Hive.openBox('locationCache');
   await Hive.openBox('userBox');
-  runApp(const MyApp());
+
+  await UserBoxHelper.updateLastActive();
+
+  final startScreen = UserBoxHelper.needsPersonalization
+      ? const personalization_screen()
+      : const welcome_screen();
+  runApp(MyApp(startScreen: startScreen));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final Widget startScreen;
+  const MyApp({super.key, required this.startScreen});
 
   // This widget is the root of your application.
   @override
@@ -55,7 +64,7 @@ class MyApp extends StatelessWidget {
         ),
         useMaterial3: true,
       ),
-      home: const welcome_screen(),
+      home: startScreen,
     );
   }
 }
