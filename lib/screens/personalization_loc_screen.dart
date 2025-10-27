@@ -1,6 +1,7 @@
+import 'package:axeguide/screens/personalization_nav_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:axeguide/utils/user_box_helper.dart';
-import 'home_screen.dart';
+import 'package:axeguide/screens/home_screen.dart';
 
 class PersonalizationScreen extends StatefulWidget {
   const PersonalizationScreen({super.key});
@@ -32,11 +33,19 @@ class _PersonalizationScreenState extends State<PersonalizationScreen> {
     // Save to Hive or any persistent storage here
     setState(() => saving = false);
     if (!mounted) return;
-    // Navigate to the welcome screen after saving
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => const HomeScreen()),
-    );
+    final shouldShowNavSetup = UserBoxHelper.navPreference == null || UserBoxHelper.needsReconfirm;
+
+    if (shouldShowNavSetup) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const PersonalizationNavScreen()),
+      );
+    } else {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const HomeScreen()),
+      );
+    }
   }
 
   @override
