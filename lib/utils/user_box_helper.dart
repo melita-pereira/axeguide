@@ -6,6 +6,7 @@ class UserBoxHelper {
   static const String keyUserLocation = 'userLocation';
   static const String keyNavPreference = 'navPreference';
   static const String keyProgressData = 'progressData';
+  static const String keyLastStep = 'lastStep';
 
   static Future<void> write(String key, dynamic value) async {
     await userBox.put(key, value);
@@ -13,7 +14,12 @@ class UserBoxHelper {
 
   static T? read<T>(String key, {T? defaultValue}) {
     final val = userBox.get(key, defaultValue: defaultValue);
-    if (val is T) return val;
+    if (val == null) {
+      return defaultValue;
+    }
+    if (val is T) {
+      return val;
+    }
     return defaultValue;
   }
 
@@ -23,6 +29,23 @@ class UserBoxHelper {
 
   static Future<void> clear() async {
     await userBox.clear();
+  }
+
+  static  Future<String?> setCheckpoint(String stepId) async {
+    await userBox.put(keyLastStep, stepId);
+    await userBox.put(keyHasProgress, true);
+    // Read back the persisted value to ensure correct stored type/value.
+    return read<String>(keyLastStep);
+  }
+
+  static String? getCheckpoint() {
+    return read<String>(keyLastStep);
+  }
+
+  static Future<bool> clearCheckpoint() async {
+    final hasCheckpoint = userBox.containsKey(keyLastStep);
+    await userBox.delete(keyLastStep);
+    return hasCheckpoint;
   }
 
   static bool get hasProgress =>
