@@ -34,11 +34,12 @@ class UserBoxHelper {
   static  Future<String?> setCheckpoint(String stepId) async {
     await userBox.put(keyLastStep, stepId);
     await userBox.put(keyHasProgress, true);
-    return stepId;
+    // Read back the persisted value to ensure correct stored type/value.
+    return read<String>(keyLastStep);
   }
 
   static String? getCheckpoint() {
-    return userBox.get(keyLastStep);
+    return read<String>(keyLastStep);
   }
 
   static Future<bool> clearCheckpoint() async {
