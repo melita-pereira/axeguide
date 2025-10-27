@@ -6,7 +6,8 @@ class PersonalizationNavScreen extends StatefulWidget {
   const PersonalizationNavScreen({super.key});
 
   @override
-  State<PersonalizationNavScreen> createState() => _PersonalizationNavScreenState();
+  State<PersonalizationNavScreen> createState() =>
+      _PersonalizationNavScreenState();
 }
 
 class _PersonalizationNavScreenState extends State<PersonalizationNavScreen> {
@@ -68,7 +69,10 @@ class _PersonalizationNavScreenState extends State<PersonalizationNavScreen> {
                 ),
                 child: saving
                     ? const CircularProgressIndicator(color: Colors.white)
-                    : const Text('Continue', style: TextStyle(color: Colors.white)),
+                    : const Text(
+                        'Continue',
+                        style: TextStyle(color: Colors.white),
+                      ),
               ),
             ),
           ],

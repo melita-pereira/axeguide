@@ -33,12 +33,15 @@ class _PersonalizationScreenState extends State<PersonalizationScreen> {
     // Save to Hive or any persistent storage here
     setState(() => saving = false);
     if (!mounted) return;
-    final shouldShowNavSetup = UserBoxHelper.navPreference == null || UserBoxHelper.needsReconfirm;
+    final shouldShowNavSetup =
+        UserBoxHelper.navPreference == null || UserBoxHelper.needsReconfirm;
 
     if (shouldShowNavSetup) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const PersonalizationNavScreen()),
+        MaterialPageRoute(
+          builder: (context) => const PersonalizationNavScreen(),
+        ),
       );
     } else {
       Navigator.pushReplacement(
