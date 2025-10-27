@@ -59,7 +59,9 @@ class UserBoxHelper {
   }
 
   static bool get needsReconfirm {
-    final lastActive = UserBoxHelper.keyLastActive as DateTime?;
+    // Use the parsed `lastActive` value (stored as ISO string) instead of
+    // incorrectly casting the `keyLastActive` constant.
+    final lastActive = UserBoxHelper.lastActive;
     if (lastActive == null) return false;
     final diff = DateTime.now().difference(lastActive).inDays;
     return diff >= 30;

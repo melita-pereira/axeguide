@@ -21,9 +21,22 @@ Future<void> main() async {
 
   await UserBoxHelper.updateLastActive();
 
-  final startScreen = UserBoxHelper.needsPersonalization
-      ? const personalization_screen()
-      : const welcome_screen();
+  // Decide start screen defensively. If any error occurs while reading
+  // user preferences, fall back to the welcome screen so the app doesn't
+  // crash at startup.
+  Widget startScreen;
+  try {
+    startScreen = UserBoxHelper.needsPersonalization
+        ? const personalization_screen()
+        : const welcome_screen();
+  } catch (e, st) {
+    // Log the error to console and proceed with welcome screen.
+    // In production you might report this to a crash-reporting service.
+    // ignore: avoid_print
+    print('Failed to determine start screen: $e\n$st');
+    startScreen = const welcome_screen();
+  }
+
   runApp(MyApp(startScreen: startScreen));
 }
 
