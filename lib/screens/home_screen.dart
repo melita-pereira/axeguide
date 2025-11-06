@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:axeguide/utils/user_box_helper.dart';
+import 'package:hive/hive.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'settings_screen.dart';
+import 'package:axeguide/services/hive_service.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -26,7 +28,19 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _initialize() async {
     await _loadUserData();
-    await _loadLocations();
+    if (HiveService.isCacheStale()) {
+      await _loadLocations();
+    } else {
+      final cached = HiveService.getCachedLocations();
+      if (cached != null && cached.isNotEmpty) {
+        setState(() {
+          locations = List<Map<String, dynamic>>.from(cached);
+          loading = false;
+        });
+      } else {
+        await _loadLocations();
+      }
+    }
   }
 
   Future<void> _loadUserData() async {
@@ -55,13 +69,64 @@ class _HomeScreenState extends State<HomeScreen> {
           )
           .ilike('area_tag', '%$normalized%')
           .limit(10);
-      setState(() {
+      if (response.isNotEmpty) {
+        await HiveService.saveLocations(response);
+        setState(() {
         locations = List<Map<String, dynamic>>.from(response);
         loading = false;
       });
+      return;
+      }
+
+      final cached = HiveService.getCachedLocations();
+      if (cached != null && cached.isNotEmpty) {
+        setState(() {
+          locations = List<Map<String, dynamic>>.from(cached);
+          loading = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Loaded locations from cache.'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      } else {
+        setState(() {
+          loading = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('No locations available at the moment.'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
     } catch (e) {
-      setState(() => loading = false);
-      debugPrint('Error loading locations: $e');
+      debugPrint('Supabase fetch failed: $e');
+
+      final cached = HiveService.getCachedLocations();
+      if (cached != null && cached.isNotEmpty) {
+        setState(() {
+          locations = List<Map<String, dynamic>>.from(cached);
+          loading = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Loaded locations from cache due to network error.'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      } else {
+        setState(() {
+          loading = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Failed to load locations. Please check your connection.'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
     }
   }
 
@@ -165,9 +230,17 @@ class _HomeScreenState extends State<HomeScreen> {
             const Divider(height: 40, thickness: 1),
             Text('Explore', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600, color: color)),
             const SizedBox(height: 16),
-
             if (loading) ...[
-              const Padding(padding: EdgeInsets.all(16.0), child: CircularProgressIndicator()),
+              const Padding(
+                padding: EdgeInsets.all(16.0),
+                child: Column(
+                  children: [
+                    CircularProgressIndicator(),
+                    SizedBox(height: 16),
+                    Text('Fetching data...', style: TextStyle(fontSize: 16)),
+                  ],
+                ),
+              ),
             ] else if (locations.isEmpty) ...[
               Container(
                 height: 150,
