@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:axeguide/utils/user_box_helper.dart';
 import 'welcome_screen.dart';
+import 'settings_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -50,7 +51,23 @@ class _HomeScreenState extends State<HomeScreen> {
     final color = theme.colorScheme.primary;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('The AxeGuide Home'), centerTitle: true),
+      appBar: AppBar(
+        title: const Text('The AxeGuide Home'), 
+        centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings_outlined),
+            tooltip: 'Settings',
+            onPressed: () {
+              // Navigate to settings screen
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const SettingsScreen()),
+              );
+            },
+          ),
+        ],
+      ),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
