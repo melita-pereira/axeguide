@@ -53,6 +53,9 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _loadLocations() async {
+    setState(() {
+      loading = true;
+    });
     String normalizeLocation(String location) {
       final lower = location.toLowerCase();
       if (lower.contains('acadia')) {
@@ -65,6 +68,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     final normalized = normalizeLocation(userLocation ?? '');
+    List<Map<String, dynamic>>? data;
     // Simulate loading locations from a data source
     try {
       final response = await Supabase.instance.client
@@ -73,65 +77,45 @@ class _HomeScreenState extends State<HomeScreen> {
           .ilike('area_tag', '%$normalized%')
           .limit(10);
       if (response.isNotEmpty) {
+        data = List<Map<String, dynamic>>.from(response);
         await HiveService.saveLocations(response);
-        setState(() {
-        locations = List<Map<String, dynamic>>.from(response);
-        loading = false;
-      });
-      return;
-      }
-
-      final cached = HiveService.getCachedLocations();
-      if (cached != null && cached.isNotEmpty) {
-        setState(() {
-          locations = List<Map<String, dynamic>>.from(cached);
-          loading = false;
-        });
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Loaded locations from cache.'),
-            duration: Duration(seconds: 2),
-          ),
-        );
+        debugPrint('Loaded ${data.length} locations from Supabase.');
       } else {
-        setState(() {
-          loading = false;
-        });
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('No locations available at the moment.'),
-            duration: Duration(seconds: 2),
-          ),
-        );
+        debugPrint('No Supabase data found, using cache if available.');
+        data = HiveService.getCachedLocations();
+        if (data == null || data.isEmpty) {
+          _showSnack('No locations available at the moment.');
+        } else {
+          _showSnack('Loaded locations from cache.');
+        }
       }
     } catch (e) {
       debugPrint('Supabase fetch failed: $e');
-
-      final cached = HiveService.getCachedLocations();
-      if (cached != null && cached.isNotEmpty) {
-        setState(() {
-          locations = List<Map<String, dynamic>>.from(cached);
-          loading = false;
-        });
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Loaded locations from cache due to network error.'),
-            duration: Duration(seconds: 2),
-          ),
-        );
+      data = HiveService.getCachedLocations();
+      if (data != null && data.isNotEmpty) {
+        _showSnack('Loaded locations from cache due to network error.');
       } else {
-        setState(() {
-          loading = false;
-        });
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Failed to load locations. Please check your connection.'),
-            duration: Duration(seconds: 2),
-          ),
-        );
+        _showSnack('Failed to load locations. Please check your connection.');
       }
     }
+
+    if (mounted) {
+      setState(() {
+        locations = data ?? [];
+        loading = false;
+      });
+    }
   }
+  void _showSnack(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
 
   Future<void> _resetApp() async {
     await UserBoxHelper.clear();
@@ -265,26 +249,38 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ] else if (locations.isEmpty) ...[
                 Container(
-                  height: 150,
+                  height: 180,
                   width: double.infinity,
                   decoration: BoxDecoration(
                     color: Colors.blueGrey.shade50,
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(color: Colors.blueGrey.shade100),
                   ),
-                  child: const Center(
-                    child: Text(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text(
                       'No locations available at the moment.',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 16,
                         color: Colors.blueGrey,
                         fontStyle: FontStyle.italic,
+                      )),
+                      const SizedBox(height: 12),
+                      ElevatedButton.icon(
+                        onPressed: _loadLocations,
+                        icon: const Icon(Icons.refresh),
+                        label: const Text('Retry'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF013A6E),
+                          foregroundColor: Colors.white,
+                          ),
                       ),
+                    ],
                     ),
-                  ),
-                )
-              ] else ...[
+                  ), 
+                ] else ...[
                 Column(
                   children: locations.map((loc) {
                     final title = loc['name'] ?? 'Unknown';
