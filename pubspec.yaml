@@ -97,3 +97,4 @@ flutter:
   assets:
     - .env
     - lib/assets/logo.png
+    - lib/assets/data/walkthrough.json

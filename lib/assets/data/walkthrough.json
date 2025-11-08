@@ -1,0 +1,429 @@
+{
+    "walkthrough": [
+        {
+            "id": "welcome",
+            "type": "conditional",
+            "condition": "hive.hasKey('walkthrough_checkpoint')",
+            "question": "Welcome! We see you have some progress saved. Would you like to retrieve it?",
+            "options": [
+                {
+                    "label": "Yes",
+                    "nextStepId": "import_progress"
+                },
+                {
+                    "label": "No",
+                    "nextStepId": "start_location"
+                }
+            ]
+        },
+        {
+            "id": "import_progress",
+            "type": "action",
+            "action": "importHiveCheckpoint",
+            "next": "dynamic_home"
+        },
+        {
+            "id": "start_location",
+            "type": "question",
+            "text": "Let's get you started! Where are you currently?",
+            "options": [
+                {
+                    "label": "Halifax Airport",
+                    "nextStepId": "navigation_pref"
+                },
+                {
+                    "label": "Acadia University",
+                    "nextStepId": "navigation_pref"
+                },
+                {
+                    "label": "Wolfville",
+                    "nextStepId": "navigation_pref"
+                },
+                {
+                    "label": "New Minas",
+                    "nextStepId": "navigation_pref"
+                },
+                {
+                    "label": "Kentville",
+                    "nextStepId": "navigation_pref"
+                },
+                {
+                    "label": "Halifax",
+                    "nextStepId": "navigation_pref"
+                },
+                {
+                    "label": "Other",
+                    "nextStepId": "generic_homescreen"
+                }
+            ]
+        },
+        {
+            "id": "navigation_pref",
+            "type": "question",
+            "text": "What type of guidance would you like?",
+            "options": [
+                {
+                    "label": "In-depth",
+                    "nextStepId": "next_after_navigation",
+                    "action": "setnavigationPreference('in-depth')"
+                },
+                {
+                    "label": "Basic",
+                    "nextStepId": "next_after_navigation",
+                    "action": "setnavigationPreference('basic')"
+                }
+            ]
+        },
+        {
+            "id": "next_after_navigation",
+            "type": "conditional",
+            "condition": "user.selectedLocation == 'Halifax Airport'",
+            "nextStepId": "halifax_airport_intro",
+            "elseNextStepId": "check_other_locations"
+        },
+        {
+            "id": "check_other_locations",
+            "type": "conditional",
+            "condition": "user.selectedLocation == 'Acadia University'",
+            "nextStepId": "acadia_intro",
+            "elseNextStepId": "check_valley_or_city"
+        },
+        {
+            "id": "check_valley_or_city",
+            "type": "conditional",
+            "condition": "['Wolfville','New Minas','Kentville'].contains(user.selectedLocation)",
+            "nextStepId": "valley_intro",
+            "elseNextStepId": "city_intro"
+        },
+        {
+            "id": "halifax_airport_intro",
+            "type": "question",
+            "text": "Are you new to Canada?",
+            "options": [
+                {
+                    "label": "Yes",
+                    "nextStepId": "immigration_baggage"
+                },
+                {
+                    "label": "No",
+                    "nextStepId": "transport"
+                }
+            ]
+        },
+        {
+            "id": "immigration_baggage",
+            "type": "info",
+            "text": "Do you need help with immigration and baggage?",
+            "options":[
+                {
+                    "label": "Yes",
+                    "nextStepId": "immigration_baggage_help"
+                },
+                {
+                    "label": "No",
+                    "nextStepId": "airport_transport"
+                }
+            ]
+        },
+        {
+            "id": "immigration_baggage_help",
+            "type": "action",
+            "action": "showImmigrationBaggageHelp",
+            "nextStepId": "airport_transport"
+        },
+        {
+            "id": "airport_transport",
+            "type": "question",
+            "text": "How do you plan on navigating out of the airport?",
+            "options":[
+                {
+                    "label": "University Shuttle",
+                    "nextStepId": "shuttle_info"
+                },
+                {
+                    "label": "Friend/Family",
+                    "nextStepId": "friend_family_info"
+                },
+                {
+                    "label": "Public Bus",
+                    "nextStepId": "public_bus_info"
+                },
+                {
+                    "label": "Taxi",
+                    "nextStepId": "taxi_info"
+                },
+                {
+                    "label": "Not Sure",
+                    "nextStepId": "international_centre_info"
+                }
+            ]
+        },
+        {
+            "id": "shuttle_info",
+            "type": "action",
+            "action": "showShuttleGuidance",
+            "nextStepId": "airport_sim"
+        },
+        {
+            "id": "friend_family_info",
+            "type": "action",
+            "action": "showFriendFamilyGuidance",
+            "nextStepId": "airport_sim"
+        },
+        {
+            "id": "public_bus_info",
+            "type": "action",
+            "action": "showBusGuidance",
+            "nextStepId": "airport_sim"
+        },
+        {
+            "id": "taxi_info",
+            "type": "action",
+            "action": "showTaxiGuidance",
+            "nextStepId":"airport_sim"
+        },
+        {
+            "id": "international_centre_info",
+            "type": "action",
+            "action": "showAirportHelp",
+            "nextStepId": "airport_sim"
+        },
+        {
+            "id": "airport_sim",
+            "type": "question",
+            "text": "Do you need a SIM card?",
+            "options": [
+                {
+                    "label": "Yes",
+                    "nextStepId": "sim_kiosk"
+                },
+                {
+                    "label": "No",
+                    "nextStepId": "airport_help"
+                }
+            ]
+        },
+        {
+            "id": "sim_kiosk",
+            "type": "action",
+            "action": "showSIMKioskInfo",
+            "nextStepId": "airport_help"
+        },
+        {
+            "id": "airport_help",
+            "type": "question",
+            "text": "Do you need aiport help?",
+            "options": [
+                {
+                    "label": "Yes",
+                    "nextStepId": "show_airport_help"
+                },
+                {
+                    "label": "No",
+                    "nextStepId": "airport_next_steps"
+                }
+            ]
+        },
+        {
+            "id": "show_airport_help",
+            "type": "action",
+            "action": "displayAirportHelpInfo",
+            "nextStepId": "airport_next_steps"
+        },
+        {
+            "id": "airport_next_steps",
+            "type": "question",
+            "text": "What's next?",
+            "options": [
+                {
+                    "label": "Head to Acadia",
+                    "nextStepId": "acadia_intro",
+                    "condition": "!hive.hasKey('acadia_intro_completed')",
+                    "elseNextStepId": "explore_acadia"
+                },
+                {
+                    "label": "Head to the Valley (Wolfville, New Minas, Kentville)",
+                    "nextStepId": "valley_intro",
+                    "condition": "!hive.hasKey('valley_intro_completed')",
+                    "elseNextStepId": "choose_valley_town"
+                },
+                {
+                    "label": "Explore Halifax",
+                    "nextStepId": "city_intro",
+                    "condition": "!hive.hasKey('city_intro_completed')",
+                    "elseNextStepId": "explore_halifax"
+                },
+                {
+                    "label": "Explore Halifax Airport",
+                    "nextStepId": "explore_airport"
+                },
+                {
+                    "label": "Skip",
+                    "nextStepId": "generic_homescreen"
+                }
+            ]
+        },
+        {
+            "id": "explore_airpot",
+            "type": "action",
+            "action": "navigateToAirportHomeScreen",
+            "nextStepId": "dynamic_home"
+        },
+        {
+            "id": "acadia_intro",
+            "type": "question",
+            "text": "Is this your first time at Acadia University?",
+            "options": [
+                {
+                    "label": "Yes",
+                    "nextStepId": "acadia_transport"
+                },
+                {
+                    "label": "No",
+                    "nextStepId": "acadia_location"
+                }
+            ]
+        },
+        {
+            "id": "acadia_transport",
+            "type": "question",
+            "text": "How did you reach Acadia?",
+            "options": [
+                {
+                    "label": "University Shuttle",
+                    "nextStepId": "shuttlePointers"
+                },
+                {
+                    "label": "Friend/Family",
+                    "nextStepId": "friend_family_pointers"
+                },
+                {
+                    "label": "Public Bus",
+                    "nextStepId": "busPointers"
+                },
+                {
+                    "label": "Taxi",
+                    "nextStepId": "taxiPointers"
+                }
+            ]
+        },
+        {
+            "id": "shuttlePointers",
+            "type": "action",
+            "action": "showShuttlePointers",
+            "nextStepId": "acadia_housing"
+        },
+        {
+            "id": "friend_family_pointers",
+            "type": "action",
+            "action": "showFriendFamilyPointers",
+            "nextStepId": "acadia_housing"
+        },
+        {
+            "id": "busPointers",
+            "type": "action",
+            "action": "showBusPointers",
+            "nextStepId": "acadia_housing"
+        },
+        {
+            "id": "taxiPointers",
+            "type": "action",
+            "action": "showTaxiPointers",
+            "nextStepId": "acadia_housing"
+        },
+        {
+            "id": "acadia_housing",
+            "type": "question",
+            "text": "Where do you plan on staying for the year?",
+            "options":[
+                {
+                    "label": "On Campus",
+                    "nextStepId": "acadia_campus"
+                },
+                {
+                    "label": "Off Campus",
+                    "nextStepId": "acadia_off_campus"
+                }
+            ]
+        },
+        {
+            "id": "acadia_campus",
+            "type":"action",
+            "action": "showCampusResDirections",
+            "params": {
+                "residences": [
+                    "Chase Court",
+                    "Chipman House",
+                    "Christofor Hall",
+                    "Crowell Tower",
+                    "55 University Ave (formerly known as Cutten House)",
+                    "Dennis House",
+                    "Eaton House",
+                    "Roy Jodrey Hall",
+                    "Seminary House",
+                    "War Memorial House (also known as Barrax or Rax)",
+                    "Whitman House (also known as Tully)"
+                ],
+                "startingPointsQuery" : {
+                    "area_tag": "acadia",
+                    "parent_id_null": true
+                }
+            },
+            "nextStepId": "acadia_sim"
+        },
+        {
+            "id": "acadia_off_campus",
+            "type": "action",
+            "action": "enterOffCampusAddress",
+            "nextStepId": "acadia_sim"
+        },
+        {
+            "id": "acadia_sim",
+            "type": "question",
+            "question": "Do you need a SIM card?",
+            "options":[
+                {
+                    "label": "Yes",
+                    "nextStepId": "acadia_sim_directions"
+                },
+                {
+                    "label": "No",
+                    "nextStepId": "acadia_next_steps"
+                }
+            ]
+        },
+        {
+            "id": "acadia_sim_directions",
+            "type": "action",
+            "action": "showSIMDirections",
+            "params": {
+                "locations": [
+                    "Wong International Centre",
+                    "New Minas"
+                ]
+            },
+            "nextStepId": "airport_next_steps"
+        },
+        {
+            "id": "acadia_next_steps",
+            "type": "question",
+            "question": "Where do you want to go next?",
+            "options": [
+                {
+                    "label": "On Campus",
+                    "nextStepId": "explore_acadia"
+                },
+                {
+                    "label": "Off Campus",
+                    "nextStepId": "valley_intro"
+                }
+            ]
+        },
+        {
+            "id": "explore_acadia",
+            "type": "action",
+            "action": "navigateToAcadiaHomeScreen",
+            "nextStepId": "dynamic_home"
+        }
+    ]
+}
