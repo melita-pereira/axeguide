@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:axeguide/utils/user_box_helper.dart';
 import 'welcome_screen.dart';
+import 'package:axeguide/assets/scrollable_scaffold.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -49,9 +50,9 @@ class _HomeScreenState extends State<HomeScreen> {
     final theme = Theme.of(context);
     final color = theme.colorScheme.primary;
 
-    return Scaffold(
+    return ScrollableScaffold(
       appBar: AppBar(title: const Text('The AxeGuide Home'), centerTitle: true),
-      body: Center(
+      child: Center(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
           child: Column(
