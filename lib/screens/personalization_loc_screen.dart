@@ -2,6 +2,7 @@ import 'package:axeguide/screens/personalization_nav_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:axeguide/utils/user_box_helper.dart';
 import 'package:axeguide/screens/home_screen.dart';
+import 'package:axeguide/assets/scrollable_scaffold.dart';
 
 class PersonalizationScreen extends StatefulWidget {
   const PersonalizationScreen({super.key});
@@ -53,13 +54,13 @@ class _PersonalizationScreenState extends State<PersonalizationScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return ScrollableScaffold(
       backgroundColor: const Color(0xFFF7F7F7),
       appBar: AppBar(
         title: const Text('Personalize Your Experience'),
         centerTitle: true,
       ),
-      body: Padding(
+      child: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
