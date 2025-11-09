@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:nativewrappers/_internal/vm/lib/ffi_allocation_patch.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:hive/hive.dart';
 
@@ -49,8 +50,9 @@ class WalkthroughManager {
   bool evaluateCondition(String condition){
     final Map<String, bool Function()> conditionMap ={
       "hive.has('walkthrough_checkpoint)": () =>
-      Hive.box('userBox').containsKey(walkthrough_checkpoint),
+      Hive.box('userBox').containsKey('walkthrough_checkpoint'),
     };
+    return conditionMap[condition]?.call() ?? false;
   }
 
   void performAction(String actionName, [Map<String, dynamic>? params]){
