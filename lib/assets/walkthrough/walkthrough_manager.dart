@@ -1,10 +1,11 @@
 import 'dart:convert';
-import 'dart:nativewrappers/_internal/vm/lib/ffi_allocation_patch.dart';
 import 'package:flutter/services.dart' show rootBundle;
-import 'package:hive/hive.dart';
+import 'package:axeguide/utils/hive_boxes.dart';
 
 class WalkthroughManager {
-  late Map<String, dynamic> _steps;
+  final box = userBox;
+  final cache = locationCache;
+  late Map<String, dynamic> _steps = {};
   String? _currentStepId;
 
   void Function(Map<String, dynamic> step)? onStepChanged;
@@ -15,9 +16,15 @@ class WalkthroughManager {
     final String jsonString = await rootBundle.loadString(
       'lib/assets/data/walkthrough.json',
     );
-    final Map<String, dynamic> jsonMap = json.decode(jsonString);
-    _steps = {for (var step in jsonMap['walkthrough']) step['id']: step};
-    _currentStepId = _steps.keys.first;
+    final Map<String, dynamic> jsonMap = json.decode(jsonString) as Map<String, dynamic>;
+    final List<dynamic> rawSteps = jsonMap['walkthrough'] as List<dynamic>;
+    _steps = {
+      for (final raw in rawSteps) 
+        raw['id'] as String: Map<String, dynamic>.from(raw as Map<String, dynamic>)
+      };
+    _currentStepId = _steps.containsKey('welcome')
+    ? 'welcome'
+    : (_steps.isNotEmpty ? _steps.keys.first : null);
     _notifyStepChanged();
   }
 
@@ -33,6 +40,7 @@ class WalkthroughManager {
       _currentStepId = null;
     }
     _notifyStepChanged();
+    userBox.put('walkthrough_checkpoint', _currentStepId);
   }
 
   void processConditionalStep(Map<String, dynamic> step) {
@@ -45,20 +53,69 @@ class WalkthroughManager {
     final result = evaluateCondition(condition);
     _currentStepId = result ? step['nextStepId']:step['elseNextStepId'];
     _notifyStepChanged();
+    userBox.put('walkthrough_checkpoint', _currentStepId);
   }
 
-  bool evaluateCondition(String condition){
-    final Map<String, bool Function()> conditionMap ={
-      "hive.has('walkthrough_checkpoint)": () =>
-      Hive.box('userBox').containsKey('walkthrough_checkpoint'),
+  bool evaluateCondition(String condition) {
+
+    final Map<String, bool Function()> conditionMap = {
+      "hive.hasKey('walkthrough_checkpoint')": () =>
+          userBox.containsKey('walkthrough_checkpoint'),
+
+      "user.hasSelectedLocation": () =>
+          userBox.containsKey('selectedLocation'),
     };
-    return conditionMap[condition]?.call() ?? false;
+
+    // Exact match first
+    if (conditionMap.containsKey(condition)) {
+      return conditionMap[condition]!();
+    }
+
+    // Basic pattern handling
+    if (condition.startsWith("user.selectedLocation ==")) {
+      final match = RegExp(r"'(.*?)'").firstMatch(condition);
+      final value = match?.group(1);
+      return userBox.get('selectedLocation') == value;
+    }
+
+    return false;
   }
 
   void performAction(String actionName, [Map<String, dynamic>? params]){
     final actionMap = <String, void Function()> {
       "importHiveCheckpoint": () => importHiveCheckpoint(),
-      "showSIMKioskInfo": () => showSIMKioskInfo(params),
+      "setNavigationPreference" : () => setNavigationPreference(params),
+      "showSIMKioskInfo": () => showSIMKioskInfo(),
+      "showImmigrationBaggageHelp": () => showImmigrationBaggageHelp(),
+      "showShuttleGuidance": () => showShuttleGuidance(),
+      "showFriendFamilyGuidance": () => showFriendFamilyGuidance(),
+      "showBusGuidance": () => showBusGuidance(),
+      "showTaxiGuidance": () => showTaxiGuidance(),
+      "showAirportHelp": () => showAirportHelp(),
+      "displayAirportHelpInfo": () => displayAirportHelpInfo(),
+      "navigateToAirportHomeScreen": () => navigateToAirportHomeScreen(),
+      "showShuttlePointers": () => showShuttlePointers(),
+      "showFriendFamilyPointers": () => showFriendFamilyPointers(),
+      "showBusPointers": () => showBusPointers(),
+      "showTaxiPointers": () => showTaxiPointers(),
+      "showCampusDirections": () => showCampusDirections(),
+      "enterOffCampusAddress": () => enterOffCampusAddress(),
+      "showSIMDirections": () => showSIMDirections(),
+      "navigateToAcadiaHomeScreen": () => navigateToAcadiaHomeScreen(),
+      "showWolfvilleEssentials": () => showWolfvilleEssentials(),
+      "navigateToWolfvilleHomeScreen": () => navigateToWolfvilleHomeScreen(),
+      "showNewMinasEssentials": () => showNewMinasEssentials(),
+      "navigateToNewMinasHomeScreen": () => navigateToNewMinasHomeScreen(),
+      "showKentvilleEssentials": () => showKentvilleEssentials(),
+      "navigateToKentvilleHomeScreen": () => navigateToKentvilleHomeScreen(),
+      "showHalifaxTransitGuide": () => showHalifaxTransitGuide(),
+      "showHalifaxTaxiGuide": () => showHalifaxTaxiGuide(),
+      "showHalifaxCarRentalGuide": () => showHalifaxCarRentalGuide(),
+      "showHalifaxSIMLocations": () => showHalifaxSIMLocations(),
+      "showHalifaxGroceriesPharmacy": () => showHalifaxGroceriesPharmacy(),
+      "showHalifaxBankingOptions": () => showHalifaxBankingOptions(),
+      "showHalifaxAttractions": () => showHalifaxAttractions(),
+      "navigateToHalifaxHomeScreen": () => navigateToHalifaxHomeScreen(),
     };
 
     actionMap[actionName]?.call();
@@ -81,8 +138,8 @@ class WalkthroughManager {
       case 'question':
       if (selectedOptionId != null){
         final options = step['options'] as List<dynamic>;
-        final chosen = options.firstWhere((opt)=> opt['label'] == selectedOptionId, orElse: () => null);
-        if (chosen != null) {
+        final chosen = options.cast<Map<String,dynamic>>().firstWhere((opt)=> opt['label'] == selectedOptionId || opt['id'] == selectedOptionId, orElse: () => <String, dynamic>{});
+        if (chosen.isNotEmpty) {
           if (chosen['action'] != null) performAction(chosen['action'], chosen['params']);
           goToNextStep(chosen['nextStepId'], elseNextStepId: chosen['elseNextStepId']);
         }
@@ -112,11 +169,69 @@ class WalkthroughManager {
     }
   }
 
-  void importHiveCheckpoint() {
-    print("Importing Hive checkpoint...");
-  }
-
-  void showSIMKioskInfo([Map<String, dynamic>? params]){
-    print("Showing SIM Kiosk info: $params");
-  }
+  void importHiveCheckpoint() {}
+  
+  void setNavigationPreference(Map<String, dynamic>? params) {}
+  
+  void showImmigrationBaggageHelp() {}
+  
+  void showShuttleGuidance() {}
+  
+  void showFriendFamilyGuidance() {}
+  
+  void showSIMKioskInfo() {}
+  
+  void showBusGuidance() {}
+  
+  void showTaxiGuidance() {}
+  
+  void showAirportHelp() {}
+  
+  void displayAirportHelpInfo() {}
+  
+  void navigateToAirportHomeScreen() {}
+  
+  void showShuttlePointers() {}
+  
+  void showFriendFamilyPointers() {}
+  
+  void showBusPointers() {}
+  
+  void showTaxiPointers() {}
+  
+  void showCampusDirections() {}
+  
+  void enterOffCampusAddress() {}
+  
+  void showSIMDirections() {}
+  
+  void navigateToAcadiaHomeScreen() {}
+  
+  void showWolfvilleEssentials() {}
+  
+  void navigateToWolfvilleHomeScreen() {}
+  
+  void showNewMinasEssentials() {}
+  
+  void navigateToNewMinasHomeScreen() {}
+  
+  void showKentvilleEssentials() {}
+  
+  void navigateToKentvilleHomeScreen() {}
+  
+  void showHalifaxTransitGuide() {}
+  
+  void showHalifaxTaxiGuide() {}
+  
+  void showHalifaxCarRentalGuide() {}
+  
+  void showHalifaxSIMLocations() {}
+  
+  void showHalifaxGroceriesPharmacy() {}
+  
+  void showHalifaxBankingOptions() {}
+  
+  void showHalifaxAttractions() {}
+  
+  void navigateToHalifaxHomeScreen() {}
 }

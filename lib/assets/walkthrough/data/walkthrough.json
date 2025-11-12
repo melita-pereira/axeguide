@@ -20,7 +20,7 @@
             "id": "import_progress",
             "type": "action",
             "action": "importHiveCheckpoint",
-            "next": "dynamic_home"
+            "nextStepId": "dynamic_home"
         },
         {
             "id": "start_location",
@@ -65,12 +65,12 @@
                 {
                     "label": "In-depth",
                     "nextStepId": "next_after_navigation",
-                    "action": "setnavigationPreference('in-depth')"
+                    "action": "setNavigationPreference('in-depth')"
                 },
                 {
                     "label": "Basic",
                     "nextStepId": "next_after_navigation",
-                    "action": "setnavigationPreference('basic')"
+                    "action": "setNavigationPreference('basic')"
                 }
             ]
         },
