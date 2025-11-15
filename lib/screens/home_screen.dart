@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:axeguide/utils/user_box_helper.dart';
+import 'package:axeguide/utils/hive_boxes.dart';
+import 'package:axeguide/screens/welcome_screen.dart';
+import 'package:axeguide/screens/settings_screen.dart';
 import 'package:hive/hive.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -26,18 +29,14 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _initialize() async {
     await _loadUserData();
-    if (HiveService.isCacheStale()) {
-      await _loadLocations();
+    final cached = locationCache.get('locations');
+    if (cached != null && cached.isNotEmpty) {
+      setState(() {
+        locations = List<Map<String, dynamic>>.from(cached);
+        loading = false;
+      });
     } else {
-      final cached = HiveService.getCachedLocations();
-      if (cached != null && cached.isNotEmpty) {
-        setState(() {
-          locations = List<Map<String, dynamic>>.from(cached);
-          loading = false;
-        });
-      } else {
-        await _loadLocations();
-      }
+      await _loadLocations();
     }
   }
 
@@ -72,15 +71,19 @@ class _HomeScreenState extends State<HomeScreen> {
           .ilike('area_tag', '%$normalized%')
           .limit(10);
       if (response.isNotEmpty) {
-        data = List<Map<String, dynamic>>.from(response);
-        await HiveService.saveLocations(response);
-        debugPrint('Loaded ${data.length} locations from Supabase.');
+        locations = List<Map<String, dynamic>>.from(response);
+        await locationCache.put('locations', response);
+        setState(() {
+          loading = false;
+        });
+        debugPrint('Loaded ${locations.length} locations from Supabase.');
       } else {
         debugPrint('No Supabase data found, using cache if available.');
-        data = HiveService.getCachedLocations();
-        if (data == null || data.isEmpty) {
+        final cached = locationCache.get('locations');
+        if (cached == null || cached.isEmpty) {
           _showSnack('No locations available at the moment.');
         } else {
+          locations = List<Map<String, dynamic>>.from(cached);
           _showSnack('Loaded locations from cache.');
         }
       }
@@ -105,6 +108,13 @@ class _HomeScreenState extends State<HomeScreen> {
         content: Text('User data cleared. Restart the app to begin fresh.'),
         duration: Duration(seconds: 2),
       ),
+    );
+  }
+
+  void _showSnack(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message), duration: const Duration(seconds: 2)),
     );
   }
 
