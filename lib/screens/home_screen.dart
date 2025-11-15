@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:axeguide/utils/user_box_helper.dart';
-import 'welcome_screen.dart';
 import 'settings_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -29,22 +28,6 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  Future<void> _resetApp() async {
-    await UserBoxHelper.clear();
-    if (!mounted) return;
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(builder: (context) => const WelcomeScreen()),
-      (route) => false,
-    );
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('User data cleared. Restart the app to begin fresh.'),
-        duration: Duration(seconds: 2),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -52,7 +35,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('The AxeGuide Home'), 
+        title: const Text('The AxeGuide Home'),
         centerTitle: true,
         actions: [
           IconButton(
@@ -96,23 +79,6 @@ class _HomeScreenState extends State<HomeScreen> {
               Text(
                 'Mode: ${userMode ?? "Loading..."}',
                 style: const TextStyle(fontSize: 18),
-              ),
-              const SizedBox(height: 40),
-              ElevatedButton.icon(
-                onPressed: _resetApp,
-                icon: const Icon(Icons.restart_alt),
-                label: const Text('Reset App'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.redAccent,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 14,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
               ),
             ],
           ),

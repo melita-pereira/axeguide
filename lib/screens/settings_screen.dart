@@ -11,24 +11,25 @@ class SettingsScreen extends StatelessWidget {
       builder: (context) => AlertDialog(
         title: const Text('Clear personalization data?'),
         content: const Text(
-            'This will erase your location, mode preferences, and progress. Are you sure you want to proceed?'
-          ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context, false),
-          child: const Text('Cancel'),
+          'This will erase your location, mode preferences, and progress. '
+          'Are you sure you want to proceed?',
         ),
-        ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.redAccent,
-            foregroundColor: Colors.white,
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
           ),
-          child: const Text('Clear Data'),
-          onPressed: () => Navigator.pop(context, true),
-        ),
-      ],
-    ),
-  );
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.redAccent,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Clear Data'),
+            onPressed: () => Navigator.pop(context, true),
+          ),
+        ],
+      ),
+    );
 
     if (confirm == true) {
       await UserBoxHelper.clear();
@@ -40,7 +41,9 @@ class SettingsScreen extends StatelessWidget {
       );
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Personalization data cleared. Restart the app to begin fresh.'),
+          content: Text(
+            'Personalization data cleared. Restart the app to begin fresh.',
+          ),
           duration: Duration(seconds: 2),
         ),
       );
@@ -55,7 +58,7 @@ class SettingsScreen extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         children: [
           const ListTile(
-            leading: Icon(Icons.tune, color: Colors.blueAccent, size:40),
+            leading: Icon(Icons.tune, color: Colors.blueAccent, size: 40),
             title: Text(
               'Settings',
               style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
