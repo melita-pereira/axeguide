@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:axeguide/utils/user_box_helper.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'welcome_screen.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'settings_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -41,17 +41,12 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _loadLocations() async {
     String normalizeLocation(String location) {
       final lower = location.toLowerCase();
-      if (lower.contains('acadia')) {
-        return 'acadia';
-      }
-      if (lower.contains('airport')) {
-        return 'halifax_airport';
-      }
+      if (lower.contains('acadia')) return 'acadia';
+      if (lower.contains('airport')) return 'halifax_airport';
       return lower;
     }
 
     final normalized = normalizeLocation(userLocation ?? '');
-    // Simulate loading locations from a data source
     try {
       final response = await Supabase.instance.client
           .from('locations')
@@ -65,27 +60,9 @@ class _HomeScreenState extends State<HomeScreen> {
         loading = false;
       });
     } catch (e) {
-      setState(() {
-        loading = false;
-      });
+      setState(() => loading = false);
       debugPrint('Error loading locations: $e');
     }
-  }
-
-  Future<void> _resetApp() async {
-    await UserBoxHelper.clear();
-    if (!mounted) return;
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(builder: (context) => const WelcomeScreen()),
-      (route) => false,
-    );
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('User data cleared. Restart the app to begin fresh.'),
-        duration: Duration(seconds: 2),
-      ),
-    );
   }
 
   Future<void> _openMap(dynamic mapData) async {
@@ -101,21 +78,15 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     if (lat != null && lng != null) {
-      final Uri googleUri = Uri.parse(
-        'https://www.google.com/maps/search/?api=1&query=$lat,$lng',
-      );
-      final Uri appleUri = Uri.parse('https://maps.apple.com/?q=$lat,$lng');
-      final Uri geoUri = Uri.parse('geo:$lat,$lng');
+      final googleUri = Uri.parse('https://www.google.com/maps/search/?api=1&query=$lat,$lng');
+      final appleUri = Uri.parse('https://maps.apple.com/?q=$lat,$lng');
+      final geoUri = Uri.parse('geo:$lat,$lng');
 
       if (kIsWeb) {
-        // On web, prefer Google Maps
         if (!await launchUrl(googleUri, mode: LaunchMode.externalApplication)) {
           if (!mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Could not open the map.'),
-              duration: Duration(seconds: 2),
-            ),
+            const SnackBar(content: Text('Could not open the map.'), duration: Duration(seconds: 2)),
           );
           return;
         }
@@ -138,10 +109,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Could not open the map.'),
-          duration: Duration(seconds: 2),
-        ),
+        const SnackBar(content: Text('Could not open the map.'), duration: Duration(seconds: 2)),
       );
       return;
     }
@@ -153,6 +121,7 @@ class _HomeScreenState extends State<HomeScreen> {
         return;
       }
     }
+
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('No valid map information available.')),
@@ -165,7 +134,19 @@ class _HomeScreenState extends State<HomeScreen> {
     final color = theme.colorScheme.primary;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Home'), centerTitle: true),
+      appBar: AppBar(
+        title: const Text('The AxeGuide Home'),
+        centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings_outlined),
+            tooltip: 'Settings',
+            onPressed: () {
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsScreen()));
+            },
+          ),
+        ],
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
         child: Column(
@@ -175,38 +156,18 @@ class _HomeScreenState extends State<HomeScreen> {
             const SizedBox(height: 24),
             Text(
               'Welcome Back!',
-              style: TextStyle(
-                fontSize: 26,
-                fontWeight: FontWeight.bold,
-                color: color,
-              ),
+              style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: color),
             ),
             const SizedBox(height: 16),
-            Text(
-              'Location: ${userLocation ?? "Loading..."}',
-              style: const TextStyle(fontSize: 18),
-            ),
-            Text(
-              'Mode: ${userMode ?? "Loading..."}',
-              style: const TextStyle(fontSize: 18),
-            ),
+            Text('Location: ${userLocation ?? "Loading..."}', style: const TextStyle(fontSize: 18)),
+            Text('Mode: ${userMode ?? "Loading..."}', style: const TextStyle(fontSize: 18)),
             const SizedBox(height: 40),
             const Divider(height: 40, thickness: 1),
-            Text(
-              'Explore',
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.w600,
-                color: color,
-              ),
-            ),
+            Text('Explore', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600, color: color)),
             const SizedBox(height: 16),
 
             if (loading) ...[
-              const Padding(
-                padding: EdgeInsets.all(16.0),
-                child: CircularProgressIndicator(),
-              ),
+              const Padding(padding: EdgeInsets.all(16.0), child: CircularProgressIndicator()),
             ] else if (locations.isEmpty) ...[
               Container(
                 height: 150,
@@ -220,11 +181,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: Text(
                     'No locations available at the moment.',
                     textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.blueGrey,
-                      fontStyle: FontStyle.italic,
-                    ),
+                    style: TextStyle(fontSize: 16, color: Colors.blueGrey, fontStyle: FontStyle.italic),
                   ),
                 ),
               ),
@@ -232,55 +189,32 @@ class _HomeScreenState extends State<HomeScreen> {
               Column(
                 children: locations.map((loc) {
                   final title = loc['name'] ?? 'Unknown';
-                  final description =
-                      loc['description'] ?? 'No description available.';
+                  final description = loc['description'] ?? 'No description available.';
                   final town = loc['town'] ?? 'Unknown town';
                   final hours = loc['hours'] ?? 'Hours not available';
                   final mapLink = loc['map_link'] ?? '';
                   final lat = loc['latitude'];
                   final lng = loc['longitude'];
-                  final mapData = (lat != null && lng != null)
-                      ? {'lat': lat, 'lng': lng}
-                      : mapLink;
+                  final mapData = (lat != null && lng != null) ? {'lat': lat, 'lng': lng} : mapLink;
 
                   return Card(
                     margin: const EdgeInsets.symmetric(vertical: 10),
                     elevation: 2,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            title,
-                            style: const TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFF013A6E),
-                            ),
-                          ),
+                          Text(title, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF013A6E))),
                           const SizedBox(height: 8),
-                          Text(
-                            description,
-                            style: const TextStyle(fontSize: 16),
-                          ),
+                          Text(description, style: const TextStyle(fontSize: 16)),
                           const SizedBox(height: 8),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text(
-                                town,
-                                style: const TextStyle(color: Colors.grey),
-                              ),
-                              Text(
-                                hours.isNotEmpty
-                                    ? 'Hours: $hours'
-                                    : 'Hours not available',
-                                style: const TextStyle(color: Colors.grey),
-                              ),
+                              Text(town, style: const TextStyle(color: Colors.grey)),
+                              Text(hours.isNotEmpty ? 'Hours: $hours' : 'Hours not available', style: const TextStyle(color: Colors.grey)),
                             ],
                           ),
                           const SizedBox(height: 12),
@@ -290,13 +224,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               onPressed: () => _openMap(mapData),
                               icon: const Icon(Icons.map_outlined),
                               label: const Text('View on Map'),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF013A6E),
-                                foregroundColor: Colors.white,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                              ),
+                              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF013A6E), foregroundColor: Colors.white),
                             ),
                           ),
                         ],
@@ -308,22 +236,6 @@ class _HomeScreenState extends State<HomeScreen> {
             ],
 
             const SizedBox(height: 40),
-            ElevatedButton.icon(
-              onPressed: _resetApp,
-              icon: const Icon(Icons.restart_alt),
-              label: const Text('Reset App'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.redAccent,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 14,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-              ),
-            ),
           ],
         ),
       ),
