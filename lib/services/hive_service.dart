@@ -12,13 +12,17 @@ class HiveService {
     return (prefs.get('prefs') as Map?)?.cast<String, dynamic>();
   }
 
-  static Future<void> saveLocations(List<dynamic> locations) async {
+  static Future<void> saveLocations(List<Map<String, dynamic>> locations) async {
     await cache.put('data', locations);
     await cache.put('fetchedAt', DateTime.now().toIso8601String());
   }
 
-  static List<dynamic>? getCachedLocations() {
-    return cache.get('data') as List<dynamic>?;
+  static List<Map<String, dynamic>>? getCachedLocations() {
+    final data = cache.get('data');
+    if (data is List) {
+      return List<Map<String, dynamic>>.from(data);
+    }
+    return null;
   }
 
   static bool isCacheStale({Duration maxAge = const Duration(hours: 1)}) {

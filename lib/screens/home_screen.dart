@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:axeguide/utils/user_box_helper.dart';
+import 'package:axeguide/utils/hive_boxes.dart';
+import 'package:axeguide/screens/welcome_screen.dart';
+import 'package:axeguide/screens/settings_screen.dart';
+import 'package:hive/hive.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'settings_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -26,7 +29,15 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _initialize() async {
     await _loadUserData();
-    await _loadLocations();
+    final cached = locationCache.get('locations');
+    if (cached != null && cached.isNotEmpty) {
+      setState(() {
+        locations = List<Map<String, dynamic>>.from(cached);
+        loading = false;
+      });
+    } else {
+      await _loadLocations();
+    }
   }
 
   Future<void> _loadUserData() async {
@@ -39,6 +50,9 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _loadLocations() async {
+    setState(() {
+      loading = true;
+    });
     String normalizeLocation(String location) {
       final lower = location.toLowerCase();
       if (lower.contains('acadia')) return 'acadia';
@@ -47,6 +61,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     final normalized = normalizeLocation(userLocation ?? '');
+    // Simulate loading locations from a data source
     try {
       final response = await Supabase.instance.client
           .from('locations')
@@ -55,14 +70,52 @@ class _HomeScreenState extends State<HomeScreen> {
           )
           .ilike('area_tag', '%$normalized%')
           .limit(10);
-      setState(() {
+      if (response.isNotEmpty) {
         locations = List<Map<String, dynamic>>.from(response);
+        await locationCache.put('locations', response);
+        setState(() {
+          loading = false;
+        });
+        debugPrint('Loaded ${locations.length} locations from Supabase.');
+      } else {
+        debugPrint('No Supabase data found, using cache if available.');
+        final cached = locationCache.get('locations');
+        if (cached == null || cached.isEmpty) {
+          _showSnack('No locations available at the moment.');
+        } else {
+          locations = List<Map<String, dynamic>>.from(cached);
+          _showSnack('Loaded locations from cache.');
+        }
+      }
+    } catch (e) {
+      setState(() {
         loading = false;
       });
-    } catch (e) {
-      setState(() => loading = false);
       debugPrint('Error loading locations: $e');
     }
+  }
+
+  Future<void> _resetApp() async {
+    await UserBoxHelper.clear();
+    if (!mounted) return;
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => const WelcomeScreen()),
+      (route) => false,
+    );
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('User data cleared. Restart the app to begin fresh.'),
+        duration: Duration(seconds: 2),
+      ),
+    );
+  }
+
+  void _showSnack(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message), duration: const Duration(seconds: 2)),
+    );
   }
 
   Future<void> _openMap(dynamic mapData) async {
@@ -166,36 +219,45 @@ class _HomeScreenState extends State<HomeScreen> {
             Text('Explore', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600, color: color)),
             const SizedBox(height: 16),
 
-            if (loading) ...[
-              const Padding(padding: EdgeInsets.all(16.0), child: CircularProgressIndicator()),
-            ] else if (locations.isEmpty) ...[
-              Container(
-                height: 150,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: Colors.blueGrey.shade50,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.blueGrey.shade100),
-                ),
-                child: const Center(
-                  child: Text(
-                    'No locations available at the moment.',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 16, color: Colors.blueGrey, fontStyle: FontStyle.italic),
+              if (loading) ...[
+                const Padding(
+                  padding: EdgeInsets.all(16.0),
+                  child: CircularProgressIndicator(),
+                )
+              ] else if (locations.isEmpty) ...[
+                Container(
+                  height: 150,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: Colors.blueGrey.shade50,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: Colors.blueGrey.shade100),
                   ),
-                ),
-              ),
-            ] else ...[
-              Column(
-                children: locations.map((loc) {
-                  final title = loc['name'] ?? 'Unknown';
-                  final description = loc['description'] ?? 'No description available.';
-                  final town = loc['town'] ?? 'Unknown town';
-                  final hours = loc['hours'] ?? 'Hours not available';
-                  final mapLink = loc['map_link'] ?? '';
-                  final lat = loc['latitude'];
-                  final lng = loc['longitude'];
-                  final mapData = (lat != null && lng != null) ? {'lat': lat, 'lng': lng} : mapLink;
+                  child: const Center(
+                    child: Text(
+                      'No locations available at the moment.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.blueGrey,
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
+                  ),
+                )
+              ] else ...[
+                Column(
+                  children: locations.map((loc) {
+                    final title = loc['name'] ?? 'Unknown';
+                    final description = loc['description'] ?? 'No description available.';
+                    final town = loc['town'] ?? 'Unknown town';
+                    final hours = loc['hours'] ?? 'Hours not available';
+                    final mapLink = loc['map_link'] ?? '';
+                    final lat = loc['latitude'];
+                    final lng = loc['longitude'];
+                    final mapData = (lat != null && lng != null)
+                        ? {'lat': lat, 'lng': lng}
+                        : mapLink;
 
                   return Card(
                     margin: const EdgeInsets.symmetric(vertical: 10),
