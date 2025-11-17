@@ -335,7 +335,7 @@
             "id": "acadia_housing",
             "type": "question",
             "text": "Where do you plan on staying for the year?",
-            "options":[
+            "options": [
                 {
                     "label": "On Campus",
                     "nextStepId": "acadia_campus"
