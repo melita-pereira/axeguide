@@ -570,7 +570,7 @@
             "id": "city_intro",
             "type": "info",
             "text": "Welcome to Halifax! The capital of Nova Scotia — vibrant, coastal, and full of culture. What would you like to do first?",
-            "options":[
+            "options": [
                 {
                     "label": "Figure out transportation",
                     "nextStepId": "halifax_transport"
