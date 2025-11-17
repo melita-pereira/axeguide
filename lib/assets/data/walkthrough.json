@@ -593,7 +593,7 @@
             "id": "halifax_transport",
             "type": "question",
             "text": "How do you plan on getting around Halifax?",
-            "options":[
+            "options": [
                 {
                     "label": "Bus (Public Transit)",
                     "nextStepId": "halifax_transit"
