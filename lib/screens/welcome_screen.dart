@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import 'package:axeguide/utils/hive_boxes.dart';
 import 'package:axeguide/utils/user_box_helper.dart';
+import 'package:axeguide/assets/scrollable_scaffold.dart';
 
 class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
@@ -103,8 +104,8 @@ class _WelcomeScreenState extends State<WelcomeScreen>
     final primaryColor = theme.colorScheme.primary;
     final isDark = theme.brightness == Brightness.dark;
 
-    return Scaffold(
-      body: Container(
+    return ScrollableScaffold(
+      child: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,

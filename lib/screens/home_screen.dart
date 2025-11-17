@@ -1,5 +1,6 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:axeguide/utils/user_box_helper.dart';
+import 'package:axeguide/assets/scrollable_scaffold.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -188,7 +189,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final theme = Theme.of(context);
     final color = theme.colorScheme.primary;
 
-    return Scaffold(
+    return ScrollableScaffold(
       appBar: AppBar(
         title: const Text('The AxeGuide Home'),
         centerTitle: true,
@@ -202,104 +203,114 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            const Icon(Icons.map_outlined, size: 90, color: Color(0xFF013A6E)),
-            const SizedBox(height: 24),
-            Text(
-              'Welcome Back!',
-              style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: color),
-            ),
-            const SizedBox(height: 16),
-            Text('Location: ${userLocation ?? "Loading..."}', style: const TextStyle(fontSize: 18)),
-            Text('Mode: ${userMode ?? "Loading..."}', style: const TextStyle(fontSize: 18)),
-            const SizedBox(height: 40),
-            const Divider(height: 40, thickness: 1),
-            Text('Explore', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600, color: color)),
-            const SizedBox(height: 16),
-            if (loading) ...[
-              const Padding(
-                padding: EdgeInsets.all(16.0),
-                child: Column(
-                  children: [
-                    CircularProgressIndicator(),
-                    SizedBox(height: 16),
-                    Text('Fetching data...', style: TextStyle(fontSize: 16)),
-                  ],
+      child: Center(
+        child: Padding(
+          padding: EdgeInsets.zero,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(
+                Icons.map_outlined,
+                size: 90,
+                color: Color(0xFF013A6E),
+              ),
+              const SizedBox(height: 24),
+              Text(
+                'Welcome Back!',
+                style: TextStyle(
+                  fontSize: 26,
+                  fontWeight: FontWeight.bold,
+                  color: color,
                 ),
               ),
-            ] else if (locations.isEmpty) ...[
-              Container(
-                height: 150,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: Colors.blueGrey.shade50,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.blueGrey.shade100),
-                ),
-                child: const Center(
-                  child: Text(
-                    'No locations available at the moment.',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 16, color: Colors.blueGrey, fontStyle: FontStyle.italic),
+              const SizedBox(height: 16),
+              Text('Location: ${userLocation ?? "Loading..."}', style: const TextStyle(fontSize: 18)),
+              Text('Mode: ${userMode ?? "Loading..."}', style: const TextStyle(fontSize: 18)),
+              const SizedBox(height: 40),
+              const Divider(height: 40, thickness: 1),
+              Text('Explore', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600, color: color)),
+              const SizedBox(height: 16),
+              if (loading) ...[
+                const Padding(
+                  padding: EdgeInsets.all(16.0),
+                  child: Column(
+                    children: [
+                      CircularProgressIndicator(),
+                      SizedBox(height: 16),
+                      Text('Fetching data...', style: TextStyle(fontSize: 16)),
+                    ],
                   ),
                 ),
-              ),
-            ] else ...[
-              Column(
-                children: locations.map((loc) {
-                  final title = loc['name'] ?? 'Unknown';
-                  final description = loc['description'] ?? 'No description available.';
-                  final town = loc['town'] ?? 'Unknown town';
-                  final hours = loc['hours'] ?? 'Hours not available';
-                  final mapLink = loc['map_link'] ?? '';
-                  final lat = loc['latitude'];
-                  final lng = loc['longitude'];
-                  final mapData = (lat != null && lng != null) ? {'lat': lat, 'lng': lng} : mapLink;
-
-                  return Card(
-                    margin: const EdgeInsets.symmetric(vertical: 10),
-                    elevation: 2,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(title, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF013A6E))),
-                          const SizedBox(height: 8),
-                          Text(description, style: const TextStyle(fontSize: 16)),
-                          const SizedBox(height: 8),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(town, style: const TextStyle(color: Colors.grey)),
-                              Text(hours.isNotEmpty ? 'Hours: $hours' : 'Hours not available', style: const TextStyle(color: Colors.grey)),
-                            ],
-                          ),
-                          const SizedBox(height: 12),
-                          Align(
-                            alignment: Alignment.centerRight,
-                            child: ElevatedButton.icon(
-                              onPressed: () => _openMap(mapData),
-                              icon: const Icon(Icons.map_outlined),
-                              label: const Text('View on Map'),
-                              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF013A6E), foregroundColor: Colors.white),
-                            ),
-                          ),
-                        ],
-                      ),
+              ] else if (locations.isEmpty) ...[
+                Container(
+                  height: 150,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: Colors.blueGrey.shade50,
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: Colors.blueGrey.shade100),
+                  ),
+                  child: const Center(
+                    child: Text(
+                      'No locations available at the moment.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 16, color: Colors.blueGrey, fontStyle: FontStyle.italic),
                     ),
-                  );
-                }).toList(),
-              ),
-            ],
+                  ),
+                ),
+              ] else ...[
+                Column(
+                  children: locations.map((loc) {
+                    final title = loc['name'] ?? 'Unknown';
+                    final description = loc['description'] ?? 'No description available.';
+                    final town = loc['town'] ?? 'Unknown town';
+                    final hours = loc['hours'] ?? 'Hours not available';
+                    final mapLink = loc['map_link'] ?? '';
+                    final lat = loc['latitude'];
+                    final lng = loc['longitude'];
+                    final mapData = (lat != null && lng != null) ? {'lat': lat, 'lng': lng} : mapLink;
 
-            const SizedBox(height: 40),
-          ],
+                    return Card(
+                      margin: const EdgeInsets.symmetric(vertical: 10),
+                      elevation: 2,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(title, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF013A6E))),
+                            const SizedBox(height: 8),
+                            Text(description, style: const TextStyle(fontSize: 16)),
+                            const SizedBox(height: 8),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(town, style: const TextStyle(color: Colors.grey)),
+                                Text(hours.isNotEmpty ? 'Hours: $hours' : 'Hours not available', style: const TextStyle(color: Colors.grey)),
+                              ],
+                            ),
+                            const SizedBox(height: 12),
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: ElevatedButton.icon(
+                                onPressed: () => _openMap(mapData),
+                                icon: const Icon(Icons.map_outlined),
+                                label: const Text('View on Map'),
+                                style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF013A6E), foregroundColor: Colors.white),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ],
+
+              const SizedBox(height: 40),
+            ],
+          ),
         ),
       ),
     );
