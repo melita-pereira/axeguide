@@ -205,8 +205,11 @@ class WalkthroughManager {
       case 'question':
       if (selectedOptionLabel == null) return;
       final options = (step['options'] as List<dynamic>?)?.cast<Map<String, dynamic>>() ?? [];
-      final chosen = options.firstWhere((opt)=> opt['label'] == selectedOptionLabel || opt['id'] == selectedOptionLabel, orElse: () => {});
-      if ((chosen as Map).isEmpty) return;
+      final chosen = options.firstWhere(
+        (opt) => opt['label'] == selectedOptionLabel || opt['id'] == selectedOptionLabel,
+        orElse: () => <String, dynamic>{}
+      );
+      if (chosen.isEmpty) return;
 
       final actionName = chosen['action'] as String?;
       if (actionName != null) {
