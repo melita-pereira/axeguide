@@ -106,7 +106,7 @@
                 },
                 {
                     "label": "No",
-                    "nextStepId": "transport"
+                    "nextStepId": "airport_transport"
                 }
             ]
         },
