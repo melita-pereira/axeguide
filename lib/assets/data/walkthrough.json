@@ -429,7 +429,7 @@
             "id": "valley_intro",
             "type": "question",
             "text": "Welcome to the Annapolis Valley! Are you already settled here, or just arriving?",
-            "options":[
+            "options": [
                 {
                     "label": "Just arriving",
                     "nextStepId": "valley_arrival_help"
