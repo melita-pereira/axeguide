@@ -69,7 +69,7 @@ class WalkthroughManager {
     _notifyStepChanged();
   }
 
-  void resetWalkthrough(){
+  void resetWalkthrough() {
     _currentStepId = null;
     box.delete('walkthrough_checkpoint');
     _notifyStepChanged();
