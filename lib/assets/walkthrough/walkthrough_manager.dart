@@ -51,9 +51,9 @@ class WalkthroughManager {
       _currentStepId != null ? _steps[_currentStepId!] : null;
 
   void goToNextStep(String? nextStepId, {String? elseNextStepId}) {
-    if (nextStepId != null) {
+    if (nextStepId != null && _steps.containsKey(nextStepId)) {
       _currentStepId = nextStepId;
-    } else if (elseNextStepId != null) {
+    } else if (elseNextStepId != null && _steps.containsKey(elseNextStepId)) {
       _currentStepId = elseNextStepId;
     } else {
       _currentStepId = null;
