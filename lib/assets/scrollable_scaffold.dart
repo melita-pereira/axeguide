@@ -20,7 +20,7 @@ class ScrollableScaffold extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: backgroundColor ?? Theme.of(context).scaffoldBackgroundColor,
-      appBar: appBar?? (title != null ? AppBar(title: Text(title!)) : null),
+      appBar: appBar ?? (title != null ? AppBar(title: Text(title!)) : null),
       body: LayoutBuilder(
         builder: (context, constraints) {
           return SingleChildScrollView(
