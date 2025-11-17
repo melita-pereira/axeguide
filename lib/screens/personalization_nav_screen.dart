@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:axeguide/utils/user_box_helper.dart';
 import 'home_screen.dart';
+import 'package:axeguide/assets/scrollable_scaffold.dart';
 
 class PersonalizationNavScreen extends StatefulWidget {
   const PersonalizationNavScreen({super.key});
@@ -30,12 +31,12 @@ class _PersonalizationNavScreenState extends State<PersonalizationNavScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return ScrollableScaffold(
       appBar: AppBar(
         title: const Text('Navigation Preference'),
         centerTitle: true,
       ),
-      body: Padding(
+      child: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

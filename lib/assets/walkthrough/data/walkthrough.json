@@ -106,7 +106,7 @@
                 },
                 {
                     "label": "No",
-                    "nextStepId": "transport"
+                    "nextStepId": "airport_transport"
                 }
             ]
         },
@@ -180,7 +180,7 @@
             "id": "taxi_info",
             "type": "action",
             "action": "showTaxiGuidance",
-            "nextStepId":"airport_sim"
+            "nextStepId": "airport_sim"
         },
         {
             "id": "international_centre_info",
@@ -335,7 +335,7 @@
             "id": "acadia_housing",
             "type": "question",
             "text": "Where do you plan on staying for the year?",
-            "options":[
+            "options": [
                 {
                     "label": "On Campus",
                     "nextStepId": "acadia_campus"
@@ -348,7 +348,7 @@
         },
         {
             "id": "acadia_campus",
-            "type":"action",
+            "type": "action",
             "action": "showCampusResDirections",
             "params": {
                 "residences": [
@@ -364,7 +364,7 @@
                     "War Memorial House (also known as Barrax or Rax)",
                     "Whitman House (also known as Tully)"
                 ],
-                "startingPointsQuery" : {
+                "startingPointsQuery": {
                     "area_tag": "acadia",
                     "parent_id_null": true
                 }
@@ -407,7 +407,7 @@
         {
             "id": "acadia_next_steps",
             "type": "question",
-            "question": "Where do you want to go next?",
+            "text": "Where do you want to go next?",
             "options": [
                 {
                     "label": "On Campus",
@@ -429,7 +429,7 @@
             "id": "valley_intro",
             "type": "question",
             "text": "Welcome to the Annapolis Valley! Are you already settled here, or just arriving?",
-            "options":[
+            "options": [
                 {
                     "label": "Just arriving",
                     "nextStepId": "valley_arrival_help"
@@ -526,7 +526,7 @@
             "type": "action",
             "action": "showNewMinasEssentials",
             "params": {
-                "categories": ["Grocery", "Pharmacy", "Electronic", "SIM", "Shopping"]
+                "categories": ["Grocery", "Pharmacy", "Electronics", "SIM", "Shopping"]
             },
             "nextStepId": "explore_newminas"
         },
@@ -570,7 +570,7 @@
             "id": "city_intro",
             "type": "info",
             "text": "Welcome to Halifax! The capital of Nova Scotia — vibrant, coastal, and full of culture. What would you like to do first?",
-            "options":[
+            "options": [
                 {
                     "label": "Figure out transportation",
                     "nextStepId": "halifax_transport"
@@ -593,7 +593,7 @@
             "id": "halifax_transport",
             "type": "question",
             "text": "How do you plan on getting around Halifax?",
-            "options":[
+            "options": [
                 {
                     "label": "Bus (Public Transit)",
                     "nextStepId": "halifax_transit"
@@ -629,7 +629,7 @@
         {
             "id": "halifax_essentials",
             "type": "question",
-            "text": "What essential are you looking for?",
+            "text": "What essentials are you looking for?",
             "options": [
                 {
                     "label": "SIM / Phone plan",
