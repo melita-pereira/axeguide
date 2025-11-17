@@ -180,7 +180,7 @@
             "id": "taxi_info",
             "type": "action",
             "action": "showTaxiGuidance",
-            "nextStepId":"airport_sim"
+            "nextStepId": "airport_sim"
         },
         {
             "id": "international_centre_info",
