@@ -13,7 +13,7 @@ class ScrollableScaffold extends StatelessWidget {
     required this.child,
     this.appBar,
     this.backgroundColor,
-    this.padding = const EdgeInsets.all(16),
+    this.padding = EdgeInsets.zero,
   });
 
   @override
