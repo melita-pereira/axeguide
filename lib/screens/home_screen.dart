@@ -96,8 +96,8 @@ class _HomeScreenState extends State<HomeScreen> {
       if (response.isNotEmpty) {
         await HiveService.saveLocations(response, currentLoc);
         setState(() {
-        locations = List<Map<String, dynamic>>.from(response);
-        loading = false;
+          locations = List<Map<String, dynamic>>.from(response);
+          loading = false;
       });
       return;
       }
