@@ -110,7 +110,7 @@ class WalkthroughManager {
     }
 
     // Basic pattern handling
-    final equalsMatch = RegExp(r"user\.selectedLocation\s*==\s*'(.*?)'").firstMatch(condition);
+    final equalsMatch = RegExp(r"user\.selectedLocation\s*==\s*'([^']+)'").firstMatch(condition);
     if (equalsMatch != null) {
       final expected = equalsMatch.group(1);
       return box.get('selectedLocation') == expected;
