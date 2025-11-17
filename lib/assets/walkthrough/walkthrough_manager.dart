@@ -14,7 +14,7 @@ class WalkthroughManager {
 
   Future<void> loadWalkthrough() async {
     final String jsonString = await rootBundle.loadString(
-      'lib/assets/data/walkthrough.json',
+      'lib/assets/walkthrough/data/walkthrough.json',
     );
     final Map<String, dynamic> jsonMap = json.decode(jsonString) as Map<String, dynamic>;
     final List<dynamic> rawSteps = jsonMap['walkthrough'] as List<dynamic>;
