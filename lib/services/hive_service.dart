@@ -48,7 +48,7 @@ class HiveService {
     if (fetchedAtStr == null) {
       return true;
     }
-    try{
+    try {
       final dt = DateTime.parse(fetchedAtStr);
       return DateTime.now().difference(dt) > maxAge;
     } catch (e) {
