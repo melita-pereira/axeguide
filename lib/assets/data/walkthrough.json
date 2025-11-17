@@ -20,7 +20,7 @@
             "id": "import_progress",
             "type": "action",
             "action": "importHiveCheckpoint",
-            "next": "dynamic_home"
+            "nextStepId": "dynamic_home"
         },
         {
             "id": "start_location",
