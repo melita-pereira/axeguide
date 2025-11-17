@@ -407,7 +407,7 @@
         {
             "id": "acadia_next_steps",
             "type": "question",
-            "question": "Where do you want to go next?",
+            "text": "Where do you want to go next?",
             "options": [
                 {
                     "label": "On Campus",
