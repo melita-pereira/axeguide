@@ -364,7 +364,7 @@
                     "War Memorial House (also known as Barrax or Rax)",
                     "Whitman House (also known as Tully)"
                 ],
-                "startingPointsQuery" : {
+                "startingPointsQuery": {
                     "area_tag": "acadia",
                     "parent_id_null": true
                 }
