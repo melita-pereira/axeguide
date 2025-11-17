@@ -216,7 +216,7 @@ class WalkthroughManager {
 
       if (chosen.containsKey('condition')){
         final cond = chosen['condition'] as String?;
-        if (cond != null){
+        if (cond != null) {
           final condResult = evaluateCondition(cond);
           final nextIfTrue = condResult ? (chosen['nextStepId'] as String?) : (chosen['elseNextStepId'] as String?);
           goToNextStep(nextIfTrue);
