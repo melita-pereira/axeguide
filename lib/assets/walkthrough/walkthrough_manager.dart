@@ -197,7 +197,7 @@ class WalkthroughManager {
 
       case 'info':
       final options = (step['options'] as List<dynamic>?)?.cast<Map<String, dynamic>>();
-      if (options != null && options.isNotEmpty){
+      if (options != null && options.isNotEmpty) {
         goToNextStep(options.first['nextStepId'] as String?);
       } else {
         _currentStepId = null;
