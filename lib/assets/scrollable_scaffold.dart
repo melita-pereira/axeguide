@@ -8,13 +8,13 @@ class ScrollableScaffold extends StatelessWidget {
   final Color? backgroundColor;
 
   const ScrollableScaffold({
-    Key? key,
+    super.key,
     this.title,
     required this.child,
     this.appBar,
     this.backgroundColor,
     this.padding = const EdgeInsets.all(16),
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
