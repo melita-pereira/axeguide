@@ -50,6 +50,32 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  void _handleCacheFallback(String currentLoc, {required String cacheMessage, required String noDataMessage}) {
+    final cached = HiveService.getCachedLocationsFor(currentLoc);
+    if (cached != null && cached.isNotEmpty) {
+      setState(() {
+        locations = List<Map<String, dynamic>>.from(cached);
+        loading = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(cacheMessage),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    } else {
+      setState(() {
+        loading = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(noDataMessage),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
+  }
+
   Future<void> _loadLocations() async {
     String normalizeLocation(String location) {
       final lower = location.toLowerCase();
@@ -76,55 +102,21 @@ class _HomeScreenState extends State<HomeScreen> {
       return;
       }
 
-      final cached = HiveService.getCachedLocationsFor(currentLoc);
-      if (cached != null && cached.isNotEmpty) {
-        setState(() {
-          locations = List<Map<String, dynamic>>.from(cached);
-          loading = false;
-        });
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Loaded locations from cache.'),
-            duration: Duration(seconds: 2),
-          ),
-        );
-      } else {
-        setState(() {
-          loading = false;
-        });
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('No locations available at the moment.'),
-            duration: Duration(seconds: 2),
-          ),
-        );
-      }
+      // Empty response - try cache or show error
+      _handleCacheFallback(
+        currentLoc,
+        cacheMessage: 'Loaded locations from cache.',
+        noDataMessage: 'No locations available at the moment.',
+      );
     } catch (e) {
       debugPrint('Supabase fetch failed: $e');
 
-      final cached = HiveService.getCachedLocationsFor(currentLoc);
-      if (cached != null && cached.isNotEmpty) {
-        setState(() {
-          locations = List<Map<String, dynamic>>.from(cached);
-          loading = false;
-        });
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Loaded locations from cache due to network error.'),
-            duration: Duration(seconds: 2),
-          ),
-        );
-      } else {
-        setState(() {
-          loading = false;
-        });
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Failed to load locations. Please check your connection.'),
-            duration: Duration(seconds: 2),
-          ),
-        );
-      }
+      // Network error - try cache or show error
+      _handleCacheFallback(
+        currentLoc,
+        cacheMessage: 'Loaded locations from cache due to network error.',
+        noDataMessage: 'Failed to load locations. Please check your connection.',
+      );
     }
   }
 
