@@ -56,7 +56,7 @@ class WalkthroughManager {
     _notifyStepChanged();
   }
 
-  void goToStepId (String? id) {
+  void goToStepId(String? id) {
     if (id == null || !_steps.containsKey(id)) return;
     _currentStepId = id;
     _persistCheckpoint();
