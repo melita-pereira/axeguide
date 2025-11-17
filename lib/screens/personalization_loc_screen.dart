@@ -61,7 +61,7 @@ class _PersonalizationScreenState extends State<PersonalizationScreen> {
         centerTitle: true,
       ),
       child: Padding(
-        padding: const EdgeInsets.all(20.0),
+        padding: EdgeInsets.zero,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
