@@ -36,6 +36,7 @@ class _PersonalizationNavScreenState extends State<PersonalizationNavScreen> {
         title: const Text('Navigation Preference'),
         centerTitle: true,
       ),
+      padding: EdgeInsets.zero,
       child: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
