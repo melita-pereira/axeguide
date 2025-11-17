@@ -5,7 +5,7 @@ import 'package:axeguide/utils/hive_boxes.dart';
 class WalkthroughManager {
   final box = userBox;
   final cache = locationCache;
-  late Map<String, dynamic> _steps = {};
+  Map<String, dynamic> _steps = {};
   String? _currentStepId;
 
   void Function(Map<String, dynamic> step)? onStepChanged;
