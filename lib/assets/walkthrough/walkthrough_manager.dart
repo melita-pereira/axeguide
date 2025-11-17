@@ -117,7 +117,7 @@ class WalkthroughManager {
     }
 
     final containsMatch = RegExp(r"\[\s*'([^']*)'(?:\s*,\s*'([^']*)')*\s*\].contains\(\s*user\.selectedLocation\s*\)").firstMatch(condition);
-    if (containsMatch != null){
+    if (containsMatch != null) {
       final listMatch = RegExp(r"'(.*?)'").allMatches(condition).map((m) => m.group(1)).whereType<String>().toList();
       final userLoc = box.get('selectedLocation');
       return listMatch.contains(userLoc);
