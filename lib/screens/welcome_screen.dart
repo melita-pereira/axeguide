@@ -1,9 +1,9 @@
-import 'package:axeguide/screens/personalization_loc_screen.dart';
+import 'package:axeguide/screens/personalization/personalization_loc_screen.dart';
 import 'package:flutter/material.dart';
 
 import 'package:axeguide/utils/hive_boxes.dart';
 import 'package:axeguide/utils/user_box_helper.dart';
-import 'package:axeguide/assets/scrollable_scaffold.dart';
+import 'package:axeguide/utils/scrollable_scaffold.dart';
 
 class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});

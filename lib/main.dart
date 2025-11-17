@@ -5,7 +5,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:axeguide/utils/user_box_helper.dart';
 
 import 'screens/welcome_screen.dart';
-import 'screens/personalization_loc_screen.dart';
+import 'screens/personalization/personalization_loc_screen.dart';
 import 'screens/home_screen.dart';
 
 Future<void> main() async {

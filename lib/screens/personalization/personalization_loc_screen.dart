@@ -1,8 +1,8 @@
-import 'package:axeguide/screens/personalization_nav_screen.dart';
+import 'package:axeguide/screens/personalization/personalization_nav_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:axeguide/utils/user_box_helper.dart';
 import 'package:axeguide/screens/home_screen.dart';
-import 'package:axeguide/assets/scrollable_scaffold.dart';
+import 'package:axeguide/utils/scrollable_scaffold.dart';
 
 class PersonalizationScreen extends StatefulWidget {
   const PersonalizationScreen({super.key});
