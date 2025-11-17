@@ -183,8 +183,8 @@ class WalkthroughManager {
       final chosen = options.firstWhere((opt)=> opt['label'] == selectedOptionLabel || opt['id'] == selectedOptionLabel, orElse: () => {});
       if ((chosen as Map).isEmpty) return;
 
-      if (chosen.containsKey('action')){
-        final actionName = chosen['action'] as String?;
+      final actionName = chosen['action'] as String?;
+      if (actionName != null) {
         final params = chosen['params'] as Map<String, dynamic>?;
         performAction(actionName, params);
       }
