@@ -20,25 +20,31 @@ class WalkthroughManager {
     final List<dynamic> rawSteps = jsonMap['walkthrough'] as List<dynamic>;
     _steps = {
       for (final raw in rawSteps) 
-        (raw as Map<String, dynamic>)['id'] as String:
-          Map<String, dynamic>.from(raw)
-      };
+    try {
+      final String jsonString = await rootBundle.loadString(
+        'lib/assets/data/walkthrough.json',
+      );
+      final Map<String, dynamic> jsonMap = json.decode(jsonString) as Map<String, dynamic>;
+      final List<dynamic> rawSteps = jsonMap['walkthrough'] as List<dynamic>;
+      _steps = {
+        for (final raw in rawSteps) 
+          (raw as Map<String, dynamic>)['id'] as String:
+            Map<String, dynamic>.from(raw)
+        };
 
-    final checkpoint = box.get('walkthrough_checkpoint') as String?;
-    if (checkpoint != null) {
-      _currentStepId = checkpoint;
-    } else if (_steps.containsKey('welcome')) {
-      _currentStepId = 'welcome';
-    } else if (_steps.isNotEmpty) {
-      _currentStepId = _steps.keys.first;
-    } else {
+      final checkpoint = box.get('walkthrough_checkpoint') as String?;
+      _currentStepId = checkpoint ?? (_steps.containsKey('welcome') ? 'welcome' : (_steps.isNotEmpty ? _steps.keys.first : null));
+
+      if (_currentStepId != null && !_steps.containsKey(_currentStepId)) {
+        _currentStepId = _steps.containsKey('welcome') ? 'welcome' : (_steps.isNotEmpty ? _steps.keys.first : null);
+      }
+
+      _notifyStepChanged();
+    } catch (e) {
+      // Handle error appropriately (log, show error to user, use defaults, etc.)
+      _steps = {};
       _currentStepId = null;
     }
-    if (_currentStepId != null && !_steps.containsKey(_currentStepId)) {
-      _currentStepId = _steps.containsKey('welcome') ? 'welcome' : (_steps.isNotEmpty ? _steps.keys.first : null);
-    }
-
-    _notifyStepChanged();
   }
 
   Map<String, dynamic>? get currentStep =>
