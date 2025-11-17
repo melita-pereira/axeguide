@@ -526,7 +526,7 @@
             "type": "action",
             "action": "showNewMinasEssentials",
             "params": {
-                "categories": ["Grocery", "Pharmacy", "Electronic", "SIM", "Shopping"]
+                "categories": ["Grocery", "Pharmacy", "Electronics", "SIM", "Shopping"]
             },
             "nextStepId": "explore_newminas"
         },
