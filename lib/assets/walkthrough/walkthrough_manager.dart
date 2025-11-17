@@ -25,8 +25,15 @@ class WalkthroughManager {
       };
 
     final checkpoint = box.get('walkthrough_checkpoint') as String?;
-    _currentStepId = checkpoint ?? (_steps.containsKey('welcome') ? 'welcome' : (_steps.isNotEmpty ? _steps.keys.first : null));
-
+    if (checkpoint != null) {
+      _currentStepId = checkpoint;
+    } else if (_steps.containsKey('welcome')) {
+      _currentStepId = 'welcome';
+    } else if (_steps.isNotEmpty) {
+      _currentStepId = _steps.keys.first;
+    } else {
+      _currentStepId = null;
+    }
     if (_currentStepId != null && !_steps.containsKey(_currentStepId)) {
       _currentStepId = _steps.containsKey('welcome') ? 'welcome' : (_steps.isNotEmpty ? _steps.keys.first : null);
     }
