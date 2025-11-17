@@ -629,7 +629,7 @@
         {
             "id": "halifax_essentials",
             "type": "question",
-            "text": "What essential are you looking for?",
+            "text": "What essentials are you looking for?",
             "options": [
                 {
                     "label": "SIM / Phone plan",
