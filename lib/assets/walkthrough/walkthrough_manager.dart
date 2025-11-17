@@ -5,7 +5,7 @@ import 'package:axeguide/utils/hive_boxes.dart';
 class WalkthroughManager {
   final box = userBox;
   final cache = locationCache;
-  late Map<String, dynamic> _steps = {};
+  Map<String, dynamic> _steps = {};
   String? _currentStepId;
 
   void Function(Map<String, dynamic> step)? onStepChanged;
@@ -20,27 +20,40 @@ class WalkthroughManager {
     final List<dynamic> rawSteps = jsonMap['walkthrough'] as List<dynamic>;
     _steps = {
       for (final raw in rawSteps) 
-        (raw as Map<String, dynamic>)['id'] as String:
-          Map<String, dynamic>.from(raw)
-      };
+    try {
+      final String jsonString = await rootBundle.loadString(
+        'lib/assets/data/walkthrough.json',
+      );
+      final Map<String, dynamic> jsonMap = json.decode(jsonString) as Map<String, dynamic>;
+      final List<dynamic> rawSteps = jsonMap['walkthrough'] as List<dynamic>;
+      _steps = {
+        for (final raw in rawSteps) 
+          (raw as Map<String, dynamic>)['id'] as String:
+            Map<String, dynamic>.from(raw)
+        };
 
-    final checkpoint = box.get('walkthrough_checkpoint') as String?;
-    _currentStepId = checkpoint ?? (_steps.containsKey('welcome') ? 'welcome' : (_steps.isNotEmpty ? _steps.keys.first : null));
+      final checkpoint = box.get('walkthrough_checkpoint') as String?;
+      _currentStepId = checkpoint ?? (_steps.containsKey('welcome') ? 'welcome' : (_steps.isNotEmpty ? _steps.keys.first : null));
 
-    if (_currentStepId != null && !_steps.containsKey(_currentStepId)) {
-      _currentStepId = _steps.containsKey('welcome') ? 'welcome' : (_steps.isNotEmpty ? _steps.keys.first : null);
+      if (_currentStepId != null && !_steps.containsKey(_currentStepId)) {
+        _currentStepId = _steps.containsKey('welcome') ? 'welcome' : (_steps.isNotEmpty ? _steps.keys.first : null);
+      }
+
+      _notifyStepChanged();
+    } catch (e) {
+      // Handle error appropriately (log, show error to user, use defaults, etc.)
+      _steps = {};
+      _currentStepId = null;
     }
-
-    _notifyStepChanged();
   }
 
   Map<String, dynamic>? get currentStep =>
       _currentStepId != null ? _steps[_currentStepId!] : null;
 
   void goToNextStep(String? nextStepId, {String? elseNextStepId}) {
-    if (nextStepId != null) {
+    if (nextStepId != null && _steps.containsKey(nextStepId)) {
       _currentStepId = nextStepId;
-    } else if (elseNextStepId != null) {
+    } else if (elseNextStepId != null && _steps.containsKey(elseNextStepId)) {
       _currentStepId = elseNextStepId;
     } else {
       _currentStepId = null;
@@ -49,14 +62,14 @@ class WalkthroughManager {
     _notifyStepChanged();
   }
 
-  void goToStepId (String? id) {
+  void goToStepId(String? id) {
     if (id == null || !_steps.containsKey(id)) return;
     _currentStepId = id;
     _persistCheckpoint();
     _notifyStepChanged();
   }
 
-  void resetWalkthrough(){
+  void resetWalkthrough() {
     _currentStepId = null;
     box.delete('walkthrough_checkpoint');
     _notifyStepChanged();
@@ -72,7 +85,7 @@ class WalkthroughManager {
 
   void processConditionalStep(Map<String, dynamic> step) {
     final condition = step['condition'] as String?;
-    if (condition == null){
+    if (condition == null) {
       goToNextStep(step['nextStepId'] as String?, elseNextStepId: step['elseNextStepId'] as String?);
       return;
     }
@@ -97,15 +110,14 @@ class WalkthroughManager {
     }
 
     // Basic pattern handling
-    final equalsMatch = RegExp(r"user\.selectedLocation\s*==\s*'(.*?)'").firstMatch(condition);
+    final equalsMatch = RegExp(r"user\.selectedLocation\s*==\s*'([^']+)'").firstMatch(condition);
     if (equalsMatch != null) {
       final expected = equalsMatch.group(1);
       return box.get('selectedLocation') == expected;
     }
 
-    final containsMatch = RegExp(r"\[\s*'([^']*)'(?:\s*,\s*'([^']*)')*\s*\].contains\(\s*user\.selectedLocation\s*\)").firstMatch(condition);
-    if (containsMatch != null){
-      final listMatch = RegExp(r"'(.*?)'").allMatches(condition).map((m) => m.group(1)).whereType<String>().toList();
+    final listMatch = RegExp(r"'(.*?)'").allMatches(condition).map((m) => m.group(1)).whereType<String>().toList();
+    if (listMatch.isNotEmpty) {
       final userLoc = box.get('selectedLocation');
       return listMatch.contains(userLoc);
     }
@@ -151,7 +163,26 @@ class WalkthroughManager {
       "navigateToHalifaxHomeScreen": (_) => navigateToHalifaxHomeScreen(),
     };
 
-    actionMap[actionName]?.call(params);
+    // Parse actionName if it contains parameters, e.g. setNavigationPreference('in-depth')
+    String extractedActionName = actionName;
+    Map<String, dynamic>? extractedParams = params;
+    final regExp = RegExp(r"^(\w+)\((.*)\)$");
+    final match = regExp.firstMatch(actionName);
+    if (match != null) {
+      extractedActionName = match.group(1)!;
+      String paramString = match.group(2)!.trim();
+      // Only handle single string literal parameter for now
+      if (paramString.isNotEmpty) {
+        // Remove surrounding quotes if present
+        if ((paramString.startsWith("'") && paramString.endsWith("'")) ||
+            (paramString.startsWith('"') && paramString.endsWith('"'))) {
+          paramString = paramString.substring(1, paramString.length - 1);
+        }
+        extractedParams = {"value": paramString};
+      }
+    }
+
+    actionMap[extractedActionName]?.call(extractedParams);
   }
 
   void next({String? selectedOptionLabel}){
@@ -173,18 +204,21 @@ class WalkthroughManager {
       case 'question':
       if (selectedOptionLabel == null) return;
       final options = (step['options'] as List<dynamic>?)?.cast<Map<String, dynamic>>() ?? [];
-      final chosen = options.firstWhere((opt)=> opt['label'] == selectedOptionLabel || opt['id'] == selectedOptionLabel, orElse: () => {});
-      if ((chosen as Map).isEmpty) return;
+      final chosen = options.firstWhere(
+        (opt) => opt['label'] == selectedOptionLabel || opt['id'] == selectedOptionLabel,
+        orElse: () => <String, dynamic>{}
+      );
+      if (chosen.isEmpty) return;
 
-      if (chosen.containsKey('action')){
-        final actionName = chosen['action'] as String?;
+      final actionName = chosen['action'] as String?;
+      if (actionName != null) {
         final params = chosen['params'] as Map<String, dynamic>?;
         performAction(actionName, params);
       }
 
       if (chosen.containsKey('condition')){
         final cond = chosen['condition'] as String?;
-        if (cond != null){
+        if (cond != null) {
           final condResult = evaluateCondition(cond);
           final nextIfTrue = condResult ? (chosen['nextStepId'] as String?) : (chosen['elseNextStepId'] as String?);
           goToNextStep(nextIfTrue);
@@ -197,7 +231,7 @@ class WalkthroughManager {
 
       case 'info':
       final options = (step['options'] as List<dynamic>?)?.cast<Map<String, dynamic>>();
-      if (options != null && options.isNotEmpty){
+      if (options != null && options.isNotEmpty) {
         goToNextStep(options.first['nextStepId'] as String?);
       } else {
         _currentStepId = null;
