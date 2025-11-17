@@ -27,19 +27,18 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _initialize() async {
     await _loadUserData();
-    if (HiveService.isCacheStale()) {
-      await _loadLocations();
-    } else {
-      final cached = HiveService.getCachedLocations();
-      if (cached != null && cached.isNotEmpty) {
-        setState(() {
-          locations = List<Map<String, dynamic>>.from(cached);
-          loading = false;
-        });
-      } else {
-        await _loadLocations();
-      }
+    final loc = userLocation ?? '';
+    final isStale = HiveService.isCacheStale(loc);
+    final cached = HiveService.getCachedLocationsFor(loc);
+
+    if (!isStale && cached != null && cached.isNotEmpty) {
+      setState(() {
+        locations = List<Map<String, dynamic>>.from(cached);
+        loading = false;
+      });
+      return;
     }
+    await _loadLocations();
   }
 
   Future<void> _loadUserData() async {
@@ -58,8 +57,8 @@ class _HomeScreenState extends State<HomeScreen> {
       if (lower.contains('airport')) return 'halifax_airport';
       return lower;
     }
-
-    final normalized = normalizeLocation(userLocation ?? '');
+    final currentLoc = userLocation ?? '';
+    final normalized = normalizeLocation(currentLoc);
     try {
       final response = await Supabase.instance.client
           .from('locations')
@@ -69,7 +68,7 @@ class _HomeScreenState extends State<HomeScreen> {
           .ilike('area_tag', '%$normalized%')
           .limit(10);
       if (response.isNotEmpty) {
-        await HiveService.saveLocations(response);
+        await HiveService.saveLocations(response, currentLoc);
         setState(() {
         locations = List<Map<String, dynamic>>.from(response);
         loading = false;
@@ -77,7 +76,7 @@ class _HomeScreenState extends State<HomeScreen> {
       return;
       }
 
-      final cached = HiveService.getCachedLocations();
+      final cached = HiveService.getCachedLocationsFor(currentLoc);
       if (cached != null && cached.isNotEmpty) {
         setState(() {
           locations = List<Map<String, dynamic>>.from(cached);
@@ -103,7 +102,7 @@ class _HomeScreenState extends State<HomeScreen> {
     } catch (e) {
       debugPrint('Supabase fetch failed: $e');
 
-      final cached = HiveService.getCachedLocations();
+      final cached = HiveService.getCachedLocationsFor(currentLoc);
       if (cached != null && cached.isNotEmpty) {
         setState(() {
           locations = List<Map<String, dynamic>>.from(cached);

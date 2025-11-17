@@ -15,16 +15,35 @@ void main() {
   });
 
   tearDownAll(() async {
-    await Hive.box('locationCache').clear();
-    await Hive.box('userPreferences').clear();
-    await Hive.box('locationCache').close();
-    await Hive.box('userPreferences').close();
     try {
-      await tmpDir.delete(recursive: true);
+      if (Hive.isBoxOpen('locationCache')) {
+        await Hive.box('locationCache').clear();
+        await Hive.box('locationCache').close();
+        await Hive.deleteBoxFromDisk('locationCache');
+      }
+      if (Hive.isBoxOpen('userPreferences')) {
+        await Hive.box('userPreferences').clear();
+        await Hive.box('userPreferences').close();
+        await Hive.deleteBoxFromDisk('userPreferences');
+      }
+    } catch (_) {}
+    try {
+      await Hive.close();
+    } catch (_) {}
+    try {
+      if (tmpDir.existsSync()) {
+        await tmpDir.delete(recursive: true);
+      }
     } catch (_) {}
   });
 
   group('HiveService - Preferences', () {
+    setUp(() async {
+      if (!Hive.isBoxOpen('userPreferences')) {
+        await Hive.openBox('userPreferences');
+      }
+      await Hive.box('userPreferences').clear();
+    });
     test('savePrefs() stores preferences correctly', () async {
       final testPrefs = {'theme': 'dark', 'language': 'en'};
       await HiveService.savePrefs(testPrefs);
@@ -56,6 +75,9 @@ void main() {
 
   group('HiveService - Location Cache', () {
     setUp(() async {
+      if (!Hive.isBoxOpen('locationCache')) {
+        await Hive.openBox('locationCache');
+      }
       await Hive.box('locationCache').clear();
     });
 
@@ -65,9 +87,9 @@ void main() {
         {'name': 'Location 2', 'town': 'Wolfville'},
       ];
 
-      await HiveService.saveLocations(locations);
+      await HiveService.saveLocations(locations, 'Halifax');
 
-      final cached = HiveService.getCachedLocations();
+      final cached = HiveService.getCachedLocationsFor('Halifax');
       expect(cached, isNotNull);
       expect(cached!.length, 2);
       expect(cached[0]['name'], 'Location 1');
@@ -75,22 +97,22 @@ void main() {
     });
 
     test('getCachedLocations() returns null when cache is empty', () async {
-      final cached = HiveService.getCachedLocations();
+      final cached = HiveService.getCachedLocationsFor('Halifax');
       expect(cached, isNull);
     });
 
     test('saveLocations() updates existing cache', () async {
       final locations1 = [{'name': 'Old Location'}];
-      await HiveService.saveLocations(locations1);
-      expect(HiveService.getCachedLocations()!.length, 1);
+      await HiveService.saveLocations(locations1, 'Halifax');
+      expect(HiveService.getCachedLocationsFor('Halifax')!.length, 1);
 
       final locations2 = [
         {'name': 'New Location 1'},
         {'name': 'New Location 2'},
         {'name': 'New Location 3'},
       ];
-      await HiveService.saveLocations(locations2);
-      final cached = HiveService.getCachedLocations();
+      await HiveService.saveLocations(locations2, 'Halifax');
+      final cached = HiveService.getCachedLocationsFor('Halifax');
       expect(cached!.length, 3);
       expect(cached[0]['name'], 'New Location 1');
     });
@@ -100,9 +122,9 @@ void main() {
         {'name': 'Loc1', 'id': 1, 'active': true},
         {'name': 'Loc2', 'id': 2, 'active': false},
       ];
-      await HiveService.saveLocations(locations);
+      await HiveService.saveLocations(locations, 'Halifax');
 
-      final cached = HiveService.getCachedLocations();
+      final cached = HiveService.getCachedLocationsFor('Halifax') as List<Map<String, dynamic>>?;
       expect(cached, isNotNull);
       expect(cached!.first['name'], 'Loc1');
       expect(cached[0]['id'], 1);
@@ -111,7 +133,7 @@ void main() {
 
     test('saveLocations() stores ISO8601 timestamp', () async {
       final before = DateTime.now();
-      await HiveService.saveLocations([{'name': 'Test'}]);
+      await HiveService.saveLocations([{'name': 'Test'}], 'Halifax');
       final after = DateTime.now();
 
       final fetchedAtStr = Hive.box('locationCache').get('fetchedAt') as String?;
@@ -125,41 +147,44 @@ void main() {
 
   group('HiveService - Cache Staleness', () {
     setUp(() async {
+      if (!Hive.isBoxOpen('locationCache')) {
+        await Hive.openBox('locationCache');
+      }
       await Hive.box('locationCache').clear();
     });
 
     test('isCacheStale() returns true when no fetchedAt timestamp exists', () {
-      final isStale = HiveService.isCacheStale();
+      final isStale = HiveService.isCacheStale('Halifax');
       expect(isStale, isTrue);
     });
 
     test('isCacheStale() returns false for fresh cache (within maxAge)', () async {
-      await HiveService.saveLocations([{'name': 'Test'}]);
-      final isStale = HiveService.isCacheStale(maxAge: const Duration(hours: 1));
+      await HiveService.saveLocations([{'name': 'Test'}], 'Halifax');
+      final isStale = HiveService.isCacheStale('Halifax', maxAge: const Duration(hours: 1));
       expect(isStale, isFalse);
     });
 
     test('isCacheStale() returns true for stale cache (older than maxAge)', () async {
-      await HiveService.saveLocations([{'name': 'Test'}]);
+      await HiveService.saveLocations([{'name': 'Test'}], 'Halifax');
 
       // Simulate old timestamp
       final oldTime = DateTime.now().subtract(const Duration(hours: 2));
       await Hive.box('locationCache').put('fetchedAt', oldTime.toIso8601String());
 
-      final isStale = HiveService.isCacheStale(maxAge: const Duration(hours: 1));
+      final isStale = HiveService.isCacheStale('Halifax', maxAge: const Duration(hours: 1));
       expect(isStale, isTrue);
     });
 
     test('isCacheStale() with custom maxAge duration works correctly', () async {
-      await HiveService.saveLocations([{'name': 'Test'}]);
+      await HiveService.saveLocations([{'name': 'Test'}], 'Halifax');
 
       // Simulate an older fetchedAt so we can test different maxAge values.
       // Make the cache ~45 minutes old: stale for 30 minutes, fresh for 2 hours.
       final simulatedOldTime = DateTime.now().subtract(const Duration(minutes: 45));
       await Hive.box('locationCache').put('fetchedAt', simulatedOldTime.toIso8601String());
 
-      final isStaleFor30Min = HiveService.isCacheStale(maxAge: const Duration(minutes: 30));
-      final isStaleFor2Hours = HiveService.isCacheStale(maxAge: const Duration(hours: 2));
+      final isStaleFor30Min = HiveService.isCacheStale('Halifax', maxAge: const Duration(minutes: 30));
+      final isStaleFor2Hours = HiveService.isCacheStale('Halifax', maxAge: const Duration(hours: 2));
 
       expect(isStaleFor30Min, isTrue);
       expect(isStaleFor2Hours, isFalse);
@@ -167,13 +192,13 @@ void main() {
 
     test('isCacheStale() handles invalid timestamp gracefully', () async {
       await Hive.box('locationCache').put('fetchedAt', 'invalid-date');
-      final isStale = HiveService.isCacheStale();
+      final isStale = HiveService.isCacheStale('Halifax');
       expect(isStale, isTrue);
     });
 
     test('isCacheStale() returns true when fetchedAt is empty string', () async {
       await Hive.box('locationCache').put('fetchedAt', '');
-      final isStale = HiveService.isCacheStale();
+      final isStale = HiveService.isCacheStale('Halifax');
       expect(isStale, isTrue);
     });
   });
