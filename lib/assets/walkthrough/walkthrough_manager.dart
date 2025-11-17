@@ -79,7 +79,7 @@ class WalkthroughManager {
 
   void processConditionalStep(Map<String, dynamic> step) {
     final condition = step['condition'] as String?;
-    if (condition == null){
+    if (condition == null) {
       goToNextStep(step['nextStepId'] as String?, elseNextStepId: step['elseNextStepId'] as String?);
       return;
     }
