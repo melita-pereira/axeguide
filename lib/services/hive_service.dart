@@ -36,7 +36,7 @@ class HiveService {
     return cache.get(keyData) as List<dynamic>?;
   }
 
-  static bool isCacheStale(String currentLocation,{Duration maxAge = const Duration(hours: 1)}) {
+  static bool isCacheStale(String currentLocation, {Duration maxAge = const Duration(hours: 1)}) {
     final cachedLocation = cache.get(keyLocation);
     if (cachedLocation == null) {
       return true;
