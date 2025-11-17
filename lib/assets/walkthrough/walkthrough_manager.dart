@@ -116,10 +116,19 @@ class WalkthroughManager {
       return box.get('selectedLocation') == expected;
     }
 
-    final listMatch = RegExp(r"'(.*?)'").allMatches(condition).map((m) => m.group(1)).whereType<String>().toList();
-    if (listMatch.isNotEmpty) {
+    // Match patterns like ['loc1', 'loc2'].contains(user.selectedLocation)
+    final listContainsMatch = RegExp(r"\[(.*?)\]\.contains\(\s*user\.selectedLocation\s*\)").firstMatch(condition);
+    if (listContainsMatch != null) {
+      final listContent = listContainsMatch.group(1)!;
+      // Split by comma, trim, and remove surrounding quotes
+      final items = listContent
+          .split(',')
+          .map((s) => s.trim())
+          .where((s) => s.startsWith("'") && s.endsWith("'"))
+          .map((s) => s.substring(1, s.length - 1))
+          .toList();
       final userLoc = box.get('selectedLocation');
-      return listMatch.contains(userLoc);
+      return items.contains(userLoc);
     }
 
     return false;
