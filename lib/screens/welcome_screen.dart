@@ -173,7 +173,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                         borderRadius: BorderRadius.circular(30),
                       ),
                       elevation: 5,
-                      shadowColor: primaryColor.withOpacity(0.3),
+                      shadowColor: primaryColor.withAlpha((0.3 * 255).round()),
                     ),
                     child: const Text(
                       'Get Started',
@@ -196,42 +196,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                       style: TextStyle(fontSize: 15),
                     ),
                   ),
-                  const SizedBox(height: 24),
-                  TextButton(
-                    onPressed: () async {
-                      final messenger = ScaffoldMessenger.of(context);
-                      try {
-                        await UserBoxHelper.clearCheckpoint();
-                        await UserBoxHelper.setHasProgress(false);
-                        // Also clear any stored progress data to avoid stale state.
-                        await UserBoxHelper.setProgressData({});
-                      } catch (e) {
-                        if (!mounted) return;
-                        messenger.showSnackBar(
-                          SnackBar(
-                            content: Text('Failed to reset progress: $e'),
-                          ),
-                        );
-                        return;
-                      }
-                      if (!mounted) return;
-                      setState(() {
-                        hasProgress = false;
-                      });
-                      messenger.showSnackBar(
-                        const SnackBar(
-                          content: Text(
-                            'Progress reset. You can start fresh now.',
-                          ),
-                          duration: Duration(seconds: 2),
-                        ),
-                      );
-                    },
-                    child: const Text(
-                      'Reset Progress',
-                      style: TextStyle(fontSize: 15, color: Colors.redAccent),
-                    ),
-                  ),
+                  // Reset Progress removed from WelcomeScreen — use Settings instead.
                 ],
               ),
             ),
