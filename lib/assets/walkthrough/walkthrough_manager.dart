@@ -164,7 +164,26 @@ class WalkthroughManager {
       "navigateToHalifaxHomeScreen": (_) => navigateToHalifaxHomeScreen(),
     };
 
-    actionMap[actionName]?.call(params);
+    // Parse actionName if it contains parameters, e.g. setNavigationPreference('in-depth')
+    String extractedActionName = actionName;
+    Map<String, dynamic>? extractedParams = params;
+    final regExp = RegExp(r"^(\w+)\((.*)\)$");
+    final match = regExp.firstMatch(actionName);
+    if (match != null) {
+      extractedActionName = match.group(1)!;
+      String paramString = match.group(2)!.trim();
+      // Only handle single string literal parameter for now
+      if (paramString.isNotEmpty) {
+        // Remove surrounding quotes if present
+        if ((paramString.startsWith("'") && paramString.endsWith("'")) ||
+            (paramString.startsWith('"') && paramString.endsWith('"'))) {
+          paramString = paramString.substring(1, paramString.length - 1);
+        }
+        extractedParams = {"value": paramString};
+      }
+    }
+
+    actionMap[extractedActionName]?.call(extractedParams);
   }
 
   void next({String? selectedOptionLabel}){
