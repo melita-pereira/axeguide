@@ -13,16 +13,9 @@ class WalkthroughManager {
   WalkthroughManager();
 
   Future<void> loadWalkthrough() async {
-    final String jsonString = await rootBundle.loadString(
-      'lib/assets/walkthrough/data/walkthrough.json',
-    );
-    final Map<String, dynamic> jsonMap = json.decode(jsonString) as Map<String, dynamic>;
-    final List<dynamic> rawSteps = jsonMap['walkthrough'] as List<dynamic>;
-    _steps = {
-      for (final raw in rawSteps) 
     try {
       final String jsonString = await rootBundle.loadString(
-        'lib/assets/data/walkthrough.json',
+        'lib/assets/walkthrough/data/walkthrough.json',
       );
       final Map<String, dynamic> jsonMap = json.decode(jsonString) as Map<String, dynamic>;
       final List<dynamic> rawSteps = jsonMap['walkthrough'] as List<dynamic>;
@@ -30,7 +23,7 @@ class WalkthroughManager {
         for (final raw in rawSteps) 
           (raw as Map<String, dynamic>)['id'] as String:
             Map<String, dynamic>.from(raw)
-        };
+      };
 
       final checkpoint = box.get('walkthrough_checkpoint') as String?;
       _currentStepId = checkpoint ?? (_steps.containsKey('welcome') ? 'welcome' : (_steps.isNotEmpty ? _steps.keys.first : null));
