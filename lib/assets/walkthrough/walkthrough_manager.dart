@@ -193,57 +193,57 @@ class WalkthroughManager {
 
     switch (type) {
       case 'conditional':
-      processConditionalStep(step);
-      break;
+        processConditionalStep(step);
+        break;
 
       case 'action':
-      performAction(step['action'] as String?, (step['params'] as Map<String, dynamic>?));
-      goToNextStep(step['nextStepId'] as String?);
-      break;
+        performAction(step['action'] as String?, (step['params'] as Map<String, dynamic>?));
+        goToNextStep(step['nextStepId'] as String?);
+        break;
 
       case 'question':
-      if (selectedOptionLabel == null) return;
-      final options = (step['options'] as List<dynamic>?)?.cast<Map<String, dynamic>>() ?? [];
-      final chosen = options.firstWhere(
-        (opt) => opt['label'] == selectedOptionLabel || opt['id'] == selectedOptionLabel,
-        orElse: () => <String, dynamic>{}
-      );
-      if (chosen.isEmpty) return;
+        if (selectedOptionLabel == null) return;
+        final options = (step['options'] as List<dynamic>?)?.cast<Map<String, dynamic>>() ?? [];
+        final chosen = options.firstWhere(
+          (opt) => opt['label'] == selectedOptionLabel || opt['id'] == selectedOptionLabel,
+          orElse: () => <String, dynamic>{}
+        );
+        if (chosen.isEmpty) return;
 
-      final actionName = chosen['action'] as String?;
-      if (actionName != null) {
-        final params = chosen['params'] as Map<String, dynamic>?;
-        performAction(actionName, params);
-      }
-
-      if (chosen.containsKey('condition')){
-        final cond = chosen['condition'] as String?;
-        if (cond != null) {
-          final condResult = evaluateCondition(cond);
-          final nextIfTrue = condResult ? (chosen['nextStepId'] as String?) : (chosen['elseNextStepId'] as String?);
-          goToNextStep(nextIfTrue);
-          return;
+        final actionName = chosen['action'] as String?;
+        if (actionName != null) {
+          final params = chosen['params'] as Map<String, dynamic>?;
+          performAction(actionName, params);
         }
-      }
 
-      goToNextStep(chosen['nextStepId'] as String?, elseNextStepId: chosen['elseNextStepId'] as String?);
-      break;
+        if (chosen.containsKey('condition')){
+          final cond = chosen['condition'] as String?;
+          if (cond != null) {
+            final condResult = evaluateCondition(cond);
+            final nextIfTrue = condResult ? (chosen['nextStepId'] as String?) : (chosen['elseNextStepId'] as String?);
+            goToNextStep(nextIfTrue);
+            return;
+          }
+        }
+
+        goToNextStep(chosen['nextStepId'] as String?, elseNextStepId: chosen['elseNextStepId'] as String?);
+        break;
 
       case 'info':
-      final options = (step['options'] as List<dynamic>?)?.cast<Map<String, dynamic>>();
-      if (options != null && options.isNotEmpty) {
-        goToNextStep(options.first['nextStepId'] as String?);
-      } else {
+        final options = (step['options'] as List<dynamic>?)?.cast<Map<String, dynamic>>();
+        if (options != null && options.isNotEmpty) {
+          goToNextStep(options.first['nextStepId'] as String?);
+        } else {
+          _currentStepId = null;
+          _persistCheckpoint();
+          _notifyStepChanged();
+        }
+        break;
+
+      default:
         _currentStepId = null;
         _persistCheckpoint();
         _notifyStepChanged();
-      }
-      break;
-
-      default:
-      _currentStepId = null;
-      _persistCheckpoint();
-      _notifyStepChanged();
     }
   }
 
