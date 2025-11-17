@@ -348,7 +348,7 @@
         },
         {
             "id": "acadia_campus",
-            "type":"action",
+            "type": "action",
             "action": "showCampusResDirections",
             "params": {
                 "residences": [
