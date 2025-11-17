@@ -1,9 +1,10 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:axeguide/utils/user_box_helper.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'settings_screen.dart';
+import 'package:axeguide/services/hive_service.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -26,6 +27,17 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _initialize() async {
     await _loadUserData();
+    final loc = userLocation ?? '';
+    final isStale = HiveService.isCacheStale(loc);
+    final cached = HiveService.getCachedLocationsFor(loc);
+
+    if (!isStale && cached != null && cached.isNotEmpty) {
+      setState(() {
+        locations = List<Map<String, dynamic>>.from(cached);
+        loading = false;
+      });
+      return;
+    }
     await _loadLocations();
   }
 
@@ -38,6 +50,32 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  void _handleCacheFallback(String currentLoc, {required String cacheMessage, required String noDataMessage}) {
+    final cached = HiveService.getCachedLocationsFor(currentLoc);
+    if (cached != null && cached.isNotEmpty) {
+      setState(() {
+        locations = List<Map<String, dynamic>>.from(cached);
+        loading = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(cacheMessage),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    } else {
+      setState(() {
+        loading = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(noDataMessage),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
+  }
+
   Future<void> _loadLocations() async {
     String normalizeLocation(String location) {
       final lower = location.toLowerCase();
@@ -45,8 +83,8 @@ class _HomeScreenState extends State<HomeScreen> {
       if (lower.contains('airport')) return 'halifax_airport';
       return lower;
     }
-
-    final normalized = normalizeLocation(userLocation ?? '');
+    final currentLoc = userLocation ?? '';
+    final normalized = normalizeLocation(currentLoc);
     try {
       final response = await Supabase.instance.client
           .from('locations')
@@ -55,13 +93,30 @@ class _HomeScreenState extends State<HomeScreen> {
           )
           .ilike('area_tag', '%$normalized%')
           .limit(10);
-      setState(() {
-        locations = List<Map<String, dynamic>>.from(response);
-        loading = false;
+      if (response.isNotEmpty) {
+        await HiveService.saveLocations(response, currentLoc);
+        setState(() {
+          locations = List<Map<String, dynamic>>.from(response);
+          loading = false;
       });
+      return;
+      }
+
+      // Empty response - try cache or show error
+      _handleCacheFallback(
+        currentLoc,
+        cacheMessage: 'Loaded locations from cache.',
+        noDataMessage: 'No locations available at the moment.',
+      );
     } catch (e) {
-      setState(() => loading = false);
-      debugPrint('Error loading locations: $e');
+      debugPrint('Supabase fetch failed: $e');
+
+      // Network error - try cache or show error
+      _handleCacheFallback(
+        currentLoc,
+        cacheMessage: 'Loaded locations from cache due to network error.',
+        noDataMessage: 'Failed to load locations. Please check your connection.',
+      );
     }
   }
 
@@ -165,9 +220,17 @@ class _HomeScreenState extends State<HomeScreen> {
             const Divider(height: 40, thickness: 1),
             Text('Explore', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600, color: color)),
             const SizedBox(height: 16),
-
             if (loading) ...[
-              const Padding(padding: EdgeInsets.all(16.0), child: CircularProgressIndicator()),
+              const Padding(
+                padding: EdgeInsets.all(16.0),
+                child: Column(
+                  children: [
+                    CircularProgressIndicator(),
+                    SizedBox(height: 16),
+                    Text('Fetching data...', style: TextStyle(fontSize: 16)),
+                  ],
+                ),
+              ),
             ] else if (locations.isEmpty) ...[
               Container(
                 height: 150,
