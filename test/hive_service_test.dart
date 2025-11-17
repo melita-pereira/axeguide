@@ -153,7 +153,11 @@ void main() {
     test('isCacheStale() with custom maxAge duration works correctly', () async {
       await HiveService.saveLocations([{'name': 'Test'}]);
 
-      // Cache is fresh for 1 hour but stale for 30 minutes
+      // Simulate an older fetchedAt so we can test different maxAge values.
+      // Make the cache ~45 minutes old: stale for 30 minutes, fresh for 2 hours.
+      final simulatedOldTime = DateTime.now().subtract(const Duration(minutes: 45));
+      await Hive.box('locationCache').put('fetchedAt', simulatedOldTime.toIso8601String());
+
       final isStaleFor30Min = HiveService.isCacheStale(maxAge: const Duration(minutes: 30));
       final isStaleFor2Hours = HiveService.isCacheStale(maxAge: const Duration(hours: 2));
 
