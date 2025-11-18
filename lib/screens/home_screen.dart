@@ -115,8 +115,6 @@ class _HomeScreenState extends State<HomeScreen> {
         noDataMessage: 'No locations available at the moment.',
       );
     } catch (e) {
-      debugPrint('Supabase fetch failed: $e');
-
       // Network error - try cache or show error
       _handleCacheFallback(
         currentLoc,
@@ -165,7 +163,7 @@ class _HomeScreenState extends State<HomeScreen> {
           return;
         }
       } catch (e) {
-        debugPrint('Error launching map: $e');
+        // Failed to launch map
       }
 
       if (!mounted) return;

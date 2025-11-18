@@ -119,7 +119,7 @@ Future<void> _clearPersonalizationData(BuildContext context) async {
     await userBox.put('hasSeenWelcome', false);
 
   } catch (e) {
-    debugPrint("Reset failed: $e");
+    // Reset failed
   }
 
   if (!context.mounted) return;

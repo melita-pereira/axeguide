@@ -146,7 +146,7 @@ class WalkthroughManager {
         break;
 
       default:
-        debugPrint("[Walkthrough] UNKNOWN STEP TYPE: ${step['type']}");
+        // Unknown step type
     }
   }
 
@@ -208,29 +208,33 @@ class WalkthroughManager {
     goTo(selected['nextStepId']);
   }
 
+  /// Maps walkthrough JSON field names to Hive storage keys
+  String _mapFieldNameToHiveKey(String fieldName) {
+    switch (fieldName) {
+      case 'selectedLocation':
+        return 'userLocation';
+      case 'selectedResidence':
+        return 'userResidence';
+      case 'currentCampusLocation':
+        return 'currentCampusLocation';
+      case 'destinationLocation':
+        return 'destinationLocation';
+      case 'transportPref':
+      case 'showSIM':
+      case 'showGroceries':
+      case 'showBanking':
+      case 'hasSIM':
+        return fieldName;
+      default:
+        return fieldName;
+    }
+  }
+
   Future<void> _applySet(Map<String, dynamic> map) async {
     for (final key in map.keys) {
       if (key.startsWith("user.")) {
-        final fieldName = key.substring(5); // e.g., "selectedLocation"
-        
-        // Map walkthrough JSON keys to UserBoxHelper keys
-        String hiveKey;
-        switch (fieldName) {
-          case 'selectedLocation':
-            hiveKey = 'userLocation';
-            break;
-          case 'transportPref':
-            hiveKey = 'transportPref';
-            break;
-          case 'showSIM':
-          case 'showGroceries':
-          case 'showBanking':
-            hiveKey = fieldName; // Keep as-is
-            break;
-          default:
-            hiveKey = fieldName;
-        }
-        
+        final fieldName = key.substring(5);
+        final hiveKey = _mapFieldNameToHiveKey(fieldName);
         await box.put(hiveKey, map[key]);
       }
     }
@@ -251,11 +255,9 @@ class WalkthroughManager {
 
     if (cond.startsWith("eq.user.")) {
       final parts = cond.split(".");
-      final fieldName = parts[2]; // e.g., "selectedLocation"
-      final expected = parts.sublist(3).join("."); // e.g., "Halifax Airport"
-      
-      // Map to correct Hive key
-      final hiveKey = fieldName == 'selectedLocation' ? 'userLocation' : fieldName;
+      final fieldName = parts[2];
+      final expected = parts.sublist(3).join(".");
+      final hiveKey = _mapFieldNameToHiveKey(fieldName);
       return box.get(hiveKey) == expected;
     }
 
@@ -263,9 +265,7 @@ class WalkthroughManager {
       final afterPrefix = cond.substring(8); 
       final dotIndex = afterPrefix.indexOf(".");
       final fieldName = afterPrefix.substring(0, dotIndex);
-      
-      // Map to correct Hive key
-      final hiveKey = fieldName == 'selectedLocation' ? 'userLocation' : fieldName;
+      final hiveKey = _mapFieldNameToHiveKey(fieldName);
 
       final listStr =
           cond.substring(cond.indexOf("[") + 1, cond.indexOf("]"));
@@ -278,12 +278,14 @@ class WalkthroughManager {
         RegExp(r"\[(.*?)\]\.contains\(user\.([\w]+)\)").firstMatch(cond);
     if (legacy != null) {
       final list = legacy.group(1)!;
-      final key = legacy.group(2)!;
-      final items = list.split(",").map((e) => e.replaceAll("'", "").trim());
-      return items.contains(box.get(key));
+      final fieldName = legacy.group(2)!;
+      final items = list.split(",").map((e) => e.replaceAll("'", "").trim()).toList();
+      final hiveKey = _mapFieldNameToHiveKey(fieldName);
+      final userValue = box.get(hiveKey);
+      return items.contains(userValue);
     }
 
-    debugPrint("⚠ [Walkthrough] UNKNOWN CONDITION: $cond");
+    // Unknown condition format
     return false;
   }
 
@@ -305,24 +307,7 @@ class WalkthroughManager {
   void setValue(String key, dynamic value) {
     if (key.startsWith("user.")) {
       final fieldName = key.substring(5);
-      // Map to correct Hive key
-      String hiveKey;
-      switch (fieldName) {
-        case 'selectedLocation':
-          hiveKey = 'userLocation';
-          break;
-        case 'selectedResidence':
-          hiveKey = 'userResidence';
-          break;
-        case 'currentCampusLocation':
-          hiveKey = 'currentCampusLocation';
-          break;
-        case 'destinationLocation':
-          hiveKey = 'destinationLocation';
-          break;
-        default:
-          hiveKey = fieldName;
-      }
+      final hiveKey = _mapFieldNameToHiveKey(fieldName);
       box.put(hiveKey, value);
     }
   }
@@ -330,24 +315,7 @@ class WalkthroughManager {
   dynamic getValue(String key) {
     if (key.startsWith("user.")) {
       final fieldName = key.substring(5);
-      // Map to correct Hive key
-      String hiveKey;
-      switch (fieldName) {
-        case 'selectedLocation':
-          hiveKey = 'userLocation';
-          break;
-        case 'selectedResidence':
-          hiveKey = 'userResidence';
-          break;
-        case 'currentCampusLocation':
-          hiveKey = 'currentCampusLocation';
-          break;
-        case 'destinationLocation':
-          hiveKey = 'destinationLocation';
-          break;
-        default:
-          hiveKey = fieldName;
-      }
+      final hiveKey = _mapFieldNameToHiveKey(fieldName);
       return box.get(hiveKey);
     }
     return null;
@@ -372,8 +340,6 @@ class WalkthroughManager {
       final categoryName = query['category_name'] as String?;
       final areaTagContains = query['area_tag_contains'] as String?;
       
-      debugPrint('Fetching dropdown data: table=$table, category=$categoryName, areaTag=$areaTagContains');
-      
       // If filtering by category, we need to join through location_categories
       if (categoryName != null) {
         // First, get the category ID
@@ -395,7 +361,6 @@ class WalkthroughManager {
             .toList();
         
         if (locationIds.isEmpty) {
-          debugPrint('No location IDs found for category: $categoryName');
           return [];
         }
         
@@ -410,7 +375,6 @@ class WalkthroughManager {
         }
         
         final response = await queryBuilder;
-        debugPrint('Fetched ${response.length} items with category filter');
         return List<Map<String, dynamic>>.from(response);
       } else {
         // No category filter, just query locations directly
@@ -421,11 +385,9 @@ class WalkthroughManager {
         }
         
         final response = await queryBuilder;
-        debugPrint('Fetched ${response.length} items without category filter');
         return List<Map<String, dynamic>>.from(response);
       }
     } catch (e) {
-      debugPrint('Error fetching dropdown data from Supabase: $e');
       return [];
     }
   }

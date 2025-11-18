@@ -664,7 +664,7 @@ class WalkthroughActions {
         );
 
       default:
-        debugPrint("[Walkthrough] Unknown action: $action");
+        // Unknown action
     }
   }
 
@@ -690,17 +690,24 @@ class WalkthroughActions {
   }
 
   static Future<void> _importHiveCheckpoint(BuildContext context) async {
-    final savedStep = UserBoxHelper.walkthroughCheckpoint;
-    final savedLocation = UserBoxHelper.userLocation;
-    final navPref = UserBoxHelper.navPreference;
-
-    debugPrint("Restoring checkpoint: $savedStep");
-    debugPrint("Restoring location: $savedLocation");
-    debugPrint("Restoring navigation preference: $navPref");
-
+    // The checkpoint restoration happens automatically when WalkthroughManager loads
+    // This action just needs to navigate to the home screen since the user chose to continue
     
-    // Simulate some delay
-    await Future.delayed(const Duration(seconds: 1));
-    debugPrint("Hive checkpoint imported.");
+    // Ensure user has basic data set
+    if (UserBoxHelper.userMode == null) {
+      await UserBoxHelper.setUserMode('Student');
+    }
+    
+    // Clear the walkthrough checkpoint since they're continuing to home
+    await UserBoxHelper.clearWalkthroughCheckpoint();
+    
+    if (!context.mounted) return;
+    
+    // Navigate to home screen
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (_) => const HomeScreen()),
+      (route) => false,
+    );
   }
 }

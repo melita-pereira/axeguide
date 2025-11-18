@@ -409,8 +409,6 @@ class _WalkthroughScreenState extends State<WalkthroughScreen> {
                 manager.setValue(storeAs, selectedDropdownValue);
               }
               
-              debugPrint('Dropdown Continue clicked: value=$selectedDropdownValue');
-              
               // Call nextFromUI which will trigger navigation
               manager.nextFromUI(selectedDropdownValue);
               
@@ -455,13 +453,11 @@ class _WalkthroughScreenState extends State<WalkthroughScreen> {
 
     try {
       final items = await manager.fetchDropdownData(config);
-      debugPrint('Dropdown data loaded: ${items.length} items');
       setState(() {
         dropdownItems = items;
         loadingDropdown = false;
       });
     } catch (e) {
-      debugPrint('Error loading dropdown data: $e');
       setState(() {
         loadingDropdown = false;
       });
