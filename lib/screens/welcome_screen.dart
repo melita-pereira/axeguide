@@ -203,8 +203,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
     await UserBoxHelper.clearWalkthroughCheckpoint();
     await UserBoxHelper.setHasProgress(false);
 
-    // Set basic mode and navigate to location selection
-    await UserBoxHelper.setUserMode('basic');
+    // Set basic navigation preference and clear location
     await UserBoxHelper.setUserLocation(null);
     await UserBoxHelper.setNavPreference('basic');
 

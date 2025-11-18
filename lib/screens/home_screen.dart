@@ -16,7 +16,6 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   String? userLocation;
-  String? userMode;
   bool loading = true;
   List<Map<String, dynamic>> locations = [];
 
@@ -67,11 +66,29 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _loadUserData() async {
     final location = UserBoxHelper.userLocation;
-    final mode = UserBoxHelper.userMode;
     setState(() {
       userLocation = location; // Keep as null if not set
-      userMode = mode ?? 'Guest';
     });
+  }
+
+  String _getLocationGreeting() {
+    if (userLocation == null) return 'Loading...';
+    
+    // Return friendly greeting based on location
+    if (userLocation!.toLowerCase().contains('acadia')) {
+      return 'Acadia University';
+    } else if (userLocation!.toLowerCase().contains('airport')) {
+      return 'Halifax Airport';
+    } else if (userLocation!.toLowerCase().contains('wolfville')) {
+      return 'Wolfville';
+    } else if (userLocation!.toLowerCase().contains('new minas')) {
+      return 'New Minas';
+    } else if (userLocation!.toLowerCase().contains('kentville')) {
+      return 'Kentville';
+    } else if (userLocation!.toLowerCase().contains('halifax')) {
+      return 'Halifax';
+    }
+    return userLocation!;
   }
 
   void _handleCacheFallback(String currentLoc, {required String cacheMessage, required String noDataMessage}) {
@@ -272,7 +289,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               const Text(
-                                'Welcome Back!',
+                                'Welcome!',
                                 style: TextStyle(
                                   color: Colors.white70,
                                   fontSize: 14,
@@ -281,7 +298,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                               const SizedBox(height: 4),
                               Text(
-                                userMode ?? 'Loading...',
+                                _getLocationGreeting(),
                                 style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 22,

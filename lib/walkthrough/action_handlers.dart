@@ -189,10 +189,6 @@ class WalkthroughActions {
         );
 
       case "navigateToAirportHomeScreen":
-        // Ensure user has a mode set
-        if (UserBoxHelper.userMode == null) {
-          await UserBoxHelper.setUserMode('Student');
-        }
         // Clear checkpoint - walkthrough completed
         await UserBoxHelper.clearWalkthroughCheckpoint();
         if (!context.mounted) return;
@@ -337,9 +333,6 @@ class WalkthroughActions {
         );
 
       case "navigateToAcadiaHomeScreen":
-        if (UserBoxHelper.userMode == null) {
-          await UserBoxHelper.setUserMode('Student');
-        }
         // Clear checkpoint - walkthrough completed
         await UserBoxHelper.clearWalkthroughCheckpoint();
         if (!context.mounted) return;
@@ -391,9 +384,6 @@ class WalkthroughActions {
         );
 
       case "navigateToWolfvilleHomeScreen":
-        if (UserBoxHelper.userMode == null) {
-          await UserBoxHelper.setUserMode('Student');
-        }
         // Clear checkpoint - walkthrough completed
         await UserBoxHelper.clearWalkthroughCheckpoint();
         if (!context.mounted) return;
@@ -426,9 +416,6 @@ class WalkthroughActions {
         );
 
       case "navigateToAcadiaAttractionsHomeScreen":
-        if (UserBoxHelper.userMode == null) {
-          await UserBoxHelper.setUserMode('Student');
-        }
         // Clear checkpoint - walkthrough completed
         await UserBoxHelper.clearWalkthroughCheckpoint();
         if (!context.mounted) return;
@@ -461,9 +448,6 @@ class WalkthroughActions {
         );
 
       case "navigateToKentvilleHomeScreen":
-        if (UserBoxHelper.userMode == null) {
-          await UserBoxHelper.setUserMode('Student');
-        }
         // Clear checkpoint - walkthrough completed
         await UserBoxHelper.clearWalkthroughCheckpoint();
         if (!context.mounted) return;
@@ -625,9 +609,6 @@ class WalkthroughActions {
         );
 
       case "navigateToHalifaxHomeScreen":
-        if (UserBoxHelper.userMode == null) {
-          await UserBoxHelper.setUserMode('Student');
-        }
         // Clear checkpoint - walkthrough completed
         await UserBoxHelper.clearWalkthroughCheckpoint();
         if (!context.mounted) return;
@@ -692,11 +673,6 @@ class WalkthroughActions {
   static Future<void> _importHiveCheckpoint(BuildContext context) async {
     // The checkpoint restoration happens automatically when WalkthroughManager loads
     // This action just needs to navigate to the home screen since the user chose to continue
-    
-    // Ensure user has basic data set
-    if (UserBoxHelper.userMode == null) {
-      await UserBoxHelper.setUserMode('Student');
-    }
     
     // Clear the walkthrough checkpoint since they're continuing to home
     await UserBoxHelper.clearWalkthroughCheckpoint();
