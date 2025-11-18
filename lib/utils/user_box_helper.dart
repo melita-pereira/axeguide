@@ -121,4 +121,10 @@ class UserBoxHelper {
 
   static Future<void> clearWalkthroughCheckpoint() =>
       remove('walkthrough_checkpoint');
+
+  static bool get skippedPersonalization =>
+      read<bool>('skippedPersonalization', defaultValue: false) ?? false;
+
+  static Future<void> setSkippedPersonalization(bool value) =>
+      write('skippedPersonalization', value);
 }

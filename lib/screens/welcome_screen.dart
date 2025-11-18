@@ -89,6 +89,8 @@ class _WelcomeScreenState extends State<WelcomeScreen>
 
   Future<void> _goToPersonalization({bool resume = false}) async {
     await UserBoxHelper.setHasSeenWelcome(true);
+    // User chose walkthrough, clear skip flag
+    await UserBoxHelper.setSkippedPersonalization(false);
     if (!resume) {
       userBox.put('hasProgress', false);
       userBox.put('progressData', {});
@@ -193,6 +195,9 @@ class _WelcomeScreenState extends State<WelcomeScreen>
   onPressed: () async {
     // mark welcome as seen
     await UserBoxHelper.setHasSeenWelcome(true);
+
+    // Mark that user explicitly chose to skip personalization
+    await UserBoxHelper.setSkippedPersonalization(true);
 
     // Clear any existing walkthrough progress - user chose to skip
     await UserBoxHelper.clearWalkthroughCheckpoint();

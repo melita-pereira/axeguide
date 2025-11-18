@@ -29,6 +29,9 @@ Future<void> main() async {
   try {
     if (!UserBoxHelper.hasSeenWelcome) {
       startScreen = const WelcomeScreen();
+    } else if (UserBoxHelper.skippedPersonalization) {
+      // User chose to skip personalization, never show walkthrough
+      startScreen = const HomeScreen();
     } else if (UserBoxHelper.hasWalkthroughCheckpoint) {
       // Checkpoint exists = resume walkthrough
       startScreen = const WalkthroughScreen();
