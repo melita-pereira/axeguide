@@ -1,6 +1,7 @@
 import 'package:axeguide/walkthrough/action_handlers.dart';
 import 'package:flutter/material.dart';
 import 'package:axeguide/walkthrough/walkthrough_manager.dart';
+import 'package:axeguide/screens/welcome_screen.dart';
 
 class WalkthroughScreen extends StatefulWidget {
   const WalkthroughScreen({super.key});
@@ -45,6 +46,18 @@ class _WalkthroughScreenState extends State<WalkthroughScreen> {
     await manager.loadAll();
     // Force rebuild after history is loaded
     setState(() {});
+  }
+
+  bool get _isStartingScreen {
+    final stepId = step?['id'];
+    return stepId == 'welcome' || stepId == 'start_location';
+  }
+
+  void _goBackToWelcome() {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => const WelcomeScreen()),
+    );
   }
 
   @override
@@ -509,6 +522,25 @@ class _WalkthroughScreenState extends State<WalkthroughScreen> {
                 icon: const Icon(Icons.arrow_back, size: 18),
                 label: const Text(
                   "Back",
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                style: TextButton.styleFrom(
+                  foregroundColor: const Color(0xFF013A6E),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 12,
+                  ),
+                ),
+              )
+            else if (_isStartingScreen)
+              TextButton.icon(
+                onPressed: _goBackToWelcome,
+                icon: const Icon(Icons.arrow_back, size: 18),
+                label: const Text(
+                  "Back to Welcome",
                   style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
