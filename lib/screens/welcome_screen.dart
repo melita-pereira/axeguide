@@ -194,6 +194,10 @@ class _WelcomeScreenState extends State<WelcomeScreen>
     // mark welcome as seen
     await UserBoxHelper.setHasSeenWelcome(true);
 
+    // Clear any existing walkthrough progress - user chose to skip
+    await UserBoxHelper.clearWalkthroughCheckpoint();
+    await UserBoxHelper.setHasProgress(false);
+
     // Set basic mode and navigate to location selection
     await UserBoxHelper.setUserMode('basic');
     await UserBoxHelper.setUserLocation(null);
