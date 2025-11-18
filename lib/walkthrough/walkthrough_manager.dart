@@ -1,74 +1,242 @@
 import 'dart:convert';
-import 'package:flutter/services.dart' show rootBundle;
+import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:axeguide/utils/hive_boxes.dart';
+
+typedef WTActionHandler = Future<void> Function(
+  String actionName,
+  Map<String, dynamic>? params,
+);
 
 class WalkthroughManager {
   final box = userBox;
   final cache = locationCache;
-  Map<String, dynamic> _steps = {};
-  String? _currentStepId;
 
+  final Map<String, dynamic> _steps = {};
   void Function(Map<String, dynamic> step)? onStepChanged;
 
-  WalkthroughManager();
+  String? _currentStepId;
 
-  Future<void> loadWalkthrough() async {
-    try {
-      final String jsonString = await rootBundle.loadString(
-        'lib/assets/walkthrough/data/walkthrough.json',
-      );
-      final Map<String, dynamic> jsonMap = json.decode(jsonString) as Map<String, dynamic>;
-      final List<dynamic> rawSteps = jsonMap['walkthrough'] as List<dynamic>;
-      _steps = {
-        for (final raw in rawSteps) 
-          (raw as Map<String, dynamic>)['id'] as String:
-            Map<String, dynamic>.from(raw)
-      };
+  final WTActionHandler actionHandler;
+  final List<String> _history = [];
 
-      final checkpoint = box.get('walkthrough_checkpoint') as String?;
-      _currentStepId = checkpoint ?? (_steps.containsKey('welcome') ? 'welcome' : (_steps.isNotEmpty ? _steps.keys.first : null));
+  WalkthroughManager({required this.actionHandler});
 
-      if (_currentStepId != null && !_steps.containsKey(_currentStepId)) {
-        _currentStepId = _steps.containsKey('welcome') ? 'welcome' : (_steps.isNotEmpty ? _steps.keys.first : null);
-      }
+  Future<void> loadAll() async {
+    final files = [
+      'assets/walkthrough/core/intro.json',
+      'assets/walkthrough/places/airport.json',
+      'assets/walkthrough/places/acadia.json',
+      'assets/walkthrough/places/valley.json',
+      'assets/walkthrough/places/halifax.json',
+    ];
 
-      _notifyStepChanged();
-    } catch (e) {
-      // Handle error appropriately (log, show error to user, use defaults, etc.)
-      _steps = {};
+    if (_currentStepId != null) {
+      _saveCheckpoint();
+    }
+
+    for (final path in files) {
+      await _loadAndMerge(path);
+    }
+
+    final cp = box.get('walkthrough_checkpoint') as String?;
+    if (cp != null && _steps.containsKey(cp)) {
+      _currentStepId = cp;
+    } else if (_steps.containsKey('decide_welcome')) {
+      _currentStepId = 'welcome';
+    } else if (_steps.isNotEmpty) {
+      _currentStepId = _steps.keys.first;
+    } else {
       _currentStepId = null;
+    }
+
+    _notify();
+  }
+
+  Future<void> _loadAndMerge(String path) async {
+    try {
+      final raw = await rootBundle.loadString(path);
+      final decoded = jsonDecode(raw);
+
+      if (decoded is Map<String, dynamic>) {
+        if (decoded.containsKey('steps')) {
+          for (final s in decoded['steps']) {
+            _steps[s['id']] = s;
+          }
+        }
+
+        else {
+          for (final section in decoded.values) {
+            if (section is List) {
+              for (final s in section) {
+                _steps[s['id']] = s;
+              }
+            }
+          }
+        }
+      }
+    } catch (e) {
+      debugPrint("[Walkthrough] Failed to load $path → $e");
     }
   }
 
   Map<String, dynamic>? get currentStep =>
-      _currentStepId != null ? _steps[_currentStepId!] : null;
+      (_currentStepId == null) ? null : _steps[_currentStepId];
+  String? get currentStepId => _currentStepId;
 
-  void goToNextStep(String? nextStepId, {String? elseNextStepId}) {
-    if (nextStepId != null && _steps.containsKey(nextStepId)) {
-      _currentStepId = nextStepId;
-    } else if (elseNextStepId != null && _steps.containsKey(elseNextStepId)) {
-      _currentStepId = elseNextStepId;
-    } else {
-      _currentStepId = null;
+  
+  void goTo(String? id) {
+  if (id != null && _steps.containsKey(id)) {
+    if (_currentStepId != null && _currentStepId != id) {
+      _history.add(_currentStepId!);
     }
-    _persistCheckpoint();
-    _notifyStepChanged();
-  }
-
-  void goToStepId(String? id) {
-    if (id == null || !_steps.containsKey(id)) return;
     _currentStepId = id;
-    _persistCheckpoint();
-    _notifyStepChanged();
+    _saveCheckpoint();
+    _notify();
+  }
+}
+
+  void goBack() {
+  if (_history.isEmpty) return;
+
+  final last = _history.removeLast();
+  if (_steps.containsKey(last)) {
+    _currentStepId = last;
+    _saveCheckpoint();
+    _notify();
+  }
+}
+
+
+  void nextFromUI(String? optionLabel) {
+    final step = currentStep;
+    if (step == null) return;
+
+    switch (step['type']) {
+      case 'info':
+        _handleInfo(step);
+        break;
+
+      case 'action':
+        _handleAction(step);
+        break;
+
+      case 'conditional':
+        _handleConditional(step);
+        break;
+
+      case 'question':
+        _handleQuestion(step, optionLabel);
+        break;
+
+      default:
+        debugPrint("[Walkthrough] UNKNOWN STEP TYPE: ${step['type']}");
+    }
   }
 
-  void resetWalkthrough() {
-    _currentStepId = null;
-    box.delete('walkthrough_checkpoint');
-    _notifyStepChanged();
+  void _handleInfo(Map<String, dynamic> step) {
+    final opts = step['options'];
+    if (opts != null && opts.isNotEmpty) {
+      goTo(opts[0]['nextStepId']);
+    }
   }
 
-  void _persistCheckpoint() {
+  void _handleAction(Map<String, dynamic> step) async {
+    await actionHandler(step['action'], step['params']);
+    goTo(step['nextStepId']);
+  }
+
+  void _handleConditional(Map<String, dynamic> step) {
+    final cond = _eval(step['condition']);
+    final id = cond ? step['nextStepId'] : step['elseNextStepId'];
+    goTo(id);
+  }
+
+  Future<void> _handleQuestion(
+    Map<String, dynamic> step,
+    String? chosenLabel,
+  ) async {
+    if (chosenLabel == null) return;
+
+    final opts = (step['options'] as List).cast<Map<String, dynamic>>();
+    final selected =
+        opts.firstWhere((o) => o['label'] == chosenLabel, orElse: () => {});
+
+    if (selected.isEmpty) return;
+
+    if (selected.containsKey('set')) {
+      await _applySet(selected['set']);
+    }
+
+    if (selected['action'] != null) {
+      await actionHandler(selected['action'], selected['params']);
+    }
+
+    if (selected.containsKey('condition')) {
+      final cond = _eval(selected['condition']);
+      final id = cond ? selected['nextStepId'] : selected['elseNextStepId'];
+      goTo(id);
+      return;
+    }
+
+    goTo(selected['nextStepId']);
+  }
+
+  Future<void> _applySet(Map<String, dynamic> map) async {
+    for (final key in map.keys) {
+      if (key.startsWith("user.")) {
+        final hiveKey = key.substring(5);
+        await box.put(hiveKey, map[key]);
+      }
+    }
+  }
+
+  bool _eval(String cond) {
+    cond = cond.trim();
+
+    if (cond.startsWith("has.")) {
+      final key = cond.substring(4);
+      return box.containsKey(key);
+    }
+
+    if (cond.startsWith("!has.")) {
+      final key = cond.substring(5);
+      return !box.containsKey(key);
+    }
+
+    if (cond.startsWith("eq.user.")) {
+      final parts = cond.split(".");
+      final hiveKey = parts[2];
+      final expected = parts.sublist(3).join(".");
+      return box.get(hiveKey) == expected;
+    }
+
+    if (cond.startsWith("in.user.")) {
+      final afterPrefix = cond.substring(8); 
+      final dotIndex = afterPrefix.indexOf(".");
+      final hiveKey = afterPrefix.substring(0, dotIndex);
+
+      final listStr =
+          cond.substring(cond.indexOf("[") + 1, cond.indexOf("]"));
+      final items = listStr.split(",").map((e) => e.trim()).toList();
+
+      return items.contains(box.get(hiveKey));
+    }
+
+    final legacy =
+        RegExp(r"\[(.*?)\]\.contains\(user\.([\w]+)\)").firstMatch(cond);
+    if (legacy != null) {
+      final list = legacy.group(1)!;
+      final key = legacy.group(2)!;
+      final items = list.split(",").map((e) => e.replaceAll("'", "").trim());
+      return items.contains(box.get(key));
+    }
+
+    debugPrint("⚠ [Walkthrough] UNKNOWN CONDITION: $cond");
+    return false;
+  }
+
+  void _saveCheckpoint() {
     if (_currentStepId == null) {
       box.delete('walkthrough_checkpoint');
     } else {
@@ -76,249 +244,14 @@ class WalkthroughManager {
     }
   }
 
-  void processConditionalStep(Map<String, dynamic> step) {
-    final condition = step['condition'] as String?;
-    if (condition == null) {
-      goToNextStep(step['nextStepId'] as String?, elseNextStepId: step['elseNextStepId'] as String?);
-      return;
-    }
-
-    final result = evaluateCondition(condition);
-    final chosenNext = result ? (step['nextStepId'] as String?) : (step['elseNextStepId'] as String?);
-    goToNextStep(chosenNext);
+  void reset() {
+    _currentStepId = null;
+    box.delete('walkthrough_checkpoint');
   }
 
-  bool evaluateCondition(String condition) {
-    final Map<String, bool Function()> conditionMap = {
-      "hive.hasKey('walkthrough_checkpoint')": () =>
-          box.containsKey('walkthrough_checkpoint'),
-
-      "user.hasSelectedLocation": () =>
-          box.containsKey('selectedLocation'),
-    };
-
-    // Exact match first
-    if (conditionMap.containsKey(condition)) {
-      return conditionMap[condition]!();
-    }
-
-    // Basic pattern handling
-    final equalsMatch = RegExp(r"user\.selectedLocation\s*==\s*'([^']+)'").firstMatch(condition);
-    if (equalsMatch != null) {
-      final expected = equalsMatch.group(1);
-      return box.get('selectedLocation') == expected;
-    }
-
-    // Match patterns like ['loc1', 'loc2'].contains(user.selectedLocation)
-    final listContainsMatch = RegExp(r"\[(.*?)\]\.contains\(\s*user\.selectedLocation\s*\)").firstMatch(condition);
-    if (listContainsMatch != null) {
-      final listContent = listContainsMatch.group(1)!;
-      // Split by comma, trim, and remove surrounding quotes
-      final items = listContent
-          .split(',')
-          .map((s) => s.trim())
-          .where((s) => s.startsWith("'") && s.endsWith("'"))
-          .map((s) => s.substring(1, s.length - 1))
-          .toList();
-      final userLoc = box.get('selectedLocation');
-      return items.contains(userLoc);
-    }
-
-    return false;
-  }
-
-  void performAction(String? actionName, [Map<String, dynamic>? params]){
-    if (actionName == null) return;
-    final Map<String, void Function(Map<String, dynamic>? params)> actionMap = {
-      "importHiveCheckpoint": (_) => importHiveCheckpoint(),
-      "setNavigationPreference" : (p) => setNavigationPreference(p),
-      "showSIMKioskInfo": (p) => showSIMKioskInfo(p),
-      "showImmigrationBaggageHelp": (_) => showImmigrationBaggageHelp(),
-      "showShuttleGuidance": (_) => showShuttleGuidance(),
-      "showFriendFamilyGuidance": (_) => showFriendFamilyGuidance(),
-      "showBusGuidance": (_) => showBusGuidance(),
-      "showTaxiGuidance": (_) => showTaxiGuidance(),
-      "showAirportHelp": (_) => showAirportHelp(),
-      "displayAirportHelpInfo": (_) => displayAirportHelpInfo(),
-      "navigateToAirportHomeScreen": (_) => navigateToAirportHomeScreen(),
-      "showShuttlePointers": (_) => showShuttlePointers(),
-      "showFriendFamilyPointers": (_) => showFriendFamilyPointers(),
-      "showBusPointers": (_) => showBusPointers(),
-      "showTaxiPointers": (_) => showTaxiPointers(),
-      "showCampusDirections": (_) => showCampusDirections(),
-      "enterOffCampusAddress": (_) => enterOffCampusAddress(),
-      "showSIMDirections": (_) => showSIMDirections(),
-      "navigateToAcadiaHomeScreen": (_) => navigateToAcadiaHomeScreen(),
-      "showWolfvilleEssentials": (_) => showWolfvilleEssentials(),
-      "navigateToWolfvilleHomeScreen": (_) => navigateToWolfvilleHomeScreen(),
-      "showNewMinasEssentials": (_) => showNewMinasEssentials(),
-      "navigateToNewMinasHomeScreen": (_) => navigateToNewMinasHomeScreen(),
-      "showKentvilleEssentials": (_) => showKentvilleEssentials(),
-      "navigateToKentvilleHomeScreen": (_) => navigateToKentvilleHomeScreen(),
-      "showHalifaxTransitGuide": (_) => showHalifaxTransitGuide(),
-      "showHalifaxTaxiGuide": (_) => showHalifaxTaxiGuide(),
-      "showHalifaxCarRentalGuide": (_) => showHalifaxCarRentalGuide(),
-      "showHalifaxSIMLocations": (_) => showHalifaxSIMLocations(),
-      "showHalifaxGroceriesPharmacy": (_) => showHalifaxGroceriesPharmacy(),
-      "showHalifaxBankingOptions": (_) => showHalifaxBankingOptions(),
-      "showHalifaxAttractions": (_) => showHalifaxAttractions(),
-      "navigateToHalifaxHomeScreen": (_) => navigateToHalifaxHomeScreen(),
-    };
-
-    // Parse actionName if it contains parameters, e.g. setNavigationPreference('in-depth')
-    String extractedActionName = actionName;
-    Map<String, dynamic>? extractedParams = params;
-    final regExp = RegExp(r"^(\w+)\((.*)\)$");
-    final match = regExp.firstMatch(actionName);
-    if (match != null) {
-      extractedActionName = match.group(1)!;
-      String paramString = match.group(2)!.trim();
-      // Only handle single string literal parameter for now
-      if (paramString.isNotEmpty) {
-        // Remove surrounding quotes if present
-        if ((paramString.startsWith("'") && paramString.endsWith("'")) ||
-            (paramString.startsWith('"') && paramString.endsWith('"'))) {
-          paramString = paramString.substring(1, paramString.length - 1);
-        }
-        extractedParams = {"value": paramString};
-      }
-    }
-
-    actionMap[extractedActionName]?.call(extractedParams);
-  }
-
-  void next({String? selectedOptionLabel}){
-    final step = currentStep;
-    if (step == null) return;
-
-    final type = step['type'] as String? ?? '';
-
-    switch (type) {
-      case 'conditional':
-        processConditionalStep(step);
-        break;
-
-      case 'action':
-        performAction(step['action'] as String?, (step['params'] as Map<String, dynamic>?));
-        goToNextStep(step['nextStepId'] as String?);
-        break;
-
-      case 'question':
-        if (selectedOptionLabel == null) return;
-        final options = (step['options'] as List<dynamic>?)?.cast<Map<String, dynamic>>() ?? [];
-        final chosen = options.firstWhere(
-          (opt) => opt['label'] == selectedOptionLabel || opt['id'] == selectedOptionLabel,
-          orElse: () => <String, dynamic>{}
-        );
-        if (chosen.isEmpty) return;
-
-        final actionName = chosen['action'] as String?;
-        if (actionName != null) {
-          final params = chosen['params'] as Map<String, dynamic>?;
-          performAction(actionName, params);
-        }
-
-        if (chosen.containsKey('condition')){
-          final cond = chosen['condition'] as String?;
-          if (cond != null) {
-            final condResult = evaluateCondition(cond);
-            final nextIfTrue = condResult ? (chosen['nextStepId'] as String?) : (chosen['elseNextStepId'] as String?);
-            goToNextStep(nextIfTrue);
-            return;
-          }
-        }
-
-        goToNextStep(chosen['nextStepId'] as String?, elseNextStepId: chosen['elseNextStepId'] as String?);
-        break;
-
-      case 'info':
-        final options = (step['options'] as List<dynamic>?)?.cast<Map<String, dynamic>>();
-        if (options != null && options.isNotEmpty) {
-          goToNextStep(options.first['nextStepId'] as String?);
-        } else {
-          _currentStepId = null;
-          _persistCheckpoint();
-          _notifyStepChanged();
-        }
-        break;
-
-      default:
-        _currentStepId = null;
-        _persistCheckpoint();
-        _notifyStepChanged();
+  void _notify() {
+    if (onStepChanged != null && currentStep != null) {
+      onStepChanged!(currentStep!);
     }
   }
-
-  void _notifyStepChanged() {
-    final step = currentStep;
-    if (onStepChanged != null && step != null) {
-      onStepChanged!(step);
-    }
-  }
-
-  void importHiveCheckpoint() {}
-  
-  void setNavigationPreference(Map<String, dynamic>? p) {}
-  
-  void showImmigrationBaggageHelp() {}
-  
-  void showShuttleGuidance() {}
-  
-  void showFriendFamilyGuidance() {}
-  
-  void showSIMKioskInfo(Map<String, dynamic>? p) {}
-  
-  void showBusGuidance() {}
-  
-  void showTaxiGuidance() {}
-  
-  void showAirportHelp() {}
-  
-  void displayAirportHelpInfo() {}
-  
-  void navigateToAirportHomeScreen() {}
-  
-  void showShuttlePointers() {}
-  
-  void showFriendFamilyPointers() {}
-  
-  void showBusPointers() {}
-  
-  void showTaxiPointers() {}
-  
-  void showCampusDirections() {}
-  
-  void enterOffCampusAddress() {}
-  
-  void showSIMDirections() {}
-  
-  void navigateToAcadiaHomeScreen() {}
-  
-  void showWolfvilleEssentials() {}
-  
-  void navigateToWolfvilleHomeScreen() {}
-  
-  void showNewMinasEssentials() {}
-  
-  void navigateToNewMinasHomeScreen() {}
-  
-  void showKentvilleEssentials() {}
-  
-  void navigateToKentvilleHomeScreen() {}
-  
-  void showHalifaxTransitGuide() {}
-  
-  void showHalifaxTaxiGuide() {}
-  
-  void showHalifaxCarRentalGuide() {}
-  
-  void showHalifaxSIMLocations() {}
-  
-  void showHalifaxGroceriesPharmacy() {}
-  
-  void showHalifaxBankingOptions() {}
-  
-  void showHalifaxAttractions() {}
-  
-  void navigateToHalifaxHomeScreen() {}
 }

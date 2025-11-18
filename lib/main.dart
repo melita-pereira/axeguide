@@ -7,6 +7,7 @@ import 'package:axeguide/utils/user_box_helper.dart';
 import 'screens/welcome_screen.dart';
 import 'screens/personalization/personalization_loc_screen.dart';
 import 'screens/home_screen.dart';
+import 'screens/walkthrough/walkthrough_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -31,6 +32,8 @@ Future<void> main() async {
       startScreen = const WelcomeScreen();
     } else if (UserBoxHelper.needsPersonalization) {
       startScreen = const PersonalizationScreen();
+    } else if (!UserBoxHelper.hasWalkthroughCheckpoint) {
+      startScreen = const WalkthroughScreen();
     } else {
       startScreen = const HomeScreen();
     }
@@ -79,6 +82,9 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
       home: startScreen,
+      routes: {
+        "/genericHome": (context) => const HomeScreen(),
+      },
     );
   }
 }

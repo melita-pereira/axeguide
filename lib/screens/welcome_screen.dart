@@ -1,4 +1,5 @@
 import 'package:axeguide/screens/personalization/personalization_loc_screen.dart';
+import 'package:axeguide/screens/walkthrough/walkthrough_screen.dart';
 import 'package:flutter/material.dart';
 
 import 'package:axeguide/utils/hive_boxes.dart';
@@ -52,15 +53,16 @@ class _WelcomeScreenState extends State<WelcomeScreen>
         ),
         actions: [
           TextButton(
-            onPressed: () {
+            onPressed: () async {
               // Fire-and-forget the persistence, then navigate.
               Navigator.pop(dialogContext);
-              UserBoxHelper.setHasSeenWelcome(true);
+              await UserBoxHelper.clear();
+              await UserBoxHelper.setHasSeenWelcome(true);
               if (!mounted) return;
               Navigator.pushReplacement(
                 parentContext,
                 MaterialPageRoute(
-                  builder: (context) => const PersonalizationScreen(),
+                  builder: (context) => const WalkthroughScreen(),
                 ),
               );
             },
@@ -88,13 +90,14 @@ class _WelcomeScreenState extends State<WelcomeScreen>
   Future<void> _goToPersonalization({bool resume = false}) async {
     await UserBoxHelper.setHasSeenWelcome(true);
     if (!resume) {
-      userBox.put('hasProgress', true);
+      userBox.put('hasProgress', false);
       userBox.put('progressData', {});
+      userBox.delete('walkthrough_checkpoint');
     }
     if (!mounted) return;
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => const PersonalizationScreen()),
+      MaterialPageRoute(builder: (context) => const WalkthroughScreen()),
     );
   }
 
@@ -134,7 +137,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                         curve: Curves.easeOutBack,
                       ),
                     ),
-                    child: Image.asset('lib/assets/logo.png', height: 200),
+                    child: Image.asset('assets/images/logo.png', height: 200),
                   ),
                   const SizedBox(height: 30),
                   Text(
@@ -187,15 +190,24 @@ class _WelcomeScreenState extends State<WelcomeScreen>
 
                   const SizedBox(height: 16),
                   TextButton(
-                    onPressed: () => _goToPersonalization(resume: false),
-                    style: TextButton.styleFrom(
-                      foregroundColor: Colors.grey[700],
-                    ),
-                    child: const Text(
-                      'Skip Personalization',
-                      style: TextStyle(fontSize: 15),
-                    ),
-                  ),
+  onPressed: () async {
+    // mark welcome as seen
+    await UserBoxHelper.setHasSeenWelcome(true);
+
+    // clear personalization-related keys so the app doesn't ask again
+    await UserBoxHelper.setUserLocation(null);
+    await UserBoxHelper.setUserMode(null);
+    await UserBoxHelper.setNavPreference(null);
+
+    // go directly to generic home screen
+    if (!mounted) return;
+    Navigator.pushReplacementNamed(context, "/genericHome");
+  },
+  child: const Text(
+    'Skip Personalization',
+    style: TextStyle(fontSize: 15),
+  ),
+),
                   // Reset Progress removed from WelcomeScreen — use Settings instead.
                 ],
               ),

@@ -100,5 +100,7 @@ flutter:
 
   assets:
     - .env
-    - assets/logo.png
-    - assets/walkthrough/walkthrough.json
+    - assets/images/logo.png
+    - assets/walkthrough/
+    - assets/walkthrough/core/
+    - assets/walkthrough/places/

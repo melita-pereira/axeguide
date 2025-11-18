@@ -27,20 +27,26 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _initialize() async {
-    await _loadUserData();
-    final loc = userLocation ?? '';
-    final isStale = HiveService.isCacheStale(loc);
-    final cached = HiveService.getCachedLocationsFor(loc);
+  await _loadUserData();
+  final loc = userLocation ?? '';
+  final isStale = HiveService.isCacheStale(loc);
+  final cached = HiveService.getCachedLocationsFor(loc);
 
-    if (!isStale && cached != null && cached.isNotEmpty) {
-      setState(() {
-        locations = List<Map<String, dynamic>>.from(cached);
-        loading = false;
-      });
-      return;
-    }
-    await _loadLocations();
+  if (!isStale && cached != null && cached.isNotEmpty) {
+    final safeList = (cached as List)
+        .map((item) => Map<String, dynamic>.from(item as Map))
+        .toList();
+
+    setState(() {
+      locations = safeList;
+      loading = false;
+    });
+    return;
   }
+
+  await _loadLocations();
+}
+
 
   Future<void> _loadUserData() async {
     final location = UserBoxHelper.userLocation;

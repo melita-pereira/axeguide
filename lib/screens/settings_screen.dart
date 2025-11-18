@@ -1,54 +1,71 @@
 import 'package:flutter/material.dart';
 import 'package:axeguide/utils/user_box_helper.dart';
 import 'welcome_screen.dart';
+import 'package:axeguide/utils/hive_boxes.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
 
-  Future<void> _clearPersonalizationData(BuildContext context) async {
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Clear personalization data?'),
-        content: const Text(
-          'This will erase your location, mode preferences, and progress. '
-          'Are you sure you want to proceed?',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.redAccent,
-              foregroundColor: Colors.white,
-            ),
-            child: const Text('Clear Data'),
-            onPressed: () => Navigator.pop(context, true),
-          ),
-        ],
+Future<void> _clearPersonalizationData(BuildContext context) async {
+  final confirm = await showDialog<bool>(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: const Text('Reset AxeGuide?'),
+      content: const Text(
+        'This will erase your walkthrough progress, location, navigation '
+        'preferences, and cached data. You will restart the app like a new user.',
       ),
-    );
-
-    if (confirm == true) {
-      await UserBoxHelper.clear();
-      if (!context.mounted) return;
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (context) => const WelcomeScreen()),
-        (route) => false,
-      );
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Personalization data cleared. Restart the app to begin fresh.',
-          ),
-          duration: Duration(seconds: 2),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context, false),
+          child: const Text('Cancel'),
         ),
-      );
-    }
+        ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.redAccent,
+            foregroundColor: Colors.white,
+          ),
+          onPressed: () => Navigator.pop(context, true),
+          child: const Text('Reset Everything'),
+        ),
+      ],
+    ),
+  );
+
+  if (confirm != true) return;
+
+  try {
+    // 1. Clear walkthrough progression
+    await userBox.delete('walkthrough_checkpoint');
+
+    // 2. Clear all personalization + progress keys
+    await UserBoxHelper.clear();              // clears userBox entirely
+    await locationCache.clear();              // clears cached location results
+
+    // 3. Ensure app restarts onboarding
+    await userBox.put('hasSeenWelcome', false);
+
+  } catch (e) {
+    debugPrint("Reset failed: $e");
   }
+
+  if (!context.mounted) return;
+
+  // 4. Restart app at welcome
+  Navigator.pushAndRemoveUntil(
+    context,
+    MaterialPageRoute(builder: (_) => const WelcomeScreen()),
+    (route) => false,
+  );
+
+  // 5. Feedback
+  ScaffoldMessenger.of(context).showSnackBar(
+    const SnackBar(
+      content: Text('AxeGuide has been reset.'),
+      duration: Duration(seconds: 2),
+    ),
+  );
+}
 
   @override
   Widget build(BuildContext context) {

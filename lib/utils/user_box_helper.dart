@@ -101,4 +101,16 @@ class UserBoxHelper {
   static dynamic get progressData => read<dynamic>(keyProgressData);
   static Future<void> setProgressData(dynamic value) =>
       write(keyProgressData, value);
+
+  static String? get walkthroughCheckpoint =>
+      read<String>('walkthrough_checkpoint');
+
+  static bool get hasWalkthroughCheckpoint =>
+      walkthroughCheckpoint != null;
+
+  static Future<void> setWalkthroughCheckpoint(String id) =>
+      write('walkthrough_checkpoint', id);
+
+  static Future<void> clearWalkthroughCheckpoint() =>
+      remove('walkthrough_checkpoint');
 }

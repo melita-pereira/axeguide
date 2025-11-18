@@ -1,0 +1,83 @@
+{
+  "halifax": [
+    {
+      "id": "city_intro",
+      "type": "info",
+      "text": "Welcome to Halifax! A vibrant coastal city with lots to explore. Before we begin, let's set up a few basics.",
+      "tip": "Don’t worry—you'll be able to explore transport, essentials, and guides after setup.",
+      "options": [
+        { "label": "Continue", "nextStepId": "halifax_transport_pref" }
+      ]
+    },
+
+    {
+      "id": "halifax_transport_pref",
+      "type": "question",
+      "text": "How do you expect to get around most of the time?",
+      "tip": "This helps us prioritize what to show on your home screen.",
+      "options": [
+        {
+          "label": "Public Transit",
+          "set": { "user.transportPref": "transit" },
+          "nextStepId": "halifax_essentials_pref"
+        },
+        {
+          "label": "Taxi / Ride-share",
+          "set": { "user.transportPref": "taxi" },
+          "nextStepId": "halifax_essentials_pref"
+        },
+        {
+          "label": "I’m not sure yet",
+          "set": { "user.transportPref": "unsure" },
+          "nextStepId": "halifax_essentials_pref"
+        }
+      ]
+    },
+
+    {
+      "id": "halifax_essentials_pref",
+      "type": "question",
+      "text": "What essentials would you like quick access to on your home page?",
+      "tip": "Choose what matters most right now. You can change this later in Settings.",
+      "options": [
+        {
+          "label": "SIM / Phone setup",
+          "set": { "user.showSIM": true },
+          "nextStepId": "halifax_summary"
+        },
+        {
+          "label": "Groceries & pharmacies",
+          "set": { "user.showGroceries": true },
+          "nextStepId": "halifax_summary"
+        },
+        {
+          "label": "Banking & currency",
+          "set": { "user.showBanking": true },
+          "nextStepId": "halifax_summary"
+        },
+        {
+          "label": "All of them",
+          "set": { "user.showSIM": true, "user.showGroceries": true, "user.showBanking": true },
+          "nextStepId": "halifax_summary"
+        }
+      ]
+    },
+
+    {
+      "id": "halifax_summary",
+      "type": "info",
+      "text": "Great! Halifax is set up for you.",
+      "tip": "You can explore transit guides, essentials, and top spots anytime from the home screen.",
+      "options": [
+        { "label": "Go to Halifax Home", "nextStepId": "explore_halifax" }
+      ]
+    },
+
+    {
+      "id": "explore_halifax",
+      "type": "action",
+      "action": "navigateToHalifaxHomeScreen",
+      "nextStepId": "dynamic_home"
+    }
+  ]
+}
