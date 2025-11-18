@@ -1,4 +1,5 @@
 import 'package:axeguide/screens/walkthrough/walkthrough_screen.dart';
+import 'package:axeguide/screens/location_selection_screen.dart';
 import 'package:flutter/material.dart';
 
 import 'package:axeguide/utils/hive_boxes.dart';
@@ -193,14 +194,21 @@ class _WelcomeScreenState extends State<WelcomeScreen>
     // mark welcome as seen
     await UserBoxHelper.setHasSeenWelcome(true);
 
-    // clear personalization-related keys so the app doesn't ask again
+    // Set basic mode and navigate to location selection
+    await UserBoxHelper.setUserMode('basic');
     await UserBoxHelper.setUserLocation(null);
-    await UserBoxHelper.setUserMode(null);
-    await UserBoxHelper.setNavPreference(null);
+    await UserBoxHelper.setNavPreference('basic');
 
-    // go directly to generic home screen
+    // Navigate to location selection screen
     if (!context.mounted) return;
-    Navigator.pushReplacementNamed(context, "/genericHome");
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (_) => LocationSelectionScreen(
+          locations: LocationOption.mainLocations,
+        ),
+      ),
+    );
   },
   child: const Text(
     'Skip Personalization',

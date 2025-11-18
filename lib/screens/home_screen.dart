@@ -4,6 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'settings_screen.dart';
+import 'location_selection_screen.dart';
 import 'package:axeguide/services/hive_service.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -27,6 +28,23 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _initialize() async {
   await _loadUserData();
+  
+  // If no location is set, redirect to location selection
+  if (userLocation == null) {
+    if (!mounted) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) => LocationSelectionScreen(
+            locations: LocationOption.mainLocations,
+          ),
+        ),
+      );
+    });
+    return;
+  }
+  
   final loc = userLocation ?? '';
   final isStale = HiveService.isCacheStale(loc);
   final cached = HiveService.getCachedLocationsFor(loc);
