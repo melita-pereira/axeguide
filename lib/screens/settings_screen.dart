@@ -290,12 +290,6 @@ Future<void> _clearPersonalizationData(BuildContext context) async {
                     ),
                     const Divider(height: 24),
                     _buildInfoRow(
-                      icon: Icons.person_outline,
-                      label: 'Mode',
-                      value: UserBoxHelper.userMode ?? 'Not set',
-                    ),
-                    const Divider(height: 24),
-                    _buildInfoRow(
                       icon: Icons.explore_outlined,
                       label: 'Navigation',
                       value: UserBoxHelper.navPreference ?? 'Not set',
