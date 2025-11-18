@@ -69,7 +69,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final location = UserBoxHelper.userLocation;
     final mode = UserBoxHelper.userMode;
     setState(() {
-      userLocation = location ?? 'Unknown';
+      userLocation = location; // Keep as null if not set
       userMode = mode ?? 'Guest';
     });
   }
