@@ -314,13 +314,34 @@ class _WalkthroughScreenState extends State<WalkthroughScreen> {
     }
 
     if (dropdownItems.isEmpty) {
-      return const Center(
-        child: Text(
-          'No options available',
-          style: TextStyle(
-            fontSize: 16,
-            color: Color(0xFF718096),
-          ),
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.error_outline,
+              size: 48,
+              color: Colors.grey.shade400,
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'Unable to load options',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF1A202C),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Please check your connection and try again',
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey.shade600,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
         ),
       );
     }
@@ -502,7 +523,7 @@ class _WalkthroughScreenState extends State<WalkthroughScreen> {
                 ),
               ),
             const Spacer(),
-            if (type != "question" && type != "conditional")
+            if (type == "info")
               ElevatedButton(
                 onPressed: () => manager.nextFromUI(null),
                 style: ElevatedButton.styleFrom(

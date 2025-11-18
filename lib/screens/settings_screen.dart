@@ -107,6 +107,8 @@ Future<void> _clearPersonalizationData(BuildContext context) async {
 
   if (confirm != true) return;
 
+  bool resetSucceeded = false;
+  
   try {
     // 1. Clear walkthrough progression
     await userBox.delete('walkthrough_checkpoint');
@@ -117,37 +119,64 @@ Future<void> _clearPersonalizationData(BuildContext context) async {
 
     // 3. Ensure app restarts onboarding
     await userBox.put('hasSeenWelcome', false);
+    
+    resetSucceeded = true;
 
   } catch (e) {
-    // Reset failed
+    // Reset failed - show error to user
+    resetSucceeded = false;
   }
 
   if (!context.mounted) return;
+  
+  // Only navigate and show success if reset actually succeeded
+  if (resetSucceeded) {
+    // 4. Restart app at welcome
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (_) => const WelcomeScreen()),
+      (route) => false,
+    );
 
-  // 4. Restart app at welcome
-  Navigator.pushAndRemoveUntil(
-    context,
-    MaterialPageRoute(builder: (_) => const WelcomeScreen()),
-    (route) => false,
-  );
-
-  // 5. Feedback
-  if (context.mounted) {
+    // 5. Feedback
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Row(
+            children: [
+              Icon(Icons.check_circle_outline, color: Colors.white),
+              SizedBox(width: 12),
+              Text('AxeGuide has been reset'),
+            ],
+          ),
+          backgroundColor: const Color(0xFF013A6E),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
+  } else {
+    // Show error message
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: const Row(
           children: [
-            Icon(Icons.check_circle_outline, color: Colors.white),
+            Icon(Icons.error_outline, color: Colors.white),
             SizedBox(width: 12),
-            Text('AxeGuide has been reset'),
+            Expanded(
+              child: Text('Failed to reset. Please try again or restart the app.'),
+            ),
           ],
         ),
-        backgroundColor: const Color(0xFF013A6E),
+        backgroundColor: Colors.red.shade600,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
         ),
-        duration: const Duration(seconds: 2),
+        duration: const Duration(seconds: 4),
       ),
     );
   }
