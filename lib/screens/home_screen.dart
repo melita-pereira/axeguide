@@ -288,17 +288,8 @@ class _HomeScreenState extends State<HomeScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text(
-                                'Welcome!',
-                                style: TextStyle(
-                                  color: Colors.white70,
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
                               Text(
-                                _getLocationGreeting(),
+                                'Welcome to ${_getLocationGreeting()}!',
                                 style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 22,
