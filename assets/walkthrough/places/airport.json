@@ -90,8 +90,15 @@
       "text": "Do you need a SIM card?",
       "tip": "Getting a SIM at the airport is convenient but sometimes more expensive than city options.",
       "options": [
-        { "label": "Yes", "nextStepId": "sim_kiosk" },
-        { "label": "No", "nextStepId": "airport_help" }
+        { 
+          "label": "Yes", 
+          "nextStepId": "sim_kiosk",
+          "set": { "user.hasSIM": true }
+        },
+        { 
+          "label": "No", 
+          "nextStepId": "airport_help"
+        }
       ]
     },
 
@@ -132,21 +139,28 @@
           "label": "Head to Acadia",
           "nextStepId": "acadia_intro",
           "condition": "!has.acadia_intro_completed",
-          "elseNextStepId": "explore_acadia"
+          "elseNextStepId": "explore_acadia",
+          "set": { "user.selectedLocation": "Acadia University" }
         },
         {
           "label": "Head to the Valley (Wolfville, New Minas, Kentville)",
           "nextStepId": "valley_intro",
           "condition": "!has.valley_intro_completed",
-          "elseNextStepId": "choose_valley_town"
+          "elseNextStepId": "choose_valley_town",
+          "set": { "user.selectedLocation": "Wolfville" }
         },
         {
           "label": "Explore Halifax",
           "nextStepId": "city_intro",
           "condition": "!has.city_intro_completed",
-          "elseNextStepId": "explore_halifax"
+          "elseNextStepId": "explore_halifax",
+          "set": { "user.selectedLocation": "Halifax" }
         },
-        { "label": "Explore Halifax Airport", "nextStepId": "explore_airport" },
+        { 
+          "label": "Explore Halifax Airport", 
+          "nextStepId": "explore_airport",
+          "set": { "user.selectedLocation": "Halifax Airport" }
+        },
         { "label": "Skip", "nextStepId": "generic_homescreen" }
       ]
     },

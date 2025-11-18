@@ -1,6 +1,5 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:axeguide/utils/user_box_helper.dart';
-import 'package:axeguide/utils/scrollable_scaffold.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -33,7 +32,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final cached = HiveService.getCachedLocationsFor(loc);
 
   if (!isStale && cached != null && cached.isNotEmpty) {
-    final safeList = (cached as List)
+    final safeList = cached
         .map((item) => Map<String, dynamic>.from(item as Map))
         .toList();
 
@@ -192,81 +191,186 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final color = theme.colorScheme.primary;
-
-    return ScrollableScaffold(
+    return Scaffold(
+      backgroundColor: const Color(0xFFF9FAFB),
       appBar: AppBar(
-        title: const Text('The AxeGuide Home'),
-        centerTitle: true,
+        title: const Text('The AxeGuide'),
         actions: [
           IconButton(
             icon: const Icon(Icons.settings_outlined),
             tooltip: 'Settings',
             onPressed: () {
-              Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsScreen()));
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const SettingsScreen()),
+              );
             },
           ),
         ],
       ),
-      child: Center(
-        child: Padding(
-          padding: EdgeInsets.zero,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Icon(
-                Icons.map_outlined,
-                size: 90,
-                color: Color(0xFF013A6E),
-              ),
-              const SizedBox(height: 24),
-              Text(
-                'Welcome Back!',
-                style: TextStyle(
-                  fontSize: 26,
-                  fontWeight: FontWeight.bold,
-                  color: color,
+              // User info card
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF013A6E), Color(0xFF025A9E)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF013A6E).withValues(alpha: 0.3),
+                      blurRadius: 15,
+                      offset: const Offset(0, 5),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.2),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Icon(
+                            Icons.person_outline,
+                            color: Colors.white,
+                            size: 28,
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'Welcome Back!',
+                                style: TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                userMode ?? 'Loading...',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(
+                            Icons.location_on_outlined,
+                            color: Colors.white,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              userLocation ?? 'Loading...',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 15,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ),
+              
+              const SizedBox(height: 32),
+              
+              // Explore section
+              const Text(
+                'Explore Nearby',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF1A202C),
+                ),
+              ),
+              
               const SizedBox(height: 16),
-              Text('Location: ${userLocation ?? "Loading..."}', style: const TextStyle(fontSize: 18)),
-              Text('Mode: ${userMode ?? "Loading..."}', style: const TextStyle(fontSize: 18)),
-              const SizedBox(height: 40),
-              const Divider(height: 40, thickness: 1),
-              Text('Explore', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w600, color: color)),
-              const SizedBox(height: 16),
+              
               if (loading) ...[
-                const Padding(
-                  padding: EdgeInsets.all(16.0),
-                  child: Column(
-                    children: [
-                      CircularProgressIndicator(),
-                      SizedBox(height: 16),
-                      Text('Fetching data...', style: TextStyle(fontSize: 16)),
-                    ],
+                const Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(40.0),
+                    child: CircularProgressIndicator(
+                      color: Color(0xFF013A6E),
+                    ),
                   ),
                 ),
               ] else if (locations.isEmpty) ...[
                 Container(
-                  height: 150,
-                  width: double.infinity,
+                  padding: const EdgeInsets.all(32),
                   decoration: BoxDecoration(
-                    color: Colors.blueGrey.shade50,
+                    color: Colors.white,
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: Colors.blueGrey.shade100),
+                    border: Border.all(color: Colors.grey.shade200),
                   ),
-                  child: const Center(
-                    child: Text(
-                      'No locations available at the moment.',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 16, color: Colors.blueGrey, fontStyle: FontStyle.italic),
+                  child: Center(
+                    child: Column(
+                      children: [
+                        Icon(
+                          Icons.explore_off_outlined,
+                          size: 64,
+                          color: Colors.grey.shade400,
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'No locations available',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.grey.shade700,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Check back later for updates',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey.shade500,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
               ] else ...[
-                Column(
-                  children: locations.map((loc) {
+                ...locations.map((loc) {
                     final title = loc['name'] ?? 'Unknown';
                     final description = loc['description'] ?? 'No description available.';
                     final town = loc['town'] ?? 'Unknown town';
@@ -276,42 +380,115 @@ class _HomeScreenState extends State<HomeScreen> {
                     final lng = loc['longitude'];
                     final mapData = (lat != null && lng != null) ? {'lat': lat, 'lng': lng} : mapLink;
 
-                    return Card(
-                      margin: const EdgeInsets.symmetric(vertical: 10),
-                      elevation: 2,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 16),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.05),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
                       child: Padding(
-                        padding: const EdgeInsets.all(16.0),
+                        padding: const EdgeInsets.all(20.0),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(title, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF013A6E))),
-                            const SizedBox(height: 8),
-                            Text(description, style: const TextStyle(fontSize: 16)),
-                            const SizedBox(height: 8),
                             Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(town, style: const TextStyle(color: Colors.grey)),
-                                Text(hours.isNotEmpty ? 'Hours: $hours' : 'Hours not available', style: const TextStyle(color: Colors.grey)),
+                                Container(
+                                  padding: const EdgeInsets.all(10),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFF013A6E).withValues(alpha: 0.1),
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: const Icon(
+                                    Icons.place,
+                                    color: Color(0xFF013A6E),
+                                    size: 24,
+                                  ),
+                                ),
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        title,
+                                        style: const TextStyle(
+                                          fontSize: 19,
+                                          fontWeight: FontWeight.bold,
+                                          color: Color(0xFF1A202C),
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        town,
+                                        style: TextStyle(
+                                          color: Colors.grey.shade600,
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
                               ],
                             ),
+                            const SizedBox(height: 16),
+                            Text(
+                              description,
+                              style: TextStyle(
+                                fontSize: 15,
+                                height: 1.5,
+                                color: Colors.grey.shade700,
+                              ),
+                            ),
                             const SizedBox(height: 12),
-                            Align(
-                              alignment: Alignment.centerRight,
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                              decoration: BoxDecoration(
+                                color: Colors.amber.shade50,
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(color: Colors.amber.shade200),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.access_time, size: 16, color: Colors.amber.shade700),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    hours.isNotEmpty ? hours : 'Hours not available',
+                                    style: TextStyle(
+                                      color: Colors.amber.shade900,
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            SizedBox(
+                              width: double.infinity,
                               child: ElevatedButton.icon(
                                 onPressed: () => _openMap(mapData),
-                                icon: const Icon(Icons.map_outlined),
+                                icon: const Icon(Icons.map_outlined, size: 20),
                                 label: const Text('View on Map'),
-                                style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF013A6E), foregroundColor: Colors.white),
+                                style: ElevatedButton.styleFrom(
+                                  padding: const EdgeInsets.symmetric(vertical: 12),
+                                ),
                               ),
                             ),
                           ],
                         ),
                       ),
                     );
-                  }).toList(),
-                ),
+                }),
               ],
 
               const SizedBox(height: 40),

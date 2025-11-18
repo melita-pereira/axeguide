@@ -94,6 +94,14 @@ class UserBoxHelper {
   static Future<void> setUserLocation(String? value) =>
       write(keyUserLocation, value);
 
+  static String? get currentCampusLocation => read<String>('currentCampusLocation');
+  static Future<void> setCurrentCampusLocation(String? value) =>
+      write('currentCampusLocation', value);
+
+  static String? get destinationLocation => read<String>('destinationLocation');
+  static Future<void> setDestinationLocation(String? value) =>
+      write('destinationLocation', value);
+
   static String? get navPreference => read<String>(keyNavPreference);
   static Future<void> setNavPreference(String? value) =>
       write(keyNavPreference, value);

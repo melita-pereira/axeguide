@@ -5,7 +5,6 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:axeguide/utils/user_box_helper.dart';
 
 import 'screens/welcome_screen.dart';
-import 'screens/personalization/personalization_loc_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/walkthrough/walkthrough_screen.dart';
 
@@ -30,11 +29,11 @@ Future<void> main() async {
   try {
     if (!UserBoxHelper.hasSeenWelcome) {
       startScreen = const WelcomeScreen();
-    } else if (UserBoxHelper.needsPersonalization) {
-      startScreen = const PersonalizationScreen();
-    } else if (!UserBoxHelper.hasWalkthroughCheckpoint) {
+    } else if (UserBoxHelper.hasWalkthroughCheckpoint) {
+      // Checkpoint exists = resume walkthrough
       startScreen = const WalkthroughScreen();
     } else {
+      // No checkpoint = walkthrough completed, go to home
       startScreen = const HomeScreen();
     }
   } catch (e) {
@@ -55,31 +54,124 @@ class MyApp extends StatelessWidget {
       title: 'The AxeGuide',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF013A6E)),
-        scaffoldBackgroundColor: const Color(0xFFF7F7F7),
-        appBarTheme: const AppBarTheme(
-          backgroundColor: Color(0xFF002860),
-          foregroundColor: Colors.white,
-        ),
-        textTheme: const TextTheme(
-          bodyMedium: TextStyle(color: Color(0xFF01366B)),
-        ),
         useMaterial3: true,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF013A6E),
+          primary: const Color(0xFF013A6E),
+          secondary: const Color(0xFF025A9E),
+          surface: Colors.white,
+        ),
+        scaffoldBackgroundColor: const Color(0xFFF9FAFB),
+        
+        // AppBar theme
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Color(0xFF013A6E),
+          foregroundColor: Colors.white,
+          elevation: 0,
+          centerTitle: true,
+          titleTextStyle: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.w600,
+            color: Colors.white,
+          ),
+        ),
+        
+        // Card theme
+        cardTheme: CardThemeData(
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          color: Colors.white,
+        ),
+        
+        // Elevated button theme
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: const Color(0xFF013A6E),
+            foregroundColor: Colors.white,
+            elevation: 2,
+            shadowColor: const Color(0xFF013A6E).withValues(alpha: 0.3),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            textStyle: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 0.5,
+            ),
+          ),
+        ),
+        
+        // Text button theme
+        textButtonTheme: TextButtonThemeData(
+          style: TextButton.styleFrom(
+            foregroundColor: const Color(0xFF013A6E),
+            textStyle: const TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+        
+        // Input decoration theme
+        inputDecorationTheme: InputDecorationTheme(
+          filled: true,
+          fillColor: Colors.white,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.grey.shade300),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.grey.shade300),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: Color(0xFF013A6E), width: 2),
+          ),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        ),
+        
+        // Text theme
+        textTheme: const TextTheme(
+          displayLarge: TextStyle(
+            fontSize: 32,
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF1A202C),
+          ),
+          displayMedium: TextStyle(
+            fontSize: 28,
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF1A202C),
+          ),
+          displaySmall: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF1A202C),
+          ),
+          headlineMedium: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.w600,
+            color: Color(0xFF1A202C),
+          ),
+          titleLarge: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+            color: Color(0xFF1A202C),
+          ),
+          bodyLarge: TextStyle(
+            fontSize: 16,
+            color: Color(0xFF2D3748),
+            height: 1.5,
+          ),
+          bodyMedium: TextStyle(
+            fontSize: 15,
+            color: Color(0xFF2D3748),
+            height: 1.5,
+          ),
+        ),
       ),
       home: startScreen,
       routes: {

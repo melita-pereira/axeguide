@@ -1,4 +1,3 @@
-import 'package:axeguide/screens/personalization/personalization_loc_screen.dart';
 import 'package:axeguide/screens/walkthrough/walkthrough_screen.dart';
 import 'package:flutter/material.dart';
 
@@ -58,7 +57,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
               Navigator.pop(dialogContext);
               await UserBoxHelper.clear();
               await UserBoxHelper.setHasSeenWelcome(true);
-              if (!mounted) return;
+              if (!context.mounted) return;
               Navigator.pushReplacement(
                 parentContext,
                 MaterialPageRoute(
@@ -200,7 +199,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
     await UserBoxHelper.setNavPreference(null);
 
     // go directly to generic home screen
-    if (!mounted) return;
+    if (!context.mounted) return;
     Navigator.pushReplacementNamed(context, "/genericHome");
   },
   child: const Text(

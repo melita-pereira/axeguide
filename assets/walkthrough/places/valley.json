@@ -25,11 +25,11 @@
       "id": "choose_valley_town",
       "type": "question",
       "text": "Which town are you currently in?",
-      "tip": "Pick the town closest to where you’ll be staying or exploring.",
+      "tip": "Pick the town closest to where you'll be staying or exploring.",
       "options": [
-        { "label": "Wolfville", "nextStepId": "wolfville_intro" },
-        { "label": "New Minas", "nextStepId": "newminas_intro" },
-        { "label": "Kentville", "nextStepId": "kentville_intro" }
+        { "label": "Wolfville", "nextStepId": "wolfville_intro", "set": { "user.selectedLocation": "Wolfville" } },
+        { "label": "New Minas", "nextStepId": "newminas_intro", "set": { "user.selectedLocation": "New Minas" } },
+        { "label": "Kentville", "nextStepId": "kentville_intro", "set": { "user.selectedLocation": "Kentville" } }
       ]
     },
 
