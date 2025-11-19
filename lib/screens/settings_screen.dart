@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:axeguide/utils/user_box_helper.dart';
 import 'welcome_screen.dart';
 import 'package:axeguide/utils/hive_boxes.dart';
+import 'package:axeguide/screens/location_selection_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -182,6 +183,162 @@ Future<void> _clearPersonalizationData(BuildContext context) async {
   }
 }
 
+  Future<void> _resetLocation(BuildContext context) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        title: const Text(
+          'Reset Location?',
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        content: const Text(
+          'This will clear your selected location. You can choose a new one.',
+          style: TextStyle(fontSize: 15),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF013A6E),
+            ),
+            child: const Text('Reset'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      await UserBoxHelper.setUserLocation(null);
+      await UserBoxHelper.setCurrentCampusLocation(null);
+      
+      if (!context.mounted) return;
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (_) => LocationSelectionScreen(
+            locations: LocationOption.mainLocations,
+          ),
+        ),
+      );
+    }
+  }
+
+  Future<void> _resetAccessibility(BuildContext context) async {
+    final navPref = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        title: const Text(
+          'Guidance Preference',
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        content: const Text(
+          'What type of guidance would you like?\n\n'
+          '\u2022 In-depth: Detailed step-by-step instructions\n'
+          '\u2022 Basic: Quick summaries and essentials',
+          style: TextStyle(fontSize: 15),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, 'basic'),
+            child: const Text('Basic'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, 'in-depth'),
+            child: const Text('In-depth'),
+          ),
+        ],
+      ),
+    );
+
+    if (navPref != null) {
+      await UserBoxHelper.setNavPreference(navPref);
+      
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Row(
+            children: [
+              Icon(Icons.check_circle_outline, color: Colors.white),
+              SizedBox(width: 12),
+              Text('Guidance preference updated'),
+            ],
+          ),
+          backgroundColor: const Color(0xFF013A6E),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
+  }
+
+  Future<void> _resetWalkthrough(BuildContext context) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        title: const Text(
+          'Restart Walkthrough?',
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        content: const Text(
+          'This will restart the personalization walkthrough. Your saved location and preferences will be kept.',
+          style: TextStyle(fontSize: 15),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF013A6E),
+            ),
+            child: const Text('Restart'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      // Only clear walkthrough-specific flags, keep user data
+      await UserBoxHelper.clearWalkthroughCheckpoint();
+      await UserBoxHelper.setSkippedPersonalization(false);
+      await UserBoxHelper.setHasSeenWelcome(false);
+      
+      if (!context.mounted) return;
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (_) => const WelcomeScreen()),
+        (route) => false,
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -302,7 +459,7 @@ Future<void> _clearPersonalizationData(BuildContext context) async {
 
               // Actions Section
               const Text(
-                'Actions',
+                'Reset Options',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -323,64 +480,112 @@ Future<void> _clearPersonalizationData(BuildContext context) async {
                     ),
                   ],
                 ),
-                child: Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    onTap: () => _clearPersonalizationData(context),
-                    borderRadius: BorderRadius.circular(16),
-                    child: Padding(
-                      padding: const EdgeInsets.all(20),
-                      child: Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              color: Colors.red.shade50,
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: Icon(
-                              Icons.restart_alt,
-                              color: Colors.red.shade600,
-                              size: 24,
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          const Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Reset AxeGuide',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
-                                    color: Color(0xFF1A202C),
-                                  ),
-                                ),
-                                SizedBox(height: 4),
-                                Text(
-                                  'Clear all data and start fresh',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: Color(0xFF718096),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const Icon(
-                            Icons.arrow_forward_ios,
-                            size: 16,
-                            color: Color(0xFF718096),
-                          ),
-                        ],
-                      ),
+                child: Column(
+                  children: [
+                    _buildResetOption(
+                      context,
+                      icon: Icons.location_off_outlined,
+                      title: 'Reset Location',
+                      description: 'Choose a different location',
+                      color: const Color(0xFF013A6E),
+                      onTap: () => _resetLocation(context),
                     ),
-                  ),
+                    const Divider(height: 1),
+                    _buildResetOption(
+                      context,
+                      icon: Icons.accessibility_new_outlined,
+                      title: 'Change Guidance Preference',
+                      description: 'Switch between in-depth and basic guides',
+                      color: Colors.orange.shade700,
+                      onTap: () => _resetAccessibility(context),
+                    ),
+                    const Divider(height: 1),
+                    _buildResetOption(
+                      context,
+                      icon: Icons.replay_outlined,
+                      title: 'Restart Walkthrough',
+                      description: 'Start personalization from scratch',
+                      color: Colors.purple.shade700,
+                      onTap: () => _resetWalkthrough(context),
+                    ),
+                    const Divider(height: 1),
+                    _buildResetOption(
+                      context,
+                      icon: Icons.delete_forever_outlined,
+                      title: 'Reset Everything',
+                      description: 'Clear all data and start fresh',
+                      color: Colors.red.shade600,
+                      onTap: () => _clearPersonalizationData(context),
+                    ),
+                  ],
                 ),
               ),
 
               const SizedBox(height: 40),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildResetOption(
+    BuildContext context, {
+    required IconData icon,
+    required String title,
+    required String description,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(
+                  icon,
+                  color: color,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF1A202C),
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      description,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        color: Color(0xFF718096),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(
+                Icons.arrow_forward_ios,
+                size: 14,
+                color: Color(0xFF718096),
+              ),
             ],
           ),
         ),

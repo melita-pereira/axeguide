@@ -2,6 +2,8 @@ import 'package:axeguide/walkthrough/action_handlers.dart';
 import 'package:flutter/material.dart';
 import 'package:axeguide/walkthrough/walkthrough_manager.dart';
 import 'package:axeguide/screens/welcome_screen.dart';
+import 'package:axeguide/screens/home_screen.dart';
+import 'package:axeguide/utils/user_box_helper.dart';
 
 class WalkthroughScreen extends StatefulWidget {
   const WalkthroughScreen({super.key});
@@ -17,6 +19,7 @@ class _WalkthroughScreenState extends State<WalkthroughScreen> {
   List<Map<String, dynamic>> dropdownItems = [];
   String? selectedDropdownValue;
   bool loadingDropdown = false;
+  bool dropdownError = false;
   String? lastLoadedDropdownStepId;
 
   @override
@@ -35,6 +38,7 @@ class _WalkthroughScreenState extends State<WalkthroughScreen> {
         dropdownItems = [];
         selectedDropdownValue = null;
         loadingDropdown = false;
+        dropdownError = false;
       });
     };
 
@@ -60,6 +64,96 @@ class _WalkthroughScreenState extends State<WalkthroughScreen> {
     );
   }
 
+  Future<void> _showSkipConfirmation() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        title: const Text(
+          'Skip Walkthrough?',
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        content: const Text(
+          'You can always restart the walkthrough from Settings later.',
+          style: TextStyle(fontSize: 15),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF013A6E),
+            ),
+            child: const Text('Skip'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      // Show navigation preference dialog first
+      if (!mounted) return;
+      final navPref = await showDialog<String>(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: const Text(
+            'Guidance Preference',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          content: const Text(
+            'What type of guidance would you like?\n\n'
+            '• In-depth: Detailed step-by-step instructions\n'
+            '• Basic: Quick summaries and essentials',
+            style: TextStyle(fontSize: 15),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, 'basic'),
+              child: const Text('Basic'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, 'in-depth'),
+              child: const Text('In-depth'),
+            ),
+          ],
+        ),
+      );
+
+      if (navPref != null) {
+        // Save preference
+        await UserBoxHelper.setNavPreference(navPref);
+      }
+      
+      // Clear checkpoint and mark as skipped
+      await UserBoxHelper.clearWalkthroughCheckpoint();
+      await UserBoxHelper.setSkippedPersonalization(true);
+      await UserBoxHelper.setHasSeenWelcome(true);
+      
+      // Navigate to HomeScreen - it will redirect to location selection if userLocation is null
+      if (!mounted) return;
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (_) => const HomeScreen()),
+        (route) => false,
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     if (step == null) {
@@ -73,30 +167,104 @@ class _WalkthroughScreenState extends State<WalkthroughScreen> {
       );
     }
 
-    return Scaffold(
-      backgroundColor: const Color(0xFFF9FAFB),
-      body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildTitle(),
-                    const SizedBox(height: 16),
-                    _buildTipsButton(),
-                    if (showTips) _buildTipsBox(),
-                    const SizedBox(height: 24),
-                    _buildContent(),
-                  ],
+    return GestureDetector(
+      onTap: () => FocusScope.of(context).unfocus(),
+      child: Scaffold(
+        backgroundColor: const Color(0xFFF9FAFB),
+        body: SafeArea(
+          child: Column(
+            children: [
+              _buildProgressBar(),
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildTitle(),
+                      const SizedBox(height: 16),
+                      _buildTipsButton(),
+                      if (showTips) _buildTipsBox(),
+                      const SizedBox(height: 24),
+                      _buildContent(),
+                    ],
+                  ),
                 ),
               ),
-            ),
-            _buildBottomButtons(),
-          ],
+              _buildBottomButtons(),
+            ],
+          ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildProgressBar() {
+    final progress = manager.progress;
+    final completed = manager.completedSteps;
+    final total = manager.estimatedTotalSteps;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Progress',
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey.shade700,
+                ),
+              ),
+              Row(
+                children: [
+                  Text(
+                    '$completed / $total steps',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.grey.shade600,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  GestureDetector(
+                    onTap: _showSkipConfirmation,
+                    child: Icon(
+                      Icons.close,
+                      size: 20,
+                      color: Colors.grey.shade500,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: LinearProgressIndicator(
+              value: progress,
+              minHeight: 6,
+              backgroundColor: Colors.grey.shade200,
+              valueColor: const AlwaysStoppedAnimation<Color>(
+                Color(0xFF013A6E),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -262,36 +430,40 @@ class _WalkthroughScreenState extends State<WalkthroughScreen> {
               child: InkWell(
                 onTap: () => manager.nextFromUI(opt['label']),
                 borderRadius: BorderRadius.circular(16),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 18,
-                    horizontal: 20,
-                  ),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: const Color(0xFF013A6E).withValues(alpha: 0.2),
-                      width: 1.5,
+                child: Semantics(
+                  button: true,
+                  label: 'Option: ${opt['label']}',
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 18,
+                      horizontal: 20,
                     ),
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          opt['label'],
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w500,
-                            color: Color(0xFF1A202C),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: const Color(0xFF013A6E).withValues(alpha: 0.2),
+                        width: 1.5,
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            opt['label'],
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                              color: Color(0xFF1A202C),
+                            ),
                           ),
                         ),
-                      ),
-                      const Icon(
-                        Icons.arrow_forward_ios,
-                        size: 16,
-                        color: Color(0xFF013A6E),
-                      ),
-                    ],
+                        const Icon(
+                          Icons.arrow_forward_ios,
+                          size: 16,
+                          color: Color(0xFF013A6E),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -354,6 +526,26 @@ class _WalkthroughScreenState extends State<WalkthroughScreen> {
               ),
               textAlign: TextAlign.center,
             ),
+            if (dropdownError) ...[
+              const SizedBox(height: 16),
+              TextButton.icon(
+                onPressed: () {
+                  setState(() {
+                    dropdownError = false;
+                    lastLoadedDropdownStepId = null;
+                  });
+                },
+                icon: const Icon(Icons.refresh, size: 18),
+                label: const Text('Retry'),
+                style: TextButton.styleFrom(
+                  foregroundColor: const Color(0xFF013A6E),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 12,
+                  ),
+                ),
+              ),
+            ],
           ],
         ),
       );
@@ -490,10 +682,12 @@ class _WalkthroughScreenState extends State<WalkthroughScreen> {
       setState(() {
         dropdownItems = items;
         loadingDropdown = false;
+        dropdownError = items.isEmpty;
       });
     } catch (e) {
       setState(() {
         loadingDropdown = false;
+        dropdownError = true;
       });
     }
   }

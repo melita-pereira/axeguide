@@ -415,6 +415,18 @@ class WalkthroughActions {
                 ],
         );
 
+      case "navigateToNewMinasHomeScreen":
+        // Clear checkpoint - walkthrough completed
+        await UserBoxHelper.clearWalkthroughCheckpoint();
+        if (!context.mounted) return;
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (_) => const HomeScreen()),
+          (route) => false,
+        );
+
+        return;
+
       case "navigateToAcadiaAttractionsHomeScreen":
         // Clear checkpoint - walkthrough completed
         await UserBoxHelper.clearWalkthroughCheckpoint();

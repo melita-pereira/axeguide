@@ -92,6 +92,101 @@ class WalkthroughManager {
   String? get currentStepId => _currentStepId;
   bool get canGoBack => _history.isNotEmpty;
 
+  /// Get number of completed steps based on history
+  int get completedSteps => _history.length;
+
+  /// Get estimated total steps remaining by simulating forward navigation
+  /// This is dynamic and updates based on user choices
+  int get estimatedTotalSteps {
+    // Count completed steps from history
+    final completed = _history.length;
+    
+    // Estimate remaining steps by doing a shallow traversal from current step
+    final remaining = _estimateRemainingSteps(_currentStepId, {});
+    
+    return completed + remaining;
+  }
+
+  int _estimateRemainingSteps(String? stepId, Set<String> visited) {
+    if (stepId == null || !_steps.containsKey(stepId) || visited.contains(stepId)) {
+      return 0;
+    }
+
+    visited.add(stepId);
+    final step = _steps[stepId];
+    final type = step?['type'] as String?;
+    
+    // Count this step if it's user-facing
+    int count = (type == 'question' || type == 'info' || type == 'dropdown') ? 1 : 0;
+
+    // Find next step(s)
+    List<String?> nextSteps = [];
+    
+    switch (type) {
+      case 'question':
+        final options = step?['options'] as List?;
+        if (options != null && options.isNotEmpty) {
+          // For questions, take the average path (use first option as estimate)
+          nextSteps.add(options[0]['nextStepId']);
+        }
+        break;
+        
+      case 'info':
+        final options = step?['options'] as List?;
+        if (options != null && options.isNotEmpty) {
+          nextSteps.add(options[0]['nextStepId']);
+        }
+        break;
+        
+      case 'dropdown':
+        nextSteps.add(step?['nextStepId']);
+        break;
+        
+      case 'conditional':
+        // Try to evaluate condition, or take both paths as worst case
+        final cond = step?['condition'];
+        if (cond != null) {
+          try {
+            final result = _eval(cond);
+            if (result) {
+              nextSteps.add(step?['nextStepId']);
+            } else {
+              nextSteps.add(step?['elseNextStepId']);
+            }
+          } catch (_) {
+            // If can't evaluate, assume the path that exists
+            nextSteps.add(step?['nextStepId']);
+            nextSteps.add(step?['elseNextStepId']);
+          }
+        }
+        break;
+        
+      case 'action':
+        nextSteps.add(step?['nextStepId']);
+        break;
+    }
+
+    // Recursively count remaining steps (take max of possible paths)
+    int maxRemaining = 0;
+    for (final next in nextSteps) {
+      if (next != null) {
+        final remaining = _estimateRemainingSteps(next, Set.from(visited));
+        if (remaining > maxRemaining) {
+          maxRemaining = remaining;
+        }
+      }
+    }
+
+    return count + maxRemaining;
+  }
+
+  /// Get progress as a percentage (0.0 to 1.0)
+  double get progress {
+    final total = estimatedTotalSteps;
+    if (total == 0) return 0.0;
+    return (completedSteps / total).clamp(0.0, 1.0);
+  }
+
   
   void goTo(String? id, {bool addToHistory = true}) {
   if (id != null && _steps.containsKey(id)) {

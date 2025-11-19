@@ -41,23 +41,18 @@ class LocationSelectionScreen extends StatelessWidget {
                     ),
               ),
               const SizedBox(height: 32),
-              GridView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 16,
-                  mainAxisSpacing: 16,
-                  childAspectRatio: 1.1,
-                ),
-                itemCount: locations.length,
-                itemBuilder: (context, index) {
-                  final location = locations[index];
-                  return _LocationCard(
-                    location: location,
-                    onTap: () => _handleLocationTap(context, location),
+              Wrap(
+                spacing: 16,
+                runSpacing: 16,
+                children: locations.map((location) {
+                  return SizedBox(
+                    width: (MediaQuery.of(context).size.width - 64) / 2,
+                    child: _LocationCard(
+                      location: location,
+                      onTap: () => _handleLocationTap(context, location),
+                    ),
                   );
-                },
+                }).toList(),
               ),
             ],
           ),
@@ -116,6 +111,7 @@ class _LocationCard extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.all(20),
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Container(
@@ -149,8 +145,6 @@ class _LocationCard extends StatelessWidget {
                     fontSize: 12,
                     color: Colors.grey[600],
                   ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ],

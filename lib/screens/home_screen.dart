@@ -122,7 +122,11 @@ class _HomeScreenState extends State<HomeScreen> {
       final lower = location.toLowerCase();
       if (lower.contains('acadia')) return 'acadia';
       if (lower.contains('airport')) return 'halifax_airport';
-      return lower;
+      if (lower.contains('new minas') || lower.contains('newminas')) return 'new_minas';
+      if (lower.contains('wolfville')) return 'wolfville';
+      if (lower.contains('kentville')) return 'kentville';
+      if (lower.contains('halifax')) return 'halifax';
+      return lower.replaceAll(' ', '_');
     }
     final currentLoc = userLocation ?? '';
     final normalized = normalizeLocation(currentLoc);
@@ -453,16 +457,17 @@ class _HomeScreenState extends State<HomeScreen> {
                                 border: Border.all(color: Colors.amber.shade200),
                               ),
                               child: Row(
-                                mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Icon(Icons.access_time, size: 16, color: Colors.amber.shade700),
                                   const SizedBox(width: 8),
-                                  Text(
-                                    hours.isNotEmpty ? hours : 'Hours not available',
-                                    style: TextStyle(
-                                      color: Colors.amber.shade900,
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w500,
+                                  Expanded(
+                                    child: Text(
+                                      hours.isNotEmpty ? hours : 'Hours not available',
+                                      style: TextStyle(
+                                        color: Colors.amber.shade900,
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w500,
+                                      ),
                                     ),
                                   ),
                                 ],

@@ -24,7 +24,7 @@ class ScrollableScaffold extends StatelessWidget {
       body: LayoutBuilder(
         builder: (context, constraints) {
           return SingleChildScrollView(
-            physics: const AlwaysScrollableScrollPhysics(),
+            physics: const ClampingScrollPhysics(),
             child: ConstrainedBox(
               constraints: BoxConstraints(
                 minHeight: constraints.maxHeight,
