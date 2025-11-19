@@ -1,0 +1,194 @@
+{
+  "acadia": [
+    {
+      "id": "acadia_intro",
+      "type": "question",
+      "text": "Is this your first time at Acadia University?",
+      "tip": "If you're new, the guide will walk you through arrival, housing, and essentials. If not, you can jump straight to exploring.",
+      "options": [
+        { "label": "Yes", "nextStepId": "acadia_transport" },
+        { "label": "No", "nextStepId": "explore_acadia" }
+      ]
+    },
+
+    {
+      "id": "acadia_transport",
+      "type": "question",
+      "text": "How did you reach Acadia?",
+      "tip": "Choosing your method of arrival helps us show the most relevant pointers and directions.",
+      "options": [
+        { "label": "University Shuttle", "nextStepId": "shuttlePointers" },
+        { "label": "Friend/Family", "nextStepId": "friend_family_pointers" },
+        { "label": "Public Bus", "nextStepId": "busPointers" },
+        { "label": "Taxi", "nextStepId": "taxiPointers" }
+      ]
+    },
+
+    {
+      "id": "shuttlePointers",
+      "type": "action",
+      "action": "showShuttlePointers",
+      "tip": "You'll see where the shuttle drops off, nearby landmarks, and what to do next.",
+      "nextStepId": "acadia_housing"
+    },
+
+    {
+      "id": "friend_family_pointers",
+      "type": "action",
+      "action": "showFriendFamilyPointers",
+      "tip": "We'll outline pickup zones, parking, and the fastest way to reach campus buildings.",
+      "nextStepId": "acadia_housing"
+    },
+
+    {
+      "id": "busPointers",
+      "type": "action",
+      "action": "showBusPointers",
+      "tip": "You'll get info on stop locations, routes, and walking paths to campus.",
+      "nextStepId": "acadia_housing"
+    },
+
+    {
+      "id": "taxiPointers",
+      "type": "action",
+      "action": "showTaxiPointers",
+      "tip": "Includes drop-off areas, typical fares, and where to enter campus.",
+      "nextStepId": "acadia_housing"
+    },
+
+    {
+      "id": "acadia_housing",
+      "type": "question",
+      "text": "Where do you plan on staying for the year?",
+      "tip": "This helps us load the correct directions — campus residences or off-campus housing.",
+      "options": [
+        { "label": "On Campus", "nextStepId": "select_campus_location" },
+        { "label": "Off Campus", "nextStepId": "acadia_off_campus" }
+      ]
+    },
+
+    {
+      "id": "select_campus_location",
+      "type": "dropdown",
+      "text": "Where are you currently on campus?",
+      "tip": "Select your current location on campus so we can provide accurate directions.",
+      "dropdownConfig": {
+        "source": "supabase",
+        "query": {
+          "table": "locations",
+          "select": "id, name",
+          "area_tag_contains": "acadia"
+        },
+        "displayField": "name",
+        "valueField": "name",
+        "storeAs": "user.currentCampusLocation"
+      },
+      "nextStepId": "select_destination"
+    },
+
+    {
+      "id": "select_destination",
+      "type": "dropdown",
+      "text": "Which residence are you going to?",
+      "tip": "Select your residence hall from the list. We'll show you step-by-step directions from your current location.",
+      "dropdownConfig": {
+        "source": "supabase",
+        "query": {
+          "table": "locations",
+          "select": "id, name",
+          "category_name": "residence",
+          "area_tag_contains": "acadia"
+        },
+        "displayField": "name",
+        "valueField": "name",
+        "storeAs": "user.destinationLocation",
+        "validateDifferentFrom": "user.currentCampusLocation",
+        "validationMessage": "That's where you are right now!"
+      },
+      "nextStepId": "show_navigation_directions"
+    },
+
+    {
+      "id": "show_navigation_directions",
+      "type": "action",
+      "action": "showNavigationFromTo",
+      "tip": "You'll see step-by-step directions from your current location to your destination.",
+      "nextStepId": "acadia_sim"
+    },
+
+    {
+      "id": "acadia_off_campus",
+      "type": "action",
+      "action": "enterOffCampusAddress",
+      "tip": "You can enter an address or landmark, and we'll show the best route from campus.",
+      "nextStepId": "acadia_sim"
+    },
+
+    {
+      "id": "acadia_sim",
+      "type": "conditional",
+      "condition": "user.hasSIM == true",
+      "nextStepId": "acadia_next_steps",
+      "elseNextStepId": "acadia_sim_question"
+    },
+
+    {
+      "id": "acadia_sim_question",
+      "type": "question",
+      "text": "Do you need a SIM card?",
+      "tip": "Choosing 'Yes' will show convenient locations nearby for new students.",
+      "options": [
+        { 
+          "label": "Yes", 
+          "nextStepId": "acadia_sim_directions"
+        },
+        { 
+          "label": "No", 
+          "nextStepId": "acadia_next_steps",
+          "set": { "user.hasSIM": false }
+        }
+      ]
+    },
+
+    {
+      "id": "acadia_sim_directions",
+      "type": "action",
+      "action": "showSIMDirections",
+      "tip": "These locations are popular among students for quick SIM setup.",
+      "params": {
+        "locations": [
+          "Wong International Centre",
+          "New Minas"
+        ]
+      },
+      "nextStepId": "acadia_next_steps"
+    },
+
+    {
+      "id": "acadia_next_steps",
+      "type": "question",
+      "text": "Where do you want to go next?",
+      "tip": "You can keep exploring campus or head toward the wider Valley region.",
+      "options": [
+        { 
+          "label": "On Campus", 
+          "nextStepId": "explore_acadia",
+          "set": { "user.selectedLocation": "Acadia University" }
+        },
+        { 
+          "label": "Off Campus", 
+          "nextStepId": "valley_intro",
+          "set": { "user.selectedLocation": "Wolfville" }
+        }
+      ]
+    },
+
+    {
+      "id": "explore_acadia",
+      "type": "action",
+      "action": "navigateToAcadiaHomeScreen",
+      "tip": "Loads the Acadia home screen with campus navigation, buildings, and student resources.",
+      "nextStepId": "dynamic_home"
+    }
+  ]
+}

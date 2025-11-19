@@ -1,9 +1,10 @@
-import 'package:axeguide/screens/personalization_loc_screen.dart';
+import 'package:axeguide/screens/walkthrough/walkthrough_screen.dart';
+import 'package:axeguide/screens/location_selection_screen.dart';
 import 'package:flutter/material.dart';
 
 import 'package:axeguide/utils/hive_boxes.dart';
 import 'package:axeguide/utils/user_box_helper.dart';
-import 'package:axeguide/assets/scrollable_scaffold.dart';
+import 'package:axeguide/utils/scrollable_scaffold.dart';
 
 class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
@@ -52,15 +53,16 @@ class _WelcomeScreenState extends State<WelcomeScreen>
         ),
         actions: [
           TextButton(
-            onPressed: () {
+            onPressed: () async {
               // Fire-and-forget the persistence, then navigate.
               Navigator.pop(dialogContext);
-              UserBoxHelper.setHasSeenWelcome(true);
-              if (!mounted) return;
+              await UserBoxHelper.clear();
+              await UserBoxHelper.setHasSeenWelcome(true);
+              if (!context.mounted) return;
               Navigator.pushReplacement(
                 parentContext,
                 MaterialPageRoute(
-                  builder: (context) => const PersonalizationScreen(),
+                  builder: (context) => const WalkthroughScreen(),
                 ),
               );
             },
@@ -87,14 +89,17 @@ class _WelcomeScreenState extends State<WelcomeScreen>
 
   Future<void> _goToPersonalization({bool resume = false}) async {
     await UserBoxHelper.setHasSeenWelcome(true);
+    // User chose walkthrough, clear skip flag
+    await UserBoxHelper.setSkippedPersonalization(false);
     if (!resume) {
-      userBox.put('hasProgress', true);
+      userBox.put('hasProgress', false);
       userBox.put('progressData', {});
+      userBox.delete('walkthrough_checkpoint');
     }
     if (!mounted) return;
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => const PersonalizationScreen()),
+      MaterialPageRoute(builder: (context) => const WalkthroughScreen()),
     );
   }
 
@@ -134,7 +139,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                         curve: Curves.easeOutBack,
                       ),
                     ),
-                    child: Image.asset('lib/assets/logo.png', height: 200),
+                    child: Image.asset('assets/images/logo.png', height: 200),
                   ),
                   const SizedBox(height: 30),
                   Text(
@@ -187,15 +192,37 @@ class _WelcomeScreenState extends State<WelcomeScreen>
 
                   const SizedBox(height: 16),
                   TextButton(
-                    onPressed: () => _goToPersonalization(resume: false),
-                    style: TextButton.styleFrom(
-                      foregroundColor: Colors.grey[700],
-                    ),
-                    child: const Text(
-                      'Skip Personalization',
-                      style: TextStyle(fontSize: 15),
-                    ),
-                  ),
+  onPressed: () async {
+    // mark welcome as seen
+    await UserBoxHelper.setHasSeenWelcome(true);
+
+    // Mark that user explicitly chose to skip personalization
+    await UserBoxHelper.setSkippedPersonalization(true);
+
+    // Clear any existing walkthrough progress - user chose to skip
+    await UserBoxHelper.clearWalkthroughCheckpoint();
+    await UserBoxHelper.setHasProgress(false);
+
+    // Set basic navigation preference and clear location
+    await UserBoxHelper.setUserLocation(null);
+    await UserBoxHelper.setNavPreference('basic');
+
+    // Navigate to location selection screen
+    if (!context.mounted) return;
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (_) => LocationSelectionScreen(
+          locations: LocationOption.mainLocations,
+        ),
+      ),
+    );
+  },
+  child: const Text(
+    'Skip Personalization',
+    style: TextStyle(fontSize: 15),
+  ),
+),
                   // Reset Progress removed from WelcomeScreen — use Settings instead.
                 ],
               ),

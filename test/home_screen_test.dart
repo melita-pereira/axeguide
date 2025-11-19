@@ -69,27 +69,8 @@ void main() {
       expect(UserBoxHelper.userLocation, 'Halifax');
     });
 
-    test('UserBoxHelper stores and retrieves user mode', () async {
-      await UserBoxHelper.setUserMode('Guide');
-      expect(UserBoxHelper.userMode, 'Guide');
-    });
-
     test('UserBoxHelper returns null for unset location', () async {
       expect(UserBoxHelper.userLocation, isNull);
-    });
-
-    test('UserBoxHelper returns null for unset mode', () async {
-      expect(UserBoxHelper.userMode, isNull);
-    });
-
-    test('HomeScreen would show "Unknown" location when UserBoxHelper returns null', () async {
-      final location = UserBoxHelper.userLocation ?? 'Unknown';
-      expect(location, 'Unknown');
-    });
-
-    test('HomeScreen would show "Guest" mode when UserBoxHelper returns null', () async {
-      final mode = UserBoxHelper.userMode ?? 'Guest';
-      expect(mode, 'Guest');
     });
   });
 

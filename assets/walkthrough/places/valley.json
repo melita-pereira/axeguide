@@ -1,0 +1,126 @@
+{
+  "valley": [
+    {
+      "id": "valley_intro",
+      "type": "question",
+      "text": "Welcome to the Annapolis Valley! Are you already settled here, or just arriving?",
+      "tip": "If you're new, we can show essential spots like groceries, transit, SIM, and services.",
+      "options": [
+        { "label": "Just arriving", "nextStepId": "valley_arrival_help" },
+        { "label": "Already here", "nextStepId": "choose_valley_town" }
+      ]
+    },
+
+    {
+      "id": "valley_arrival_help",
+      "type": "info",
+      "text": "No worries, let's help you get started. You can pick the town you're in, and we'll show nearby essentials like grocery stores, pharmacies, and transit.",
+      "tip": "You'll get a simple intro before choosing your town.",
+      "options": [
+        { "label": "Continue", "nextStepId": "choose_valley_town" }
+      ]
+    },
+
+    {
+      "id": "choose_valley_town",
+      "type": "question",
+      "text": "Which town are you currently in?",
+      "tip": "Pick the town closest to where you'll be staying or exploring.",
+      "options": [
+        { "label": "Wolfville", "nextStepId": "wolfville_intro", "set": { "user.selectedLocation": "Wolfville" } },
+        { "label": "New Minas", "nextStepId": "newminas_intro", "set": { "user.selectedLocation": "New Minas" } },
+        { "label": "Kentville", "nextStepId": "kentville_intro", "set": { "user.selectedLocation": "Kentville" } }
+      ]
+    },
+
+    {
+      "id": "wolfville_intro",
+      "type": "question",
+      "text": "Welcome to Wolfville, the town of Acadia University! Would you like help finding essentials before you explore?",
+      "tip": "Wolfville is walkable — essentials like groceries, pharmacies, and cafes are close by.",
+      "options": [
+        { "label": "Yes", "nextStepId": "wolfville_help" },
+        { "label": "No, show me around!", "nextStepId": "explore_wolfville" }
+      ]
+    },
+
+    {
+      "id": "wolfville_help",
+      "type": "action",
+      "action": "showWolfvilleEssentials",
+      "tip": "We’ll show important spots like groceries, banking, transport, and SIM services.",
+      "params": {
+        "categories": ["Grocery", "SIM", "Transport", "Banking", "Pharmacy"]
+      },
+      "nextStepId": "explore_wolfville"
+    },
+
+    {
+      "id": "explore_wolfville",
+      "type": "action",
+      "action": "navigateToWolfvilleHomeScreen",
+      "tip": "Loads the Wolfville Home Screen with maps, essentials, and landmarks.",
+      "nextStepId": "dynamic_home"
+    },
+
+    {
+      "id": "newminas_intro",
+      "type": "question",
+      "text": "Welcome to New Minas, a hub for shopping and services. Need help finding anything?",
+      "tip": "New Minas is great for big stores — groceries, electronics, and shopping centres.",
+      "options": [
+        { "label": "Yes", "nextStepId": "newminas_help" },
+        { "label": "No, show me around!", "nextStepId": "explore_newminas" }
+      ]
+    },
+
+    {
+      "id": "newminas_help",
+      "type": "action",
+      "action": "showNewMinasEssentials",
+      "tip": "We’ll show you the top service locations, including food, pharmacies, and shopping.",
+      "params": {
+        "categories": ["Grocery", "Pharmacy", "Electronics", "SIM", "Shopping"]
+      },
+      "nextStepId": "explore_newminas"
+    },
+
+    {
+      "id": "explore_newminas",
+      "type": "action",
+      "action": "navigateToNewMinasHomeScreen",
+      "tip": "Loads the New Minas Home Screen with navigation and stores.",
+      "nextStepId": "dynamic_home"
+    },
+
+    {
+      "id": "kentville_intro",
+      "type": "question",
+      "text": "Welcome to Kentville! Would you like a quick overview of available services?",
+      "tip": "Kentville has government offices, medical centres, and essential local services.",
+      "options": [
+        { "label": "Yes", "nextStepId": "kentville_help" },
+        { "label": "No, take me to Explore mode", "nextStepId": "explore_kentville" }
+      ]
+    },
+
+    {
+      "id": "kentville_help",
+      "type": "action",
+      "action": "showKentvilleEssentials",
+      "tip": "You'll see important services like medical clinics, government offices, and transportation.",
+      "params": {
+        "categories": ["Government Services", "Medical", "Transportation", "Shopping"]
+      },
+      "nextStepId": "explore_kentville"
+    },
+
+    {
+      "id": "explore_kentville",
+      "type": "action",
+      "action": "navigateToKentvilleHomeScreen",
+      "tip": "Loads the Kentville Home Screen with services and navigation.",
+      "nextStepId": "dynamic_home"
+    }
+  ]
+}

@@ -1,0 +1,176 @@
+{
+  "halifax_airport": [
+    {
+      "id": "halifax_airport_intro",
+      "type": "question",
+      "text": "Are you new to Canada?",
+      "tip": "If this is your first time entering Canada, the app can guide you through immigration and baggage pickup.",
+      "options": [
+        { "label": "Yes", "nextStepId": "immigration_baggage" },
+        { "label": "No", "nextStepId": "airport_transport" }
+      ]
+    },
+
+    {
+      "id": "immigration_baggage",
+      "type": "question",
+      "text": "Do you need help with immigration and baggage?",
+      "tip": "International students often need to show documents and collect luggage from a different area — no worries, we can guide you.",
+      "options": [
+        { "label": "Yes", "nextStepId": "immigration_baggage_help" },
+        { "label": "No", "nextStepId": "airport_transport" }
+      ]
+    },
+
+    {
+      "id": "immigration_baggage_help",
+      "type": "action",
+      "action": "showImmigrationBaggageHelp",
+      "tip": "This will show a step-by-step guide for immigration, baggage claim, and customs.",
+      "nextStepId": "airport_transport"
+    },
+
+    {
+      "id": "airport_transport",
+      "type": "question",
+      "text": "How do you plan on navigating out of the airport?",
+      "tip": "If you're unsure, choosing 'Not Sure' will show you the International Centre’s help resources.",
+      "options": [
+        { "label": "University Shuttle", "nextStepId": "shuttle_info" },
+        { "label": "Friend/Family", "nextStepId": "friend_family_info" },
+        { "label": "Public Bus", "nextStepId": "public_bus_info" },
+        { "label": "Taxi", "nextStepId": "taxi_info" },
+        { "label": "Not Sure", "nextStepId": "international_centre_info" }
+      ]
+    },
+
+    {
+      "id": "shuttle_info",
+      "type": "action",
+      "action": "showShuttleGuidance",
+      "tip": "You'll see shuttle pickup locations and how to confirm your booking.",
+      "nextStepId": "airport_sim"
+    },
+
+    {
+      "id": "friend_family_info",
+      "type": "action",
+      "action": "showFriendFamilyGuidance",
+      "tip": "Guidance includes where passenger pickup lanes are and how to find them.",
+      "nextStepId": "airport_sim"
+    },
+
+    {
+      "id": "public_bus_info",
+      "type": "action",
+      "action": "showBusGuidance",
+      "tip": "You'll see bus schedules, route numbers, and where to buy or tap tickets.",
+      "nextStepId": "airport_sim"
+    },
+
+    {
+      "id": "taxi_info",
+      "type": "action",
+      "action": "showTaxiGuidance",
+      "tip": "Information includes taxi stands, typical fares, and safety tips.",
+      "nextStepId": "airport_sim"
+    },
+
+    {
+      "id": "international_centre_info",
+      "type": "action",
+      "action": "showAirportHelp",
+      "tip": "This will direct you to staff and resources that help new international arrivals.",
+      "nextStepId": "airport_sim"
+    },
+
+    {
+      "id": "airport_sim",
+      "type": "question",
+      "text": "Do you need a SIM card?",
+      "tip": "Getting a SIM at the airport is convenient but sometimes more expensive than city options.",
+      "options": [
+        { 
+          "label": "Yes", 
+          "nextStepId": "sim_kiosk",
+          "set": { "user.hasSIM": true }
+        },
+        { 
+          "label": "No", 
+          "nextStepId": "airport_help"
+        }
+      ]
+    },
+
+    {
+      "id": "sim_kiosk",
+      "type": "action",
+      "action": "showSIMKioskInfo",
+      "tip": "You'll see available carriers, prices, and kiosk locations inside the airport.",
+      "nextStepId": "airport_help"
+    },
+
+    {
+      "id": "airport_help",
+      "type": "question",
+      "text": "Do you need airport assistance?",
+      "tip": "Assistance can include directions, mobility help, lost & found, or facility support.",
+      "options": [
+        { "label": "Yes", "nextStepId": "show_airport_help" },
+        { "label": "No", "nextStepId": "airport_next_steps" }
+      ]
+    },
+
+    {
+      "id": "show_airport_help",
+      "type": "action",
+      "action": "displayAirportHelpInfo",
+      "tip": "You'll get info about help desks, accessibility services, and airport staff locations.",
+      "nextStepId": "airport_next_steps"
+    },
+
+    {
+      "id": "airport_next_steps",
+      "type": "question",
+      "text": "What's next?",
+      "tip": "Choose where you want to go so the app can load the right guide or home screen.",
+      "options": [
+        {
+          "label": "Head to Acadia",
+          "nextStepId": "acadia_intro",
+          "condition": "!has.acadia_intro_completed",
+          "elseNextStepId": "explore_acadia",
+          "set": { "user.selectedLocation": "Acadia University" }
+        },
+        {
+          "label": "Head to the Valley (Wolfville, New Minas, Kentville)",
+          "nextStepId": "valley_intro",
+          "condition": "!has.valley_intro_completed",
+          "elseNextStepId": "choose_valley_town",
+          "set": { "user.selectedLocation": "Wolfville" }
+        },
+        {
+          "label": "Explore Halifax",
+          "nextStepId": "city_intro",
+          "condition": "!has.city_intro_completed",
+          "elseNextStepId": "explore_halifax",
+          "set": { "user.selectedLocation": "Halifax" }
+        },
+        { 
+          "label": "Explore Halifax Airport", 
+          "nextStepId": "explore_airport",
+          "set": { "user.selectedLocation": "Halifax Airport" }
+        },
+        { "label": "Skip", "nextStepId": "generic_homescreen" }
+      ]
+    },
+
+    {
+      "id": "explore_airport",
+      "type": "action",
+      "action": "navigateToAirportHomeScreen",
+      "tip": "Loads the Halifax Airport home page with navigation tools and facilities.",
+      "nextStepId": "dynamic_home"
+    }
+  ]
+}

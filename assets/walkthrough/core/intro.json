@@ -1,0 +1,121 @@
+{
+  "steps": [
+    {
+      "id": "decide_welcome",
+      "type": "conditional",
+      "condition": "has.walkthrough_checkpoint",
+      "nextStepId": "welcome",
+      "elseNextStepId": "start_location"
+    },
+    {
+      "id": "welcome",
+      "type": "question",
+      "question": "Welcome! We see you have some progress saved. Would you like to retrieve it?",
+      "tip": "If you previously used AxeGuide, choosing ‘Yes’ will restore where you left off.",
+      "options": [
+        {
+          "label": "Yes",
+          "nextStepId": "import_progress"
+        },
+        {
+          "label": "No",
+          "nextStepId": "start_location"
+        }
+      ]
+    },
+
+    {
+      "id": "import_progress",
+      "type": "action",
+      "action": "importHiveCheckpoint",
+      "nextStepId": "dynamic_home"
+    },
+
+    {
+      "id": "start_location",
+      "type": "question",
+      "text": "Let's get you started! Where are you currently?",
+      "tip": "Your choice helps AxeGuide show information relevant to where you are.",
+      "options": [
+        {
+          "label": "Halifax Airport",
+          "nextStepId": "navigation_pref",
+          "set": { "user.selectedLocation": "Halifax Airport" }
+        },
+        {
+          "label": "Acadia University",
+          "nextStepId": "navigation_pref",
+          "set": { "user.selectedLocation": "Acadia University" }
+        },
+        {
+          "label": "Wolfville",
+          "nextStepId": "navigation_pref",
+          "set": { "user.selectedLocation": "Wolfville" }
+        },
+        {
+          "label": "New Minas",
+          "nextStepId": "navigation_pref",
+          "set": { "user.selectedLocation": "New Minas" }
+        },
+        {
+          "label": "Kentville",
+          "nextStepId": "navigation_pref",
+          "set": { "user.selectedLocation": "Kentville" }
+        },
+        {
+          "label": "Halifax",
+          "nextStepId": "navigation_pref",
+          "set": { "user.selectedLocation": "Halifax" }
+        },
+        {
+          "label": "Other",
+          "nextStepId": "generic_homescreen",
+          "set": { "user.selectedLocation": "Other" }
+        }
+      ]
+    },
+
+    {
+      "id": "navigation_pref",
+      "type": "question",
+      "text": "What type of guidance would you like?",
+      "tip": "In-depth guides walk you step-by-step. Basic guides give short summaries.",
+      "options": [
+        {
+          "label": "In-depth",
+          "nextStepId": "next_after_navigation",
+          "action": "setNavigationPreference.in_depth"
+        },
+        {
+          "label": "Basic",
+          "nextStepId": "next_after_navigation",
+          "action": "setNavigationPreference.basic"
+        }
+      ]
+    },
+
+    {
+      "id": "next_after_navigation",
+      "type": "conditional",
+      "condition": "eq.user.selectedLocation.Halifax Airport",
+      "nextStepId": "halifax_airport_intro",
+      "elseNextStepId": "check_other_locations"
+    },
+
+    {
+      "id": "check_other_locations",
+      "type": "conditional",
+      "condition": "eq.user.selectedLocation.Acadia University",
+      "nextStepId": "acadia_intro",
+      "elseNextStepId": "check_valley_or_city"
+    },
+
+    {
+      "id": "check_valley_or_city",
+      "type": "conditional",
+      "condition": "in.user.selectedLocation.[Wolfville,New Minas,Kentville]",
+      "nextStepId": "valley_intro",
+      "elseNextStepId": "city_intro"
+    }
+  ]
+}

@@ -94,6 +94,14 @@ class UserBoxHelper {
   static Future<void> setUserLocation(String? value) =>
       write(keyUserLocation, value);
 
+  static String? get currentCampusLocation => read<String>('currentCampusLocation');
+  static Future<void> setCurrentCampusLocation(String? value) =>
+      write('currentCampusLocation', value);
+
+  static String? get destinationLocation => read<String>('destinationLocation');
+  static Future<void> setDestinationLocation(String? value) =>
+      write('destinationLocation', value);
+
   static String? get navPreference => read<String>(keyNavPreference);
   static Future<void> setNavPreference(String? value) =>
       write(keyNavPreference, value);
@@ -101,4 +109,22 @@ class UserBoxHelper {
   static dynamic get progressData => read<dynamic>(keyProgressData);
   static Future<void> setProgressData(dynamic value) =>
       write(keyProgressData, value);
+
+  static String? get walkthroughCheckpoint =>
+      read<String>('walkthrough_checkpoint');
+
+  static bool get hasWalkthroughCheckpoint =>
+      walkthroughCheckpoint != null;
+
+  static Future<void> setWalkthroughCheckpoint(String id) =>
+      write('walkthrough_checkpoint', id);
+
+  static Future<void> clearWalkthroughCheckpoint() =>
+      remove('walkthrough_checkpoint');
+
+  static bool get skippedPersonalization =>
+      read<bool>('skippedPersonalization', defaultValue: false) ?? false;
+
+  static Future<void> setSkippedPersonalization(bool value) =>
+      write('skippedPersonalization', value);
 }
