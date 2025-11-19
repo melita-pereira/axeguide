@@ -292,7 +292,7 @@ Future<void> _clearPersonalizationData(BuildContext context) async {
                     _buildInfoRow(
                       icon: Icons.explore_outlined,
                       label: 'Navigation',
-                      value: UserBoxHelper.navPreference ?? 'Not set',
+                      value: _capitalizeFirst(UserBoxHelper.navPreference ?? 'Not set'),
                     ),
                   ],
                 ),
@@ -420,5 +420,10 @@ Future<void> _clearPersonalizationData(BuildContext context) async {
         ),
       ],
     );
+  }
+
+  String _capitalizeFirst(String text) {
+    if (text.isEmpty) return text;
+    return text[0].toUpperCase() + text.substring(1);
   }
 }
