@@ -117,8 +117,8 @@ class _WalkthroughScreenState extends State<WalkthroughScreen> {
           ),
           content: const Text(
             'What type of guidance would you like?\n\n'
-            '• In-depth: Detailed step-by-step instructions\n'
-            '• Basic: Quick summaries and essentials',
+            '\u2022 In-depth: Detailed step-by-step instructions\n'
+            '\u2022 Basic: Quick summaries and essentials',
             style: TextStyle(fontSize: 15),
           ),
           actions: [
