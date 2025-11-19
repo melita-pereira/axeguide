@@ -202,7 +202,7 @@ class _HomeScreenState extends State<HomeScreen> {
           return;
         }
       } catch (e) {
-        // Failed to launch map
+        debugPrint('Error launching map: $e');
       }
 
       if (!mounted) return;
