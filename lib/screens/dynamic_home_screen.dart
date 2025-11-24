@@ -497,7 +497,6 @@ class _DynamicHomeScreenState extends State<DynamicHomeScreen> {
                   final norm = normalizeLocation(loc);
                   await UserBoxHelper.setUserLocation(norm);
                   await HiveService.clearCacheForLocation(norm);
-                  if (!mounted) return;
                   if (!context.mounted) return;
                   Navigator.pop(ctx);
                   setState(() {
@@ -716,9 +715,7 @@ class _DynamicHomeScreenState extends State<DynamicHomeScreen> {
             return Wrap(
               spacing: spacing,
               runSpacing: spacing,
-              children: items.asMap().entries.map<Widget>((entry) {
-                final index = entry.key;
-                final loc = entry.value;
+              children: items.map<Widget>((loc) {
                 final name = loc['name'] ?? 'Unknown';
                 final description = loc['description'] ?? '';
                 final town = loc['town'] ?? '';

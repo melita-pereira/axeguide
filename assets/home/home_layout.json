@@ -1,13 +1,9 @@
 {
     "acadia": {
         "title": "Acadia University",
-        "exploreEnabled": true,
-
         "sections": [
             {
-                "id": "essentials",
                 "title": "Campus Essentials",
-                "icon": "school",
                 "items": [
                     {
                         "label": "Academic Calendar",
@@ -29,9 +25,7 @@
                 ]
             },
             {
-                "id": "campus_buildings",
                 "title": "Campus Buildings",
-                "icon": "location_city",
                 "source": "supabase.locations",
                 "filter": {
                     "area_tag": "acadia",
@@ -39,23 +33,17 @@
                 }
             },
             {
-                "id": "instagram",
                 "title": "Instagram Accounts",
-                "icon": "instagram",
                 "source": "supabase.instagram_accounts"
             }
         ]
     },
     "new_minas": {
         "title": "New Minas",
-        "exploreEnabled": true,
-
         "sections": [
             {
-                "id": "essentials",
                 "title": "New Minas Essentials",
                 "source": "supabase.locations",
-                "icon": "store",
                 "filter": {
                     "area_tag": "new_minas",
                     "category_name": ["Grocery", "Pharmacy", "Electronics", "SIM", "Shopping"]
@@ -65,14 +53,10 @@
     },
     "wolfville": {
         "title": "Wolfville",
-        "exploreEnabled": true,
-
         "sections": [
             {
-                "id": "wolfville_essentials",
                 "title": "Explore Wolfville",
                 "source": "supabase.locations",
-                "icon": "shopping_bag",
                 "filter": {
                     "area_tag": "wolfville",
                     "category_name": ["Grocery", "SIM", "Transport", "Banking", "Pharmacy"]
@@ -82,14 +66,10 @@
     },
     "kentville": {
         "title": "Kentville",
-        "exploreEnabled": true,
-
         "sections": [
             {
-                "id": "kentville_essentials",
                 "title": "Kentville Essentials",
                 "source": "supabase.locations",
-                "icon": "local_hospital",
                 "filter": {
                     "area_tag": "kentville",
                     "category_name": ["Government", "Medical", "Essential Services"]
@@ -99,14 +79,10 @@
     },
     "halifax_airport": {
         "title": "Halifax Stanfield International Airport",
-        "exploreEnabled": false,
-
         "sections": [
             {
-                "id": "airport_services",
                 "title": "Airport Services",
                 "source": "supabase.locations",
-                "icon": "flight",
                 "filter": {
                     "area_tag": "airport",
                     "category_name": ["SIM", "Assistance", "Transportation", "Food", "Shopping"]
@@ -116,14 +92,10 @@
     },
     "halifax": {
         "title": "Halifax",
-        "exploreEnabled": true,
-
         "sections": [
             {
-                "id": "halifax_essentials",
                 "title": "Halifax Essentials",
                 "source": "supabase.locations",
-                "icon": "location_city",
                 "filter": {
                     "area_tag": "halifax",
                     "category_name": ["Grocery", "Pharmacy", "SIM", "Transportation", "Banking"]
