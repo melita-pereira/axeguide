@@ -24,20 +24,20 @@ class HiveService {
     return Map<String, dynamic>.from(raw);
   }
 
-  static Future<void> saveLocations(List<dynamic> locations, String location) async {
+  static Future<void> saveLocations(List<Map<String, dynamic>> locations, String location) async {
     final key = location.toLowerCase();
     await cache.put(_dataKey(key), locations);
     await cache.put(_timestampKey(key), DateTime.now().toIso8601String());
   }
 
-  static List<dynamic>? getCachedLocationsFor(String location) {
+  static List<Map<String, dynamic>>? getCachedLocationsFor(String location) {
     final key = location.toLowerCase();
 
     final data = cache.get(_dataKey(key));
     if (data is! List) {
       return null;
     }
-    return data.cast();
+    return List<Map<String, dynamic>>.from(data);
   }
 
   static bool isCacheStale(String location, {Duration maxAge = const Duration(hours: 1)}) {

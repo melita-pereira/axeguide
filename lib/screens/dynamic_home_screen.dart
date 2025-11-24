@@ -136,7 +136,7 @@ class _DynamicHomeScreenState extends State<DynamicHomeScreen> {
           }
           
           // Apply parent_id filter
-          if (parentId != null) {
+          if (filter.containsKey('parent_id')) {
             if (parentId == null) {
               query = query.isFilter('parent_id', null);
             } else {
@@ -553,7 +553,7 @@ class _DynamicHomeScreenState extends State<DynamicHomeScreen> {
                 child: Padding(
                   padding: const EdgeInsets.all(24),
                   child: Text(
-                    "No layout found for '$userLocation'. \nCheck home_layout.json,",
+                    "No layout found for '$userLocation'.\nCheck home_layout.json.",
                     textAlign: TextAlign.center,
                     style: TextStyle(color: Colors.grey.shade700),
                   ),
@@ -645,7 +645,7 @@ class _DynamicHomeScreenState extends State<DynamicHomeScreen> {
 
   Widget _buildLinksSection(String title, Map<String, dynamic> section) {
     final links =
-        (section['links'] as List?)?.cast<Map<String, dynamic>>() ?? [];
+        (section['items'] as List?)?.cast<Map<String, dynamic>>() ?? [];
 
     return _sectionCard(
       title: title,
@@ -711,20 +711,7 @@ class _DynamicHomeScreenState extends State<DynamicHomeScreen> {
             final crossAxisCount = screenWidth > 1200 ? 4 : (screenWidth > 600 ? 3 : 2);
             final spacing = 12.0;
             final cardWidth = (constraints.maxWidth - (spacing * (crossAxisCount - 1))) / crossAxisCount;
-            
-            // Calculate card heights dynamically
-            final cardHeights = <double>[];
-            for (int i = 0; i < items.length; i++) {
-              // Fixed height for all cards
-              cardHeights.add(200.0);
-            }
-            
-            // Find max height per row
-            final rowMaxHeights = <double>[];
-            for (int i = 0; i < cardHeights.length; i += crossAxisCount) {
-              final rowHeights = cardHeights.skip(i).take(crossAxisCount);
-              rowMaxHeights.add(rowHeights.isEmpty ? 0 : rowHeights.reduce((a, b) => a > b ? a : b));
-            }
+            const cardHeight = 200.0;
             
             return Wrap(
               spacing: spacing,
@@ -736,14 +723,10 @@ class _DynamicHomeScreenState extends State<DynamicHomeScreen> {
                 final description = loc['description'] ?? '';
                 final town = loc['town'] ?? '';
                 final hours = loc['hours'] ?? '';
-                
-                // Get max height for this row
-                final rowIndex = index ~/ crossAxisCount;
-                final maxHeight = rowMaxHeights[rowIndex];
 
                 return Container(
                   width: cardWidth,
-                  height: maxHeight,
+                  height: cardHeight,
                   decoration: BoxDecoration(
                     color: Colors.white,
                     border: Border.all(
