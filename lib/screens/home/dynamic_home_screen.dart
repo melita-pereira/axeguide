@@ -27,23 +27,24 @@ class _DynamicHomeScreenState extends State<DynamicHomeScreen> {
   final Map<String, List<Map<String, dynamic>>> listData = {};
   final Map<String, bool> listLoading = {};
 
-  @override
-  void initState() {
-    super.initState();
-    _initialize();
-  }
 
   String normalizeLocation(String location) {
     final lower = location.toLowerCase();
     if (lower.contains('acadia')) return 'acadia';
     if (lower.contains('airport')) return 'halifax_airport';
-    if (lower.contains('new minas') || lower.contains('newminas')) {
-      return 'new_minas';
-    }
+    if (lower.contains('new minas') || lower.contains('newminas')) return 'new_minas';
     if (lower.contains('wolfville')) return 'wolfville';
     if (lower.contains('kentville')) return 'kentville';
     if (lower.contains('halifax')) return 'halifax';
     return lower.replaceAll(' ', '_');
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _initialize();
+    });
   }
 
   Future<void> _initialize() async {
@@ -121,22 +122,24 @@ class _DynamicHomeScreenState extends State<DynamicHomeScreen> {
           final areaTag = filter['area_tag'] as String?;
           final categoryNames = filter['category_name'];
           final parentId = filter['parent_id'];
-          
+          final categoryId = filter['category_id'] as int?;
+
           // Handle parent_id null check
           final parentIdValue = filter.containsKey('parent_id') ? parentId as int? : null;
-          
+
           // Convert category names to list
           final categoryList = categoryNames != null
               ? (categoryNames is List 
                   ? categoryNames.cast<String>() 
                   : [categoryNames.toString()])
               : null;
-          
+
           // Use optimized service method with all filters
           results = await _sb.fetchLocationsByFilters(
             areaTag: areaTag,
             categoryNames: categoryList,
             parentId: parentIdValue,
+            categoryId: categoryId,
           );
         } else {
           // No filter, use area tags based on current location
@@ -642,262 +645,287 @@ class _DynamicHomeScreenState extends State<DynamicHomeScreen> {
 
     // Locations list UI
     if (source == 'supabase.locations') {
-      return _sectionCard(
-        title: title,
-        child: LayoutBuilder(
+      // Show More logic for Acadia locations only
+      int initialLimit = 4;
+      final ValueNotifier<bool> showAllNotifier = ValueNotifier(false);
+      bool isAcadiaSection = (userLocation == 'acadia' && title.toLowerCase().contains('campus'));
+      Widget buildLocations(List locationsToShow) {
+        return LayoutBuilder(
           builder: (context, constraints) {
-            // Responsive grid: 2 columns on mobile, 3-4 on tablet/desktop
             final screenWidth = MediaQuery.of(context).size.width;
             final crossAxisCount = screenWidth > 1200 ? 4 : (screenWidth > 600 ? 3 : 2);
             final spacing = 12.0;
             final cardWidth = (constraints.maxWidth - (spacing * (crossAxisCount - 1))) / crossAxisCount;
             const cardHeight = 200.0;
-            
-            return Wrap(
-              spacing: spacing,
-              runSpacing: spacing,
-              children: items.map<Widget>((loc) {
-                final name = loc['name'] ?? 'Unknown';
-                final description = loc['description'] ?? '';
-                final town = loc['town'] ?? '';
-                final hours = loc['hours'] ?? '';
-
-                return Container(
-                  width: cardWidth,
-                  height: cardHeight,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    border: Border.all(
-                      color: Colors.grey.shade200,
-                      width: 1.5,
-                    ),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(16),
-                      onTap: () => _showLocationDetails(loc),
-                      child: Padding(
-                        padding: const EdgeInsets.all(14),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // Icon and map button row
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Wrap(
+                  spacing: spacing,
+                  runSpacing: spacing,
+                  children: locationsToShow.map<Widget>((loc) {
+                    final name = loc['name'] ?? 'Unknown';
+                    final description = loc['description'] ?? '';
+                    final town = loc['town'] ?? '';
+                    final hours = loc['hours'] ?? '';
+                    return Container(
+                      width: cardWidth,
+                      height: cardHeight,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        border: Border.all(
+                          color: Colors.grey.shade200,
+                          width: 1.5,
+                        ),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(16),
+                          onTap: () => _showLocationDetails(loc),
+                          child: Padding(
+                            padding: const EdgeInsets.all(14),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Container(
-                                  padding: const EdgeInsets.all(8),
-                                  decoration: BoxDecoration(
-                                    gradient: LinearGradient(
-                                      colors: [
-                                        const Color(0xFF013A6E).withValues(alpha: 0.15),
-                                        const Color(0xFF013A6E).withValues(alpha: 0.08),
-                                      ],
-                                      begin: Alignment.topLeft,
-                                      end: Alignment.bottomRight,
-                                    ),
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  child: const Icon(
-                                    Icons.place_rounded,
-                                    color: Color(0xFF013A6E),
-                                    size: 20,
-                                  ),
-                                ),
-                                Container(
-                                  padding: const EdgeInsets.all(6),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFF013A6E).withValues(alpha: 0.06),
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: const Icon(
-                                    Icons.info_outline,
-                                    color: Color(0xFF013A6E),
-                                    size: 16,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 10),
-                            // Name
-                            Text(
-                              name,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w700,
-                                fontSize: 14,
-                                color: Color(0xFF1A202C),
-                                height: 1.3,
-                              ),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            if (description.isNotEmpty) ...[
-                              const SizedBox(height: 6),
-                              // Description - 3 lines max
-                              Text(
-                                description,
-                                style: TextStyle(
-                                  fontSize: 11.5,
-                                  color: Colors.grey.shade600,
-                                  height: 1.4,
-                                ),
-                                maxLines: 3,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ],
-                            const Spacer(),
-                            // Tags at bottom
-                            if (town.isNotEmpty || hours.isNotEmpty)
-                              SingleChildScrollView(
-                                scrollDirection: Axis.horizontal,
-                                child: Row(
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
-                                    if (town.isNotEmpty)
-                                      Container(
-                                        constraints: BoxConstraints(
-                                          maxWidth: cardWidth * 0.5,
-                                        ),
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 8,
-                                          vertical: 4,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: const Color(0xFF013A6E).withValues(alpha: 0.08),
-                                          borderRadius: BorderRadius.circular(6),
-                                        ),
-                                        child: Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Icon(
-                                              Icons.location_city_rounded,
-                                              size: 10,
-                                              color: const Color(0xFF013A6E).withValues(alpha: 0.8),
-                                            ),
-                                            const SizedBox(width: 4),
-                                            Flexible(
-                                              child: Text(
-                                                town,
-                                                style: TextStyle(
-                                                  fontSize: 10,
-                                                  fontWeight: FontWeight.w600,
-                                                  color: const Color(0xFF013A6E).withValues(alpha: 0.9),
-                                                ),
-                                                maxLines: 1,
-                                                overflow: TextOverflow.ellipsis,
-                                              ),
-                                            ),
+                                    Container(
+                                      padding: const EdgeInsets.all(8),
+                                      decoration: BoxDecoration(
+                                        gradient: LinearGradient(
+                                          colors: [
+                                            const Color(0xFF013A6E).withValues(alpha: 0.15),
+                                            const Color(0xFF013A6E).withValues(alpha: 0.08),
                                           ],
+                                          begin: Alignment.topLeft,
+                                          end: Alignment.bottomRight,
                                         ),
+                                        borderRadius: BorderRadius.circular(10),
                                       ),
-                                    if (town.isNotEmpty && hours.isNotEmpty)
-                                      const SizedBox(width: 6),
-                                    if (hours.isNotEmpty)
-                                      Container(
-                                        constraints: BoxConstraints(
-                                          maxWidth: cardWidth * 0.6,
-                                        ),
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 8,
-                                          vertical: 4,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: Colors.green.withValues(alpha: 0.1),
-                                          borderRadius: BorderRadius.circular(6),
-                                        ),
-                                        child: Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Icon(
-                                              Icons.access_time_rounded,
-                                              size: 10,
-                                              color: Colors.green.shade700,
-                                            ),
-                                            const SizedBox(width: 4),
-                                            Flexible(
-                                              child: LayoutBuilder(
-                                                builder: (context, constraints) {
-                                                  final style = TextStyle(
-                                                    fontSize: 10,
-                                                    fontWeight: FontWeight.w600,
-                                                    color: Colors.green.shade800,
-                                                  );
-                                                  
-                                                  // If it fits in 2 lines, no truncation needed
-                                                  final check2Lines = TextPainter(
-                                                    text: TextSpan(text: hours, style: style),
-                                                    maxLines: 2,
-                                                    textDirection: TextDirection.ltr,
-                                                  )..layout(maxWidth: constraints.maxWidth);
-                                                  
-                                                  if (!check2Lines.didExceedMaxLines) {
-                                                    return Text(hours, style: style, maxLines: 2);
-                                                  }
-                                                  
-                                                  // Find position that fits in 2 lines with ellipsis
-                                                  final ellipsisText = '...';
-                                                  var endIndex = hours.length - 1;
-                                                  
-                                                  // Decrease in chunks first
-                                                  while (endIndex > 10) {
-                                                    final testText = hours.substring(0, endIndex).trimRight() + ellipsisText;
-                                                    final testPainter = TextPainter(
-                                                      text: TextSpan(text: testText, style: style),
-                                                      maxLines: 2,
-                                                      textDirection: TextDirection.ltr,
-                                                    )..layout(maxWidth: constraints.maxWidth);
-                                                    
-                                                    if (!testPainter.didExceedMaxLines) break;
-                                                    endIndex -= 3;
-                                                  }
-                                                  
-                                                  // Fine-tune character by character
-                                                  while (endIndex > 0) {
-                                                    final testText = hours.substring(0, endIndex).trimRight() + ellipsisText;
-                                                    final testPainter = TextPainter(
-                                                      text: TextSpan(text: testText, style: style),
-                                                      maxLines: 2,
-                                                      textDirection: TextDirection.ltr,
-                                                    )..layout(maxWidth: constraints.maxWidth);
-                                                    
-                                                    if (!testPainter.didExceedMaxLines) {
-                                                      // Back up a few more chars to ensure ellipsis is visible
-                                                      final finalIndex = (endIndex - 3).clamp(0, endIndex);
-                                                      final finalText = hours.substring(0, finalIndex).trimRight() + ellipsisText;
-                                                      return Text(finalText, style: style, maxLines: 2);
-                                                    }
-                                                    endIndex--;
-                                                  }
-                                                  
-                                                  return Text(ellipsisText, style: style);
-                                                },
-                                              ),
-                                            ),
-                                          ],
-                                        ),
+                                      child: const Icon(
+                                        Icons.place_rounded,
+                                        color: Color(0xFF013A6E),
+                                        size: 20,
                                       ),
+                                    ),
+                                    Container(
+                                      padding: const EdgeInsets.all(6),
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFF013A6E).withValues(alpha: 0.06),
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: const Icon(
+                                        Icons.info_outline,
+                                        color: Color(0xFF013A6E),
+                                        size: 16,
+                                      ),
+                                    ),
                                   ],
                                 ),
-                              ),
-                          ],
+                                const SizedBox(height: 10),
+                                Text(
+                                  name,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 14,
+                                    color: Color(0xFF1A202C),
+                                    height: 1.3,
+                                  ),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                if (description.isNotEmpty) ...[
+                                  const SizedBox(height: 6),
+                                  Text(
+                                    description,
+                                    style: TextStyle(
+                                      fontSize: 11.5,
+                                      color: Colors.grey.shade600,
+                                      height: 1.4,
+                                    ),
+                                    maxLines: 3,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ],
+                                const Spacer(),
+                                if (town.isNotEmpty || hours.isNotEmpty)
+                                  SingleChildScrollView(
+                                    scrollDirection: Axis.horizontal,
+                                    child: Row(
+                                      children: [
+                                        if (town.isNotEmpty)
+                                          Container(
+                                            constraints: BoxConstraints(
+                                              maxWidth: cardWidth * 0.5,
+                                            ),
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 8,
+                                              vertical: 4,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: const Color(0xFF013A6E).withValues(alpha: 0.08),
+                                              borderRadius: BorderRadius.circular(6),
+                                            ),
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                Icon(
+                                                  Icons.location_city_rounded,
+                                                  size: 10,
+                                                  color: const Color(0xFF013A6E).withValues(alpha: 0.8),
+                                                ),
+                                                const SizedBox(width: 4),
+                                                Flexible(
+                                                  child: Text(
+                                                    town,
+                                                    style: TextStyle(
+                                                      fontSize: 10,
+                                                      fontWeight: FontWeight.w600,
+                                                      color: const Color(0xFF013A6E).withValues(alpha: 0.9),
+                                                    ),
+                                                    maxLines: 1,
+                                                    overflow: TextOverflow.ellipsis,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        if (town.isNotEmpty && hours.isNotEmpty)
+                                          const SizedBox(width: 6),
+                                        if (hours.isNotEmpty)
+                                          Container(
+                                            constraints: BoxConstraints(
+                                              maxWidth: cardWidth * 0.6,
+                                            ),
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 8,
+                                              vertical: 4,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: Colors.green.withValues(alpha: 0.1),
+                                              borderRadius: BorderRadius.circular(6),
+                                            ),
+                                            child: Row(
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                Icon(
+                                                  Icons.access_time_rounded,
+                                                  size: 10,
+                                                  color: Colors.green.shade700,
+                                                ),
+                                                const SizedBox(width: 4),
+                                                Flexible(
+                                                  child: LayoutBuilder(
+                                                    builder: (context, constraints) {
+                                                      final style = TextStyle(
+                                                        fontSize: 10,
+                                                        fontWeight: FontWeight.w600,
+                                                        color: Colors.green.shade800,
+                                                      );
+                                                      final check2Lines = TextPainter(
+                                                        text: TextSpan(text: hours, style: style),
+                                                        maxLines: 2,
+                                                        textDirection: TextDirection.ltr,
+                                                      )..layout(maxWidth: constraints.maxWidth);
+                                                      if (!check2Lines.didExceedMaxLines) {
+                                                        return Text(hours, style: style, maxLines: 2);
+                                                      }
+                                                      final ellipsisText = '...';
+                                                      var endIndex = hours.length - 1;
+                                                      while (endIndex > 10) {
+                                                        final testText = hours.substring(0, endIndex).trimRight() + ellipsisText;
+                                                        final testPainter = TextPainter(
+                                                          text: TextSpan(text: testText, style: style),
+                                                          maxLines: 2,
+                                                          textDirection: TextDirection.ltr,
+                                                        )..layout(maxWidth: constraints.maxWidth);
+                                                        if (!testPainter.didExceedMaxLines) break;
+                                                        endIndex -= 3;
+                                                      }
+                                                      while (endIndex > 0) {
+                                                        final testText = hours.substring(0, endIndex).trimRight() + ellipsisText;
+                                                        final testPainter = TextPainter(
+                                                          text: TextSpan(text: testText, style: style),
+                                                          maxLines: 2,
+                                                          textDirection: TextDirection.ltr,
+                                                        )..layout(maxWidth: constraints.maxWidth);
+                                                        if (!testPainter.didExceedMaxLines) {
+                                                          final finalIndex = (endIndex - 3).clamp(0, endIndex);
+                                                          final finalText = hours.substring(0, finalIndex).trimRight() + ellipsisText;
+                                                          return Text(finalText, style: style, maxLines: 2);
+                                                        }
+                                                        endIndex--;
+                                                      }
+                                                      return Text(ellipsisText, style: style);
+                                                    },
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                      ],
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
                         ),
                       ),
-                    ),
-                  ),
-                );
-              }).toList(),
+                    );
+                  }).toList(),
+                ),
+              ),
             );
           },
-        ),
-      );
+        );
+      }
+      if (isAcadiaSection && items.length > initialLimit) {
+        return _sectionCard(
+          title: title,
+          child: ValueListenableBuilder<bool>(
+            valueListenable: showAllNotifier,
+            builder: (context, showAll, _) {
+              final locationsToShow = showAll ? items : items.take(initialLimit).toList();
+              return Column(
+                children: [
+                  buildLocations(locationsToShow),
+                  if (!showAll)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF013A6E),
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        onPressed: () => showAllNotifier.value = true,
+                        child: const Text('Show More'),
+                      ),
+                    ),
+                ],
+              );
+            },
+          ),
+        );
+      } else {
+        return _sectionCard(
+          title: title,
+          child: buildLocations(items),
+        );
+      }
     }
 
     if (source == 'supabase.instagram_accounts') {
-      return _sectionCard(
-        title: title,
-        child: Column(
-          children: items.map((acc) {
+      int initialLimit = 4;
+      final ValueNotifier<bool> showAllNotifier = ValueNotifier(false);
+      Widget buildAccounts(List accountsToShow) {
+        return Column(
+          children: accountsToShow.map((acc) {
             return ListTile(
               leading: const Icon(
                 Icons.camera_alt_outlined,
@@ -921,11 +949,50 @@ class _DynamicHomeScreenState extends State<DynamicHomeScreen> {
               },
             );
           }).toList(),
-        ),
-      );
+        );
+      }
+      if (items.length > initialLimit) {
+        return _sectionCard(
+          title: title,
+          child: ValueListenableBuilder<bool>(
+            valueListenable: showAllNotifier,
+            builder: (context, showAll, _) {
+              final accountsToShow = showAll ? items : items.take(initialLimit).toList();
+              return Column(
+                children: [
+                  buildAccounts(accountsToShow),
+                  if (!showAll)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF013A6E),
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        onPressed: () => showAllNotifier.value = true,
+                        child: const Text('Show More'),
+                      ),
+                    ),
+                ],
+              );
+            },
+          ),
+        );
+      } else {
+        return _sectionCard(
+          title: title,
+          child: buildAccounts(items),
+        );
+      }
     }
 
-    return _sectionCard(title: title, child: const SizedBox.shrink());
+    return _sectionCard(
+      title: title,
+      child: const SizedBox.shrink(),
+    );
   }
 
   Widget _sectionCard({required String title, required Widget child}) {
