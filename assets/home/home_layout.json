@@ -29,6 +29,7 @@
                 "source": "supabase.locations",
                 "filter": {
                     "area_tag": "acadia",
+                    "category_id": 1,
                     "parent_id": null
                 }
             },

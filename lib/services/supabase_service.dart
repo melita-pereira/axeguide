@@ -1,7 +1,10 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SupabaseService {
-  final SupabaseClient client = Supabase.instance.client;
+  final dynamic client;
+
+  SupabaseService({dynamic client})
+      : client = client ?? Supabase.instance.client;
 
   Future<List<Map<String, dynamic>>> fetchLocationsByTags(List<String> filters) async {
     if (filters.isEmpty) {
@@ -30,6 +33,7 @@ class SupabaseService {
     String? areaTag,
     List<String>? categoryNames,
     int? parentId,
+    int? categoryId,
   }) async {
     var query = client
         .from('locations')
@@ -47,6 +51,18 @@ class SupabaseService {
 
     var response = await query.order('name');
     var results = List<Map<String, dynamic>>.from(response);
+
+    // If category_id is provided, filter using location_categories join
+    if (categoryId != null) {
+      final locationCategoriesResponse = await client
+          .from('location_categories')
+          .select('location_id')
+          .eq('category_id', categoryId);
+      final locationIds = locationCategoriesResponse
+          .map((item) => item['location_id'] as int)
+          .toSet();
+      return results.where((loc) => locationIds.contains(loc['id'])).toList();
+    }
 
     // If no category filter, return all results
     if (categoryNames == null || categoryNames.isEmpty) {

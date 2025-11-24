@@ -124,7 +124,7 @@ void main() {
       ];
       await HiveService.saveLocations(locations, 'Halifax');
 
-      final cached = HiveService.getCachedLocationsFor('Halifax') as List<Map<String, dynamic>>?;
+      final cached = HiveService.getCachedLocationsFor('Halifax');
       expect(cached, isNotNull);
       expect(cached!.first['name'], 'Loc1');
       expect(cached[0]['id'], 1);
@@ -136,7 +136,7 @@ void main() {
       await HiveService.saveLocations([{'name': 'Test'}], 'Halifax');
       final after = DateTime.now();
 
-      final fetchedAtStr = Hive.box('locationCache').get('fetchedAt') as String?;
+      final fetchedAtStr = Hive.box('locationCache').get('halifax_timestamp') as String?;
       expect(fetchedAtStr, isNotNull);
 
       final fetchedAt = DateTime.parse(fetchedAtStr!);
@@ -169,7 +169,7 @@ void main() {
 
       // Simulate old timestamp
       final oldTime = DateTime.now().subtract(const Duration(hours: 2));
-      await Hive.box('locationCache').put('fetchedAt', oldTime.toIso8601String());
+      await Hive.box('locationCache').put('halifax_timestamp', oldTime.toIso8601String());
 
       final isStale = HiveService.isCacheStale('Halifax', maxAge: const Duration(hours: 1));
       expect(isStale, isTrue);
@@ -181,7 +181,7 @@ void main() {
       // Simulate an older fetchedAt so we can test different maxAge values.
       // Make the cache ~45 minutes old: stale for 30 minutes, fresh for 2 hours.
       final simulatedOldTime = DateTime.now().subtract(const Duration(minutes: 45));
-      await Hive.box('locationCache').put('fetchedAt', simulatedOldTime.toIso8601String());
+      await Hive.box('locationCache').put('halifax_timestamp', simulatedOldTime.toIso8601String());
 
       final isStaleFor30Min = HiveService.isCacheStale('Halifax', maxAge: const Duration(minutes: 30));
       final isStaleFor2Hours = HiveService.isCacheStale('Halifax', maxAge: const Duration(hours: 2));
@@ -191,13 +191,13 @@ void main() {
     });
 
     test('isCacheStale() handles invalid timestamp gracefully', () async {
-      await Hive.box('locationCache').put('fetchedAt', 'invalid-date');
+      await Hive.box('locationCache').put('halifax_timestamp', 'invalid-date');
       final isStale = HiveService.isCacheStale('Halifax');
       expect(isStale, isTrue);
     });
 
     test('isCacheStale() returns true when fetchedAt is empty string', () async {
-      await Hive.box('locationCache').put('fetchedAt', '');
+      await Hive.box('locationCache').put('halifax_timestamp', '');
       final isStale = HiveService.isCacheStale('Halifax');
       expect(isStale, isTrue);
     });
