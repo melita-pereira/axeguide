@@ -5,7 +5,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:axeguide/utils/user_box_helper.dart';
 
 import 'screens/welcome_screen.dart';
-import 'screens/home_screen.dart';
+import 'screens/dynamic_home_screen.dart';
 import 'screens/walkthrough/walkthrough_screen.dart';
 
 Future<void> main() async {
@@ -31,13 +31,13 @@ Future<void> main() async {
       startScreen = const WelcomeScreen();
     } else if (UserBoxHelper.skippedPersonalization) {
       // User chose to skip personalization, never show walkthrough
-      startScreen = const HomeScreen();
+      startScreen = const DynamicHomeScreen();
     } else if (UserBoxHelper.hasWalkthroughCheckpoint) {
       // Checkpoint exists = resume walkthrough
       startScreen = const WalkthroughScreen();
     } else {
       // No checkpoint = walkthrough completed, go to home
-      startScreen = const HomeScreen();
+      startScreen = const DynamicHomeScreen();
     }
   } catch (e) {
     startScreen = const WelcomeScreen();
@@ -178,7 +178,7 @@ class MyApp extends StatelessWidget {
       ),
       home: startScreen,
       routes: {
-        "/genericHome": (context) => const HomeScreen(),
+        "/genericHome": (context) => const DynamicHomeScreen(),
       },
     );
   }

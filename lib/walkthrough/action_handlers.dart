@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:axeguide/utils/user_box_helper.dart';
-import 'package:axeguide/screens/home_screen.dart';
+import 'package:axeguide/screens/dynamic_home_screen.dart';
 import 'package:axeguide/screens/walkthrough/guidance_screen.dart';
 
 typedef WTActionHandler = Future<void> Function(
@@ -194,7 +194,7 @@ class WalkthroughActions {
         if (!context.mounted) return;
         Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (_) => const HomeScreen()),
+          MaterialPageRoute(builder: (_) => const DynamicHomeScreen()),
           (route) => false,
         );
 
@@ -338,7 +338,7 @@ class WalkthroughActions {
         if (!context.mounted) return;
         Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (_) => const HomeScreen()),
+          MaterialPageRoute(builder: (_) => const DynamicHomeScreen()),
           (route) => false,
         );
 
@@ -389,7 +389,7 @@ class WalkthroughActions {
         if (!context.mounted) return;
         Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (_) => const HomeScreen()),
+          MaterialPageRoute(builder: (_) => const DynamicHomeScreen()),
           (route) => false,
         );
 
@@ -421,7 +421,7 @@ class WalkthroughActions {
         if (!context.mounted) return;
         Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (_) => const HomeScreen()),
+          MaterialPageRoute(builder: (_) => const DynamicHomeScreen()),
           (route) => false,
         );
 
@@ -433,7 +433,7 @@ class WalkthroughActions {
         if (!context.mounted) return;
         Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (_) => const HomeScreen()),
+          MaterialPageRoute(builder: (_) => const DynamicHomeScreen()),
           (route) => false,
         );
 
@@ -465,7 +465,7 @@ class WalkthroughActions {
         if (!context.mounted) return;
         Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (_) => const HomeScreen()),
+          MaterialPageRoute(builder: (_) => const DynamicHomeScreen()),
           (route) => false,
         );
 
@@ -626,7 +626,7 @@ class WalkthroughActions {
         if (!context.mounted) return;
         Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (_) => const HomeScreen()),
+          MaterialPageRoute(builder: (_) => const DynamicHomeScreen()),
           (route) => false,
         );
 
@@ -694,7 +694,7 @@ class WalkthroughActions {
     // Navigate to home screen
     Navigator.pushAndRemoveUntil(
       context,
-      MaterialPageRoute(builder: (_) => const HomeScreen()),
+      MaterialPageRoute(builder: (_) => const DynamicHomeScreen()),
       (route) => false,
     );
   }

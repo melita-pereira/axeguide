@@ -2,7 +2,7 @@ import 'package:axeguide/walkthrough/action_handlers.dart';
 import 'package:flutter/material.dart';
 import 'package:axeguide/walkthrough/walkthrough_manager.dart';
 import 'package:axeguide/screens/welcome_screen.dart';
-import 'package:axeguide/screens/home_screen.dart';
+import 'package:axeguide/screens/dynamic_home_screen.dart';
 import 'package:axeguide/utils/user_box_helper.dart';
 
 class WalkthroughScreen extends StatefulWidget {
@@ -148,7 +148,7 @@ class _WalkthroughScreenState extends State<WalkthroughScreen> {
       if (!mounted) return;
       Navigator.pushAndRemoveUntil(
         context,
-        MaterialPageRoute(builder: (_) => const HomeScreen()),
+        MaterialPageRoute(builder: (_) => const DynamicHomeScreen()),
         (route) => false,
       );
     }
