@@ -5,7 +5,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:axeguide/utils/user_box_helper.dart';
 
 import 'screens/welcome_screen.dart';
-import 'screens/dynamic_home_screen.dart';
+import 'screens/home/dynamic_home_screen.dart';
 import 'screens/walkthrough/walkthrough_screen.dart';
 
 Future<void> main() async {

@@ -2,7 +2,7 @@ import 'package:axeguide/walkthrough/action_handlers.dart';
 import 'package:flutter/material.dart';
 import 'package:axeguide/walkthrough/walkthrough_manager.dart';
 import 'package:axeguide/screens/welcome_screen.dart';
-import 'package:axeguide/screens/dynamic_home_screen.dart';
+import 'package:axeguide/screens/home/dynamic_home_screen.dart';
 import 'package:axeguide/utils/user_box_helper.dart';
 
 class WalkthroughScreen extends StatefulWidget {

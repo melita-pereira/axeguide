@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:axeguide/utils/user_box_helper.dart';
-import 'package:axeguide/screens/dynamic_home_screen.dart';
+import 'package:axeguide/screens/home/dynamic_home_screen.dart';
 import 'package:axeguide/screens/walkthrough/guidance_screen.dart';
 
 typedef WTActionHandler = Future<void> Function(

@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:axeguide/utils/user_box_helper.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'settings_screen.dart';
-import 'location_selection_screen.dart';
+import '../settings_screen.dart';
+import '../location_selection_screen.dart';
 import 'package:axeguide/services/hive_service.dart';
 import 'dart:convert';
 import 'package:flutter/services.dart' show rootBundle;
@@ -113,7 +113,6 @@ class _DynamicHomeScreenState extends State<DynamicHomeScreen> {
     try {
       if (source == 'supabase.locations') {
         final filter = section['filter'] as Map<String, dynamic>?;
-        debugPrint("[DynamicHome] Filter: $filter");
         
         List<Map<String, dynamic>> results;
         
@@ -123,87 +122,29 @@ class _DynamicHomeScreenState extends State<DynamicHomeScreen> {
           final categoryNames = filter['category_name'];
           final parentId = filter['parent_id'];
           
-          debugPrint("[DynamicHome] areaTag: $areaTag, categoryNames: $categoryNames, parentId: $parentId");
+          // Handle parent_id null check
+          final parentIdValue = filter.containsKey('parent_id') ? parentId as int? : null;
           
-          // Build query
-          var query = _sb.client
-              .from('locations')
-              .select('id, name, area_tag, description, latitude, longitude, town, hours, map_link, image_url, parent_id, temporary_parent_id');
+          // Convert category names to list
+          final categoryList = categoryNames != null
+              ? (categoryNames is List 
+                  ? categoryNames.cast<String>() 
+                  : [categoryNames.toString()])
+              : null;
           
-          // Apply area_tag filter
-          if (areaTag != null) {
-            query = query.ilike('area_tag', '%$areaTag%');
-          }
-          
-          // Apply parent_id filter
-          if (filter.containsKey('parent_id')) {
-            if (parentId == null) {
-              query = query.isFilter('parent_id', null);
-            } else {
-              query = query.eq('parent_id', parentId);
-            }
-          }
-          
-          // Fetch initial results
-          var response = await query.order('name');
-          results = List<Map<String, dynamic>>.from(response);
-          debugPrint("[DynamicHome] Initial query results: ${results.length} locations");
-          
-          // Apply category filter if specified
-          if (categoryNames != null) {
-            final categories = categoryNames is List 
-                ? categoryNames.cast<String>() 
-                : [categoryNames.toString()];
-            
-            debugPrint("[DynamicHome] Filtering by categories: $categories");
-            
-            if (categories.isNotEmpty) {
-              // Get category IDs
-              final categoryResponse = await _sb.client
-                  .from('categories')
-                  .select('id, name')
-                  .inFilter('name', categories);
-              
-              debugPrint("[DynamicHome] Category response: $categoryResponse");
-              
-              final categoryIds = categoryResponse
-                  .map((item) => item['id'] as int)
-                  .toList();
-              
-              debugPrint("[DynamicHome] Category IDs: $categoryIds");
-              
-              if (categoryIds.isNotEmpty) {
-                // Get location IDs that have these categories
-                final locationCategoriesResponse = await _sb.client
-                    .from('location_categories')
-                    .select('location_id')
-                    .inFilter('category_id', categoryIds);
-                
-                debugPrint("[DynamicHome] Location categories response: $locationCategoriesResponse");
-                
-                final locationIds = locationCategoriesResponse
-                    .map((item) => item['location_id'] as int)
-                    .toSet();
-                
-                debugPrint("[DynamicHome] Location IDs with categories: $locationIds");
-                
-                // Filter results to only include locations with matching categories
-                results = results.where((loc) => locationIds.contains(loc['id'])).toList();
-                debugPrint("[DynamicHome] Filtered results: ${results.length} locations");
-              } else {
-                debugPrint("[DynamicHome] No categories found in DB, skipping category filter - returning all ${results.length} locations");
-                // Don't filter if categories don't exist in DB yet
-              }
-            }
-          }
+          // Use optimized service method with all filters
+          results = await _sb.fetchLocationsByFilters(
+            areaTag: areaTag,
+            categoryNames: categoryList,
+            parentId: parentIdValue,
+          );
         } else {
           // No filter, use area tags based on current location
           results = await _sb.fetchLocationsByTags([userLocation!]);
-          debugPrint("[DynamicHome] No filter, fetched ${results.length} locations for $userLocation");
         }
         
+        debugPrint("[DynamicHome] Loaded ${results.length} locations for '$sectionTitle'");
         listData[sectionTitle] = results;
-        debugPrint("[DynamicHome] Final results for $sectionTitle: ${results.length} locations");
       }
       if (source == 'supabase.instagram_accounts') {
         final insta = await _sb.fetchInstagramAccounts();
