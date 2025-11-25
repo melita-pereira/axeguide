@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:axeguide/utils/user_box_helper.dart';
-import 'home_screen.dart';
+import 'home/dynamic_home_screen.dart';
 
 class LocationSelectionScreen extends StatelessWidget {
   final String? title;
@@ -75,10 +75,10 @@ class LocationSelectionScreen extends StatelessWidget {
       );
     } else {
       // Save location and navigate to home
-      UserBoxHelper.setUserLocation(location.value);
+      UserBoxHelper.setUserLocation(location.name);
       Navigator.pushAndRemoveUntil(
         context,
-        MaterialPageRoute(builder: (_) => const HomeScreen()),
+        MaterialPageRoute(builder: (_) => const DynamicHomeScreen()),
         (route) => false,
       );
     }

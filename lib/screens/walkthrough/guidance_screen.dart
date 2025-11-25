@@ -6,6 +6,7 @@ class GuidanceScreen extends StatelessWidget {
   final List<String>? steps;
   final List<String>? images;
   final VoidCallback onComplete;
+  final VoidCallback? onOpenMap;
 
   const GuidanceScreen({
     super.key,
@@ -14,6 +15,7 @@ class GuidanceScreen extends StatelessWidget {
     this.steps,
     this.images,
     required this.onComplete,
+    this.onOpenMap,
   });
 
   @override
@@ -225,6 +227,23 @@ class GuidanceScreen extends StatelessWidget {
                   ],
                   
                   const SizedBox(height: 24),
+                  if (onOpenMap != null) ...[
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        icon: const Icon(Icons.map_outlined),
+                        label: const Text('Open in Maps App'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.green.shade700,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                          textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                        ),
+                        onPressed: onOpenMap,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                  ],
                 ],
               ),
             ),

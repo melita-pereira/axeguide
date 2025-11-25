@@ -103,4 +103,5 @@ flutter:
     - assets/images/logo.png
     - assets/walkthrough/
     - assets/walkthrough/core/
+    - assets/home/home_layout.json
     - assets/walkthrough/places/

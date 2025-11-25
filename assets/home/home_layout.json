@@ -1,0 +1,126 @@
+{
+    "acadia": {
+        "title": "Acadia University",
+        "newcomer_sections": [
+            {
+                "title": "Start Here (Newcomers)",
+                "items": [
+                    {
+                        "label": "Campus Map",
+                        "url": "https://map.acadiau.ca/"
+                    },
+                    {
+                        "label": "How to Get Your Student ID",
+                        "url": "https://www2.acadiau.ca/safety-security/access-control.html"
+                    },
+                    {
+                        "label": "Move-in / Arrival Guide",
+                        "url": "https://www2.acadiau.ca/student-life/residence-campus-life/residences-housing/move-in.html"
+                    }
+                ]
+            }
+        ],
+        "sections": [
+            {
+                "title": "Campus Essentials",
+                "items": [
+                    {
+                        "label": "Academic Calendar",
+                        "url": "https://registrar.acadiau.ca/"
+                    },
+                    {
+                        "label": "Moodle",
+                        "url": "https://moodle.acadiau.ca/"
+                    },
+                    {
+                        "label": "Student Services (COLLSS)",
+                        "url": "https://collss.acadiau.ca/student/"
+                    },
+                    {
+                        "label": "Emergency Contact",
+                        "url": "https://security.acadiau.ca/"
+
+                    }
+                ]
+            },
+            {
+                "title": "Campus Buildings",
+                "source": "supabase.locations",
+                "filter": {
+                    "area_tag": "acadia",
+                    "category_id": 1,
+                    "parent_id": null
+                }
+            },
+            {
+                "title": "Instagram Accounts",
+                "source": "supabase.instagram_accounts"
+            }
+        ]
+    },
+    "new_minas": {
+        "title": "New Minas",
+        "sections": [
+            {
+                "title": "New Minas Essentials",
+                "source": "supabase.locations",
+                "filter": {
+                    "area_tag": "new_minas",
+                    "category_name": ["Grocery", "Pharmacy", "Electronics", "SIM", "Shopping"]
+                }
+            }
+        ]
+    },
+    "wolfville": {
+        "title": "Wolfville",
+        "sections": [
+            {
+                "title": "Explore Wolfville",
+                "source": "supabase.locations",
+                "filter": {
+                    "area_tag": "wolfville",
+                    "category_name": ["Grocery", "SIM", "Transport", "Banking", "Pharmacy"]
+                }
+            }
+        ]
+    },
+    "kentville": {
+        "title": "Kentville",
+        "sections": [
+            {
+                "title": "Kentville Essentials",
+                "source": "supabase.locations",
+                "filter": {
+                    "area_tag": "kentville",
+                    "category_name": ["Government", "Medical", "Essential Services"]
+                }
+            }
+        ]
+    },
+    "halifax_airport": {
+        "title": "Halifax Stanfield International Airport",
+        "sections": [
+            {
+                "title": "Airport Services",
+                "source": "supabase.locations",
+                "filter": {
+                    "area_tag": "airport",
+                    "category_name": ["SIM", "Assistance", "Transportation", "Food", "Shopping"]
+                }
+            }
+        ]
+    },
+    "halifax": {
+        "title": "Halifax",
+        "sections": [
+            {
+                "title": "Halifax Essentials",
+                "source": "supabase.locations",
+                "filter": {
+                    "area_tag": "halifax",
+                    "category_name": ["Grocery", "Pharmacy", "SIM", "Transportation", "Banking"]
+                }
+            }
+        ]
+    }
+}

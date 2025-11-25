@@ -99,6 +99,13 @@ class UserBoxHelper {
       write('currentCampusLocation', value);
 
   static String? get destinationLocation => read<String>('destinationLocation');
+      static double? get destinationLatitude => read<double>('destinationLatitude');
+      static double? get destinationLongitude => read<double>('destinationLongitude');
+      static Future<void> setDestinationLatitude(double? value) => write('destinationLatitude', value);
+      static Future<void> setDestinationLongitude(double? value) => write('destinationLongitude', value);
+    static String? get destinationLocationMapLink => read<String>('destinationLocationMapLink');
+    static Future<void> setDestinationLocationMapLink(String? value) =>
+        write('destinationLocationMapLink', value);
   static Future<void> setDestinationLocation(String? value) =>
       write('destinationLocation', value);
 

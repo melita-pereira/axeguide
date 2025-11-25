@@ -2,7 +2,7 @@ import 'package:axeguide/walkthrough/action_handlers.dart';
 import 'package:flutter/material.dart';
 import 'package:axeguide/walkthrough/walkthrough_manager.dart';
 import 'package:axeguide/screens/welcome_screen.dart';
-import 'package:axeguide/screens/home_screen.dart';
+import 'package:axeguide/screens/home/dynamic_home_screen.dart';
 import 'package:axeguide/utils/user_box_helper.dart';
 
 class WalkthroughScreen extends StatefulWidget {
@@ -148,7 +148,7 @@ class _WalkthroughScreenState extends State<WalkthroughScreen> {
       if (!mounted) return;
       Navigator.pushAndRemoveUntil(
         context,
-        MaterialPageRoute(builder: (_) => const HomeScreen()),
+        MaterialPageRoute(builder: (_) => const DynamicHomeScreen()),
         (route) => false,
       );
     }
@@ -605,17 +605,17 @@ class _WalkthroughScreenState extends State<WalkthroughScreen> {
         const SizedBox(height: 24),
         if (selectedDropdownValue != null)
           ElevatedButton(
-            onPressed: () {
+            onPressed: () async {
               // Validate if needed
               final config = step?['dropdownConfig'] ?? {};
               final validateDifferentFrom = config['validateDifferentFrom'] as String?;
-              
+
               if (validateDifferentFrom != null) {
                 // Get the value to compare against
                 final compareValue = manager.getValue(validateDifferentFrom);
                 if (compareValue == selectedDropdownValue) {
                   // Show validation message
-                  final validationMessage = config['validationMessage'] as String? ?? 
+                  final validationMessage = config['validationMessage'] as String? ??
                       "Please select a different option";
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
@@ -628,16 +628,34 @@ class _WalkthroughScreenState extends State<WalkthroughScreen> {
                   return;
                 }
               }
-              
+
               // Store the selected value
               final storeAs = config['storeAs'] as String?;
               if (storeAs != null) {
                 manager.setValue(storeAs, selectedDropdownValue);
               }
-              
+
+              // If this is the residence dropdown, fetch lat/lng and store
+              final valueField = config['valueField'] ?? 'id';
+              final displayField = config['displayField'] ?? 'name';
+              final isResidenceDropdown = storeAs == 'user.destinationLocation' && config['source'] == 'supabase';
+              if (isResidenceDropdown) {
+                // Find the selected item in dropdownItems
+                final selectedItem = dropdownItems.firstWhere(
+                  (item) => item[valueField]?.toString() == selectedDropdownValue,
+                  orElse: () => {},
+                );
+                final lat = selectedItem['latitude'];
+                final lng = selectedItem['longitude'];
+                if (lat != null && lng != null) {
+                  await UserBoxHelper.setDestinationLatitude(lat is String ? double.tryParse(lat) : lat);
+                  await UserBoxHelper.setDestinationLongitude(lng is String ? double.tryParse(lng) : lng);
+                }
+              }
+
               // Call nextFromUI which will trigger navigation
               manager.nextFromUI(selectedDropdownValue);
-              
+
               // Reset dropdown state AFTER navigation is initiated
               // The onStepChanged callback will also reset these
               Future.microtask(() {

@@ -95,7 +95,7 @@
         "source": "supabase",
         "query": {
           "table": "locations",
-          "select": "id, name",
+          "select": "id, name, latitude, longitude",
           "category_name": "residence",
           "area_tag_contains": "acadia"
         },

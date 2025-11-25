@@ -148,7 +148,7 @@ void main() {
 
       // Simulate stale cache
       final oldTime = DateTime.now().subtract(const Duration(hours: 2));
-      await Hive.box('locationCache').put('fetchedAt', oldTime.toIso8601String());
+      await Hive.box('locationCache').put('halifax_timestamp', oldTime.toIso8601String());
 
       final isStale = HiveService.isCacheStale('Halifax');
       expect(isStale, isTrue);
@@ -190,7 +190,7 @@ void main() {
       await HiveService.saveLocations([{'name': 'Test'}], 'Halifax');
       
       final oldTime = DateTime.now().subtract(const Duration(hours: 2));
-      await Hive.box('locationCache').put('fetchedAt', oldTime.toIso8601String());
+      await Hive.box('locationCache').put('halifax_timestamp', oldTime.toIso8601String());
 
       final isStale = HiveService.isCacheStale('Halifax', maxAge: const Duration(hours: 1));
       expect(isStale, isTrue);
