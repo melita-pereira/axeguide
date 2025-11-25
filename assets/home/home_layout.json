@@ -1,6 +1,25 @@
 {
     "acadia": {
         "title": "Acadia University",
+        "newcomer_sections": [
+            {
+                "title": "Start Here (Newcomers)",
+                "items": [
+                    {
+                        "label": "Campus Map",
+                        "url": "https://map.acadiau.ca/"
+                    },
+                    {
+                        "label": "How to Get Your Student ID",
+                        "url": "https://www2.acadiau.ca/safety-security/access-control.html"
+                    },
+                    {
+                        "label": "Move-in / Arrival Guide",
+                        "url": "https://www2.acadiau.ca/student-life/residence-campus-life/residences-housing/move-in.html"
+                    }
+                ]
+            }
+        ],
         "sections": [
             {
                 "title": "Campus Essentials",
@@ -14,8 +33,8 @@
                         "url": "https://moodle.acadiau.ca/"
                     },
                     {
-                        "label": "Student Services (COLLS)",
-                        "url": "https://colls.acadiau.ca/"
+                        "label": "Student Services (COLLSS)",
+                        "url": "https://collss.acadiau.ca/student/"
                     },
                     {
                         "label": "Emergency Contact",

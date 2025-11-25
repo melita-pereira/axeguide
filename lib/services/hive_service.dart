@@ -8,6 +8,8 @@ class HiveService {
   static const String keyData = 'data';
   static const String keyFetchedAt = 'fetchedAt';
   static const String keyLocation = 'cachedLocation';
+  static const String keyUserMode = 'userMode'; // "newcomer" or "familiar"
+
 
   static String _dataKey(String loc) => "${loc.toLowerCase()}_data";
   static String _timestampKey(String loc) => "${loc.toLowerCase()}_timestamp";
@@ -63,4 +65,12 @@ class HiveService {
   static Future<void> clearCache() async {
     await cache.clear();
   }
+
+  static Future<void> setUserMode(String mode) async {
+    await prefs.put(keyUserMode, mode); // mode = "newcomer" or "familiar"
+  }
+
+  static String get userMode =>
+    (prefs.get(keyUserMode) ?? 'newcomer').toString();
+
 }

@@ -19,6 +19,7 @@ Future<void> main() async {
   await Hive.initFlutter();
   await Hive.openBox('locationCache');
   await Hive.openBox('userBox');
+  await Hive.openBox('userPreferences');
 
   await UserBoxHelper.updateLastActive();
 

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:axeguide/utils/user_box_helper.dart';
 import 'package:axeguide/screens/home/dynamic_home_screen.dart';
 import 'package:axeguide/screens/walkthrough/guidance_screen.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 typedef WTActionHandler = Future<void> Function(
   BuildContext context,
@@ -36,17 +37,18 @@ class WalkthroughActions {
           content: "Here's what to expect when you arrive at Halifax Airport.",
           steps: UserBoxHelper.navPreference == "in-depth"
               ? [
-                  "Follow signs to Canada Border Services Agency (CBSA)",
-                  "Have your passport, study permit, and landing documents ready",
+                  "Follow signs to Canada Border Services Agency (CBSA) Port of Entry",
+                  "Have your passport, study permit approval letter, letter of acceptance, and other landing documents ready",
                   "Answer the officer's questions about your stay",
+                  "Receive your visa/study permit stamp or document from the immigration officer",
                   "Proceed to baggage claim after clearing immigration",
                   "Collect all your luggage from the carousel",
-                  "Exit through customs (usually just walk through if nothing to declare)"
+                  "Exit"
                 ]
               : [
                   "Follow signs to Canada Border Services",
                   "Have passport and study permit ready",
-                  "Collect baggage and exit through customs"
+                  "Collect baggage and exit"
                 ],
         );
       
@@ -57,16 +59,17 @@ class WalkthroughActions {
           content: "Acadia's airport shuttle service provides convenient transportation from Halifax Airport to campus.",
           steps: UserBoxHelper.navPreference == "in-depth"
               ? [
-                  "Exit through the main doors at Halifax Airport Arrivals",
-                  "Look for the Acadia University shuttle outside the main exit",
-                  "Have your confirmation email ready to show the driver",
-                  "Load your luggage in the designated area",
-                  "The shuttle will drop you at your assigned residence or Student Services"
+                  "Find the International Centre's booth - typically set up after the baggage claim area",
+                  "Check in with your name and flight details",
+                  "Wait in the designated area for the shuttle bus",
+                  "Board the shuttle when it arrives - you may need to walk a short distance. Follow your airport pickup team from the International Centre",
+                  "Load your luggage and get comfortable - typically would go underneath the bus",
+                  "Enjoy the 1 hourride to campus - the shuttle will drop you off at the Student Union Building"
                 ]
               : [
-                  "Find the Acadia shuttle outside the main exit",
+                  "Find the International Centre's booth after baggage claim",
                   "Show your confirmation email",
-                  "Board and relax - you'll be dropped at campus"
+                  "Wait and board the shuttle to campus"
                 ],
         );
 
@@ -94,16 +97,16 @@ class WalkthroughActions {
         return _showGuidance(
           context,
           title: "Airport Help Desk",
-          content: "Need assistance? The International Student Help Desk can guide you.",
+          content: "Need assistance? The Help Desk can guide you.",
           steps: UserBoxHelper.navPreference == "in-depth"
               ? [
-                  "Look for the International Student Help Desk near Arrivals",
+                  "Look for the Help Desk near Arrivals - typically on your right as you exit from the baggage claim area",
                   "Staff can help with directions and immediate questions",
                   "They can assist with transport options",
                   "They may have campus information for you"
                 ]
               : [
-                  "Find the International Student Help Desk near Arrivals",
+                  "Find the Help Desk near Arrivals",
                   "Staff can help with directions and questions"
                 ],
         );
@@ -115,15 +118,15 @@ class WalkthroughActions {
           content: "Taxis are a reliable option for getting to your destination from Halifax Airport.",
           steps: UserBoxHelper.navPreference == "in-depth"
               ? [
-                  "Exit through the main doors at Arrivals",
-                  "Look for the official taxi stand outside",
-                  "Official taxis are metered and regulated",
+                  "Check in with the Ground Transportation desk inside the terminal for taxi information - typically located near the main exit on your right after you exit from baggage claim",
+                  "Give your details to the dispatcher",
+                  "Wait for your taxi to arrive",
                   "Expect to pay \$70-90 to Wolfville/Acadia",
                   "To downtown Halifax, expect \$25-35",
                   "You can pay by cash or card"
                 ]
               : [
-                  "Find the official taxi stand outside Arrivals",
+                  "Find the official Ground Transportation desk near Arrivals",
                   "\$70-90 to Wolfville, \$25-35 to Halifax downtown",
                   "Cash or card accepted"
                 ],
@@ -132,21 +135,19 @@ class WalkthroughActions {
       case "showBusGuidance":
         return _showGuidance(
           context,
-          title: "Public Bus (MetroTransit)",
-          content: "The affordable way to get from Halifax Airport to downtown Halifax.",
+          title: "Public Bus",
+          content: "The affordable way to get from Halifax Airport to your destination.",
           steps: UserBoxHelper.navPreference == "in-depth"
               ? [
-                  "Exit the airport and look for the bus stop signs",
-                  "Take MetroTransit Route 320 (Airport Express)",
-                  "Buses run regularly throughout the day",
-                  "Have exact change ready (\$5 fare)",
-                  "The bus goes to downtown Halifax",
-                  "Trip takes about 30-40 minutes"
+                  "Check in with the Ground Transportation desk inside the terminal for bus information - typically located near the main exit on your right after you exit from baggage claim",
+                  "If you don't have a ticket, you can purchase one there for Regional Express 320 which will take you to Downtown Halifax",
+                  "Maritime Bus Line also operates from the airport to various locations - check their schedule in advance",
+                  "Maritime Bus only has 1 departure per day, so plan accordingly if you choose this option to get to Wolfville/Acadia",
                 ]
               : [
-                  "Find the MetroTransit 320 bus stop outside",
-                  "Fare is \$5 (exact change)",
-                  "Goes to downtown Halifax in 30-40 min"
+                  "Check in with Bus Desk near Arrivals",
+                  "Choose between Regional Express 320 or Maritime Bus",
+                  "Pay the fare and board the bus when it arrives"
                 ],
         );
 
@@ -157,15 +158,13 @@ class WalkthroughActions {
           content: "Need a Canadian phone number? The airport has options for you.",
           steps: UserBoxHelper.navPreference == "in-depth"
               ? [
-                  "Look for the Chatr or Rogers kiosk in the airport",
-                  "Prepaid SIM cards are available without ID",
+                  "Look for the Fido or Rogers kiosk in the airport",
                   "Plans start around \$15-25 per month",
                   "Ask about student discounts if available",
                   "Staff will help you activate it on the spot"
                 ]
               : [
-                  "Find Chatr/Rogers kiosk in airport",
-                  "Prepaid SIMs available, no ID needed",
+                  "Find Fido/Rogers kiosk in airport",
                   "Plans from \$15-25/month"
                 ],
         );
@@ -177,7 +176,7 @@ class WalkthroughActions {
           content: "Airport staff are here to help you navigate your arrival.",
           steps: UserBoxHelper.navPreference == "in-depth"
               ? [
-                  "Look for airport staff in red vests or uniforms",
+                  "Look for airport staff in uniforms",
                   "They can help with connecting flights",
                   "Ask about baggage issues or lost items",
                   "They can give directions within the airport"
@@ -207,14 +206,14 @@ class WalkthroughActions {
           content: "Arriving at Acadia via shuttle? Here's what to expect.",
           steps: UserBoxHelper.navPreference == "in-depth"
               ? [
-                  "The shuttle will drop you outside Wheelock Dining Hall",
+                  "The shuttle will drop you outside Student Union Building",
                   "Look for campus signs to orient yourself",
-                  "Head to Student Services if you need help",
-                  "Your residence assignment info will guide you from there"
+                  "Head to the Safety and Security office if you need help",
+                  "Your student orientation leaders will guide you from there"
                 ]
               : [
-                  "Shuttle drops at Wheelock Dining Hall",
-                  "Head to Student Services for help"
+                  "Shuttle drops at Student Union Building",
+                  "Head to the Safety and Security office for help"
                 ],
         );
 
@@ -225,13 +224,13 @@ class WalkthroughActions {
           content: "Getting dropped off at Acadia by someone you know.",
           steps: UserBoxHelper.navPreference == "in-depth"
               ? [
-                  "Visitor parking is near the main campus entrance",
-                  "Have them drop you at Student Services first",
-                  "Check in and get your residence keys",
+                  "Visitor parking is at several lots around campus - look for signs",
+                  "Have them drop you at Student Union Building first",
+                  "Check in with the Safety and Security office and get your keys",
                   "Staff will direct you to your residence from there"
                 ]
               : [
-                  "Drop-off at Student Services",
+                  "Drop-off at Student Union Building",
                   "Check in and get residence info"
                 ],
         );
@@ -240,17 +239,17 @@ class WalkthroughActions {
         return _showGuidance(
           context,
           title: "Arriving by Bus",
-          content: "Taking Valley Transit to campus? Here's your arrival plan.",
+          content: "Taking Maritime Bus to campus? Here's your arrival plan.",
           steps: UserBoxHelper.navPreference == "in-depth"
               ? [
-                  "Valley Transit stops at the main campus entrance",
+                  "Maritime Bus stops at the Wheelock Dining Hall",
                   "Look for campus directory signs",
-                  "Walk to Student Services to check in",
-                  "It's a short walk from the bus stop"
+                  "Walk to the Safety and Security office inside the Student Union Building to check in",
+                  "It's a short walk from the bus stop - downhill, at 30 Highland Ave"
                 ]
               : [
-                  "Bus stops at main entrance",
-                  "Walk to Student Services"
+                  "Bus stops at Wheelock Dining Hall",
+                  "Walk to the Safety and Security office"
                 ],
         );
 
@@ -261,13 +260,13 @@ class WalkthroughActions {
           content: "Taking a taxi to Acadia? Here's where to go.",
           steps: UserBoxHelper.navPreference == "in-depth"
               ? [
-                  "Ask the driver to drop you at Student Services",
-                  "Or go directly to your residence if you know the location",
+                  "Ask the driver to drop you at the Student Union Building",
+                  "Or go directly to your residence if you know the location and have the keys",
                   "Have your residence name ready for the driver",
                   "Payment by cash or card"
                 ]
               : [
-                  "Drop-off at Student Services or your residence",
+                  "Drop-off at Student Union Building or your residence",
                   "Cash or card accepted"
                 ],
         );
@@ -280,15 +279,15 @@ class WalkthroughActions {
           steps: UserBoxHelper.navPreference == "in-depth"
               ? [
                   "Check your residence assignment email",
-                  "Common residences: Cutten, Chipman, Crowell Tower, Dennis House",
+                  "Residences: 55 University Ave, Chipman House, Crowell Tower, Dennis House, Roy Jodrey Hall, Christopher Hall, Eaton House, Chase Court, Whitman House",
                   "Look for campus directory signs",
-                  "Ask Student Services staff if you need help",
-                  "Most residences are within a 5-10 minute walk from Student Services"
+                  "Ask Student Union Building staff or your orientation leaders if you need help",
+                  "Most residences are within a 5-10 minute walk from Student Union Building"
                 ]
               : [
                   "Check your residence assignment",
-                  "Look for directory signs or ask Student Services",
-                  "Most residences are 5-10 min walk from Student Services"
+                  "Look for directory signs or ask Student Union Building staff",
+                  "Most residences are 5-10 min walk from Student Union Building"
                 ],
         );
 
@@ -301,14 +300,14 @@ class WalkthroughActions {
               ? [
                   "Most off-campus housing in Wolfville is walkable",
                   "Use Google Maps for specific directions to your address",
-                  "Valley Transit has routes throughout Wolfville",
+                  "Kings Transit has routes throughout Wolfville",
                   "Biking is popular - campus has bike racks",
                   "Winter can be snowy - plan for extra travel time"
                 ]
               : [
                   "Most housing is walkable in Wolfville",
                   "Use Google Maps for directions",
-                  "Valley Transit available"
+                  "Kings Transit available"
                 ],
         );
 
@@ -320,14 +319,14 @@ class WalkthroughActions {
           steps: UserBoxHelper.navPreference == "in-depth"
               ? [
                   "Campus is fully walkable - most buildings within 10 minutes",
-                  "Main landmarks: University Hall (center), KC Irving Centre (library)",
+                  "Main landmarks: University Hall (center), Beveridge Arts Centre (main classroom building)",
                   "Wheelock Dining Hall and Student Union Building are central meeting points",
-                  "Campus maps are posted at major intersections",
-                  "Download the Acadia app for an interactive campus map"
+                  "Campus directions are posted at major intersections",
+                  "Check the Acadia website for a map"
                 ]
               : [
                   "Campus is fully walkable (10 min max)",
-                  "Use posted maps or Acadia app",
+                  "Use posted maps",
                   "Main buildings: University Hall, Library, Student Union"
                 ],
         );
@@ -370,15 +369,15 @@ class WalkthroughActions {
           content: "Everything you need is within walking distance in Wolfville.",
           steps: UserBoxHelper.navPreference == "in-depth"
               ? [
-                  "Groceries: Independent Grocers on Main Street",
+                  "Groceries: Independent Grocers on Main Street or Shoppers Drug Mart",
                   "Pharmacy: Shoppers Drug Mart or MacQuarries Pharmasave",
-                  "Transit: Valley Transit stops throughout town",
-                  "Banking: RBC, Scotiabank on Main Street",
+                  "Transit: Kings Transit stops throughout town",
+                  "Banking: RBC, BMO on Main Street",
                   "Most shops are within 10-15 min walk from campus"
                 ]
               : [
                   "Independent Grocers, Shoppers, MacQuarries Pharmasave",
-                  "Valley Transit available",
+                  "Kings Transit available",
                   "All walkable from campus"
                 ],
         );
@@ -402,14 +401,14 @@ class WalkthroughActions {
           content: "New Minas is the Valley's main shopping hub.",
           steps: UserBoxHelper.navPreference == "in-depth"
               ? [
-                  "Major stores: Walmart, Atlantic Superstore",
-                  "Liquor: NSLC (government liquor store)",
+                  "Major stores: Walmart, Atlantic Superstore, Dollarama, Winners",
+                  "Shopping Centre: County Fair Mall",
                   "Many retail stores and restaurants",
-                  "Take Valley Transit or taxi from Wolfville",
+                  "Take Kings Transit or taxi from Wolfville",
                   "About 10 minutes from Acadia"
                 ]
               : [
-                  "Walmart, Superstore, NSLC",
+                  "Walmart, Superstore, County Fair Mall",
                   "Many retail options",
                   "10 min from Acadia by bus/taxi"
                 ],
@@ -448,9 +447,8 @@ class WalkthroughActions {
               ? [
                   "Government services: Service Nova Scotia office",
                   "Medical: Valley Regional Hospital",
-                  "Walk-in clinics available",
                   "About 15 minutes from Acadia",
-                  "Take Valley Transit or taxi"
+                  "Take Kings Transit or taxi"
                 ]
               : [
                   "Government offices and medical centers",
@@ -478,17 +476,13 @@ class WalkthroughActions {
           content: "Getting around Halifax using public transit.",
           steps: UserBoxHelper.navPreference == "in-depth"
               ? [
-                  "Download the Halifax Transit app for schedules",
+                  "Use Transsee for schedules",
                   "Buses run frequently on main routes",
-                  "Fare is \$2.75 (exact change required)",
-                  "You can buy tickets at convenience stores",
-                  "Monthly passes available for regular users",
-                  "Service is reduced on weekends and evenings"
+                  "Fare is \$2.75",
                 ]
               : [
-                  "Use Halifax Transit app for schedules",
-                  "Fare: \$2.75 (exact change)",
-                  "Monthly passes available"
+                  "Use Transsee for schedules",
+                  "Fare: \$2.75"
                 ],
         );
 
@@ -635,25 +629,39 @@ class WalkthroughActions {
       case "showNavigationFromTo":
         final currentLocation = UserBoxHelper.currentCampusLocation;
         final destination = UserBoxHelper.destinationLocation;
-        
+        List<String> steps;
+        final lat = UserBoxHelper.destinationLatitude;
+        final lng = UserBoxHelper.destinationLongitude;
+        final mapsButton = (lat != null && lng != null)
+            ? () async {
+                final uri = Uri.parse('https://www.google.com/maps/search/?api=1&query=$lat,$lng');
+                await launchUrl(uri, mode: LaunchMode.externalApplication);
+              }
+            : null;
+        if (UserBoxHelper.navPreference == "in-depth") {
+          steps = [
+            "Start at: $currentLocation",
+            "Head towards: $destination",
+            "Follow posted campus signs and directory maps",
+            "Ask staff or students for help if needed",
+            "Estimated walk time: 5-10 minutes",
+            "Check the map on the home screen for your route"
+          ];
+        } else {
+          steps = [
+            "From: $currentLocation",
+            "To: $destination",
+            "Follow campus signs or use the map"
+          ];
+        }
         return _showGuidance(
           context,
           title: "Navigation: $currentLocation → $destination",
           content: "Here's how to get from $currentLocation to $destination.",
-          steps: UserBoxHelper.navPreference == "in-depth"
-              ? [
-                  "Starting point: $currentLocation",
-                  "Destination: $destination",
-                  "Look for campus directory signs along the way",
-                  "Walking time: approximately 5-10 minutes",
-                  "If you need help, ask any staff member or student",
-                  "The route will be shown on the map in the home screen"
-                ]
-              : [
-                  "From: $currentLocation",
-                  "To: $destination",
-                  "Follow campus signs or check map"
-                ],
+          steps: steps,
+          images: null,
+          // Pass a callback for opening maps if available
+          onOpenMap: mapsButton,
         );
 
       default:
@@ -667,6 +675,7 @@ class WalkthroughActions {
     required String content,
     List<String>? steps,
     List<String>? images,
+    VoidCallback? onOpenMap,
   }) async {
     await Navigator.push(
       context,
@@ -677,6 +686,7 @@ class WalkthroughActions {
           steps: steps,
           images: images,
           onComplete: () => Navigator.pop(context),
+          onOpenMap: onOpenMap,
         ),
       ),
     );

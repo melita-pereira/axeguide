@@ -75,7 +75,7 @@ class LocationSelectionScreen extends StatelessWidget {
       );
     } else {
       // Save location and navigate to home
-      UserBoxHelper.setUserLocation(location.value);
+      UserBoxHelper.setUserLocation(location.name);
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(builder: (_) => const DynamicHomeScreen()),

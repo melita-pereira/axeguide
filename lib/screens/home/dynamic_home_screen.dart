@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import '../settings_screen.dart';
 import '../location_selection_screen.dart';
 import 'package:axeguide/services/hive_service.dart';
+import 'package:axeguide/services/user_mode_notifier.dart';
 import 'dart:convert';
 import 'package:flutter/services.dart' show rootBundle;
 
@@ -458,65 +459,83 @@ class _DynamicHomeScreenState extends State<DynamicHomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final sections =
-        (layoutForLocation?['sections'] as List?)
-            ?.cast<Map<String, dynamic>>() ??
-        [];
-    return Scaffold(
-      backgroundColor: const Color(0xFFF9FAFB),
-      appBar: AppBar(
-        title: const Text('The AxeGuide'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings_outlined),
-            tooltip: 'Settings',
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const SettingsScreen()),
-              );
-            },
-          ),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _showExploreSheet,
-        label: const Text('Explore'),
-        icon: const Icon(Icons.explore_outlined),
-        backgroundColor: const Color(0xFF013A6E),
-        foregroundColor: Colors.white,
-      ),
-      body: SafeArea(
-        child: loading
-            ? const Center(
-                child: CircularProgressIndicator(color: Color(0xFF013A6E)),
-              )
-            : (layoutForLocation == null)
-            ? Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: Text(
-                    "No layout found for '$userLocation'.\nCheck home_layout.json.",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(color: Colors.grey.shade700),
-                  ),
-                ),
-              )
-            : SingleChildScrollView(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildHeaderCard(),
-                    const SizedBox(height: 24),
-                    for (final section in sections) ...[
-                      _buildSection(section),
-                      const SizedBox(height: 18),
-                    ],
-                  ],
-                ),
+    return ValueListenableBuilder<String>(
+      valueListenable: userModeNotifier,
+      builder: (context, userMode, _) {
+        final sections = <Map<String, dynamic>>[];
+
+        final isNewcomer = userMode == "newcomer";
+
+        // Add newcomer sections at the top for this location
+        if (isNewcomer && layoutForLocation?['newcomer_sections'] != null) {
+          sections.addAll(
+            (layoutForLocation!['newcomer_sections'] as List)
+                .cast<Map<String, dynamic>>()
+          );
+        }
+
+        // Add normal sections
+        sections.addAll(
+          (layoutForLocation?['sections'] as List?)?.cast<Map<String, dynamic>>() ?? []
+        );
+
+        return Scaffold(
+          backgroundColor: const Color(0xFFF9FAFB),
+          appBar: AppBar(
+            title: const Text('The AxeGuide'),
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.settings_outlined),
+                tooltip: 'Settings',
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const SettingsScreen()),
+                  );
+                },
               ),
-      ),
+            ],
+          ),
+          floatingActionButton: FloatingActionButton.extended(
+            onPressed: _showExploreSheet,
+            label: const Text('Explore'),
+            icon: const Icon(Icons.explore_outlined),
+            backgroundColor: const Color(0xFF013A6E),
+            foregroundColor: Colors.white,
+          ),
+          body: SafeArea(
+            child: loading
+                ? const Center(
+                    child: CircularProgressIndicator(color: Color(0xFF013A6E)),
+                  )
+                : (layoutForLocation == null)
+                ? Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(24),
+                      child: Text(
+                        "No layout found for '$userLocation'.\nCheck home_layout.json.",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: Colors.grey.shade700),
+                      ),
+                    ),
+                  )
+                : SingleChildScrollView(
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildHeaderCard(),
+                        const SizedBox(height: 24),
+                        for (final section in sections) ...[
+                          _buildSection(section),
+                          const SizedBox(height: 18),
+                        ],
+                      ],
+                    ),
+                  ),
+          ),
+        );
+      },
     );
   }
 
@@ -653,9 +672,12 @@ class _DynamicHomeScreenState extends State<DynamicHomeScreen> {
         return LayoutBuilder(
           builder: (context, constraints) {
             final screenWidth = MediaQuery.of(context).size.width;
-            final crossAxisCount = screenWidth > 1200 ? 4 : (screenWidth > 600 ? 3 : 2);
+            final isMobile = screenWidth <= 600;
+            final crossAxisCount = isMobile ? 1 : (screenWidth > 1200 ? 4 : 3);
             final spacing = 12.0;
-            final cardWidth = (constraints.maxWidth - (spacing * (crossAxisCount - 1))) / crossAxisCount;
+            final cardWidth = isMobile
+              ? constraints.maxWidth
+              : (constraints.maxWidth - (spacing * (crossAxisCount - 1))) / crossAxisCount;
             const cardHeight = 200.0;
             return Center(
               child: Padding(
