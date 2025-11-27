@@ -573,43 +573,45 @@ class _DynamicHomeScreenState extends State<DynamicHomeScreen> {
   Widget _buildHeaderCard() {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(18),
+      padding: const EdgeInsets.all(22),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [const Color(0xFF013A6E), const Color(0xFF025A9E)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF013A6E).withValues(alpha: 0.25),
-            blurRadius: 12,
-            offset: const Offset(0, 6),
+            color: const Color(0xFF013A6E).withValues(alpha: 0.18),
+            blurRadius: 16,
+            offset: const Offset(0, 8),
           ),
         ],
       ),
-
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(10),
+            padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.18),
-              borderRadius: BorderRadius.circular(12),
+              color: Colors.white.withValues(alpha: 0.22),
+              borderRadius: BorderRadius.circular(16),
             ),
             child: const Icon(
               Icons.place_outlined,
-              size: 26,
-              color: Colors.white,
+              size: 28,
+              color: Color(0xFFB6FF3C), // lime green accent
             ),
           ),
-          const SizedBox(width: 14),
+          const SizedBox(width: 18),
           Expanded(
             child: Text(
               "Welcome to ${_getLocationGreeting()}!",
               style: const TextStyle(
                 color: Colors.white,
-                fontSize: 20,
-                fontWeight: FontWeight.w700,
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 0.5,
               ),
             ),
           ),
@@ -709,7 +711,7 @@ class _DynamicHomeScreenState extends State<DynamicHomeScreen> {
             final cardWidth = isMobile
               ? constraints.maxWidth
               : (constraints.maxWidth - (spacing * (crossAxisCount - 1))) / crossAxisCount;
-            const cardHeight = 200.0;
+            const cardHeight = 205.0;
             return Center(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -723,7 +725,7 @@ class _DynamicHomeScreenState extends State<DynamicHomeScreen> {
                     final hours = loc['hours'] ?? '';
                     return Container(
                       width: cardWidth,
-                      height: cardHeight,
+                      height: cardHeight, // Restore fixed height to clip overflow
                       decoration: BoxDecoration(
                         color: Colors.white,
                         border: Border.all(
@@ -1051,15 +1053,16 @@ class _DynamicHomeScreenState extends State<DynamicHomeScreen> {
   Widget _sectionCard({required String title, required Widget child}) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(18),
+      margin: const EdgeInsets.symmetric(vertical: 4),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 8,
-            offset: const Offset(0, 3),
+            color: const Color(0xFF013A6E).withValues(alpha: .07),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -1069,12 +1072,13 @@ class _DynamicHomeScreenState extends State<DynamicHomeScreen> {
           Text(
             title,
             style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
+              fontSize: 19,
+              fontWeight: FontWeight.w800,
               color: Color(0xFF013A6E),
+              letterSpacing: 0.2,
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 10),
           child,
         ],
       ),

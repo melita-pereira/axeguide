@@ -433,6 +433,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
       backgroundColor: const Color(0xFFF9FAFB),
       appBar: AppBar(
         title: const Text('Settings'),
+        backgroundColor: const Color(0xFF013A6E),
+        foregroundColor: Colors.white,
+        elevation: 0,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(bottom: Radius.circular(18)),
+        ),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -442,37 +448,37 @@ class _SettingsScreenState extends State<SettingsScreen> {
             children: [
               // Header section
               Container(
-                padding: const EdgeInsets.all(20),
+                padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
                     colors: [Color(0xFF013A6E), Color(0xFF025A9E)],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(24),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFF013A6E).withAlpha((0.3 * 255).toInt()),
-                      blurRadius: 15,
-                      offset: const Offset(0, 5),
+                      color: Color(0xFF013A6E).withValues(alpha: 0.18),
+                      blurRadius: 18,
+                      offset: const Offset(0, 8),
                     ),
                   ],
                 ),
                 child: Row(
                   children: [
                     Container(
-                      padding: const EdgeInsets.all(12),
+                      padding: const EdgeInsets.all(14),
                       decoration: BoxDecoration(
-                        color: Colors.white.withAlpha((0.2 * 255).toInt()),
-                        borderRadius: BorderRadius.circular(12),
+                        color: Colors.white.withValues(alpha: 0.22),
+                        borderRadius: BorderRadius.circular(16),
                       ),
                       child: const Icon(
                         Icons.settings_outlined,
-                        color: Colors.white,
-                        size: 32,
+                        color: Color(0xFFB6FF3C), // lime green accent
+                        size: 34,
                       ),
                     ),
-                    const SizedBox(width: 16),
+                    const SizedBox(width: 18),
                     const Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -481,8 +487,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             'Settings',
                             style: TextStyle(
                               color: Colors.white,
-                              fontSize: 24,
+                              fontSize: 26,
                               fontWeight: FontWeight.bold,
+                              letterSpacing: 0.5,
                             ),
                           ),
                           SizedBox(height: 4),
@@ -490,7 +497,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             'Manage your preferences',
                             style: TextStyle(
                               color: Colors.white70,
-                              fontSize: 14,
+                              fontSize: 15,
                             ),
                           ),
                         ],

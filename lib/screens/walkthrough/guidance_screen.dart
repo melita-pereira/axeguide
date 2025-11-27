@@ -26,18 +26,23 @@ class GuidanceScreen extends StatelessWidget {
         title: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.asset(
-              'assets/images/logo.png',
-              height: 32,
+            Flexible(
+              child: Image.asset(
+                'assets/images/logo.png',
+                height: 32,
+              ),
             ),
             const SizedBox(width: 12),
-            Text(
-              title,
-              style: const TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF013A6E),
-                letterSpacing: 1.2,
+            Expanded(
+              child: Text(
+                title,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF013A6E),
+                  letterSpacing: 1.2,
+                ),
               ),
             ),
           ],
