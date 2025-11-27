@@ -1,12 +1,5 @@
 {
   "halifax_airport": [
-    {
-      "id": "dynamic_home",
-      "type": "info",
-      "text": "Loading Halifax Airport Home Screen...",
-      "tip": "You will be redirected to the Halifax Airport home screen.",
-      "options": []
-    },
           {
       "id": "halifax_airport_intro",
       "type": "question",
@@ -175,8 +168,7 @@
       "id": "explore_airport",
       "type": "action",
       "action": "navigateToAirportHomeScreen",
-      "tip": "Loads the Halifax Airport home page with navigation tools and facilities.",
-      "nextStepId": "dynamic_home"
+      "tip": "Loads the Halifax Airport home page with navigation tools and facilities."
     }
   ]
 }

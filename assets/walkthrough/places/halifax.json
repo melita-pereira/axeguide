@@ -1,13 +1,6 @@
 {
   "halifax": [
     {
-      "id": "dynamic_home_halifax",
-      "type": "info",
-      "text": "Loading Halifax Home Screen...",
-      "tip": "You will be redirected to the Halifax home screen.",
-      "options": []
-    },
-    {
       "id": "city_intro",
       "type": "info",
       "text": "Welcome to Halifax! A vibrant coastal city with lots to explore. Before we begin, let's set up a few basics.",
@@ -79,8 +72,7 @@
     {
       "id": "explore_halifax",
       "type": "action",
-      "action": "navigateToHalifaxHomeScreen",
-      "nextStepId": "dynamic_home_halifax"
+      "action": "navigateToHalifaxHomeScreen"
     }
   ]
 }

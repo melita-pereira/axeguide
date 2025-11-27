@@ -14,11 +14,30 @@ class LocationSelectionScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final primaryColor = const Color(0xFF013A6E);
+    final accentColor = const Color(0xFFC6FF00);
     return Scaffold(
       backgroundColor: const Color(0xFFF9FAFB),
       appBar: AppBar(
-        title: Text(title ?? 'Select Your Location'),
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image.asset('assets/images/logo.png', height: 28),
+            const SizedBox(width: 10),
+            Text(
+              title ?? 'Select Your Location',
+              style: const TextStyle(
+                color: Color(0xFF013A6E),
+                fontWeight: FontWeight.bold,
+                fontSize: 20,
+                letterSpacing: 1.1,
+              ),
+            ),
+          ],
+        ),
         automaticallyImplyLeading: false,
+        backgroundColor: Colors.white,
+        elevation: 1,
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -28,17 +47,20 @@ class LocationSelectionScreen extends StatelessWidget {
             children: [
               Text(
                 'Where are you?',
-                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: const Color(0xFF013A6E),
-                    ),
+                style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF013A6E),
+                  letterSpacing: 1.1,
+                ),
               ),
               const SizedBox(height: 8),
               Text(
                 'Select your location to get started',
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: Colors.grey[600],
-                    ),
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey[600],
+                ),
               ),
               const SizedBox(height: 32),
               Wrap(
@@ -50,6 +72,8 @@ class LocationSelectionScreen extends StatelessWidget {
                     child: _LocationCard(
                       location: location,
                       onTap: () => _handleLocationTap(context, location),
+                      accentColor: accentColor,
+                      primaryColor: primaryColor,
                     ),
                   );
                 }).toList(),
@@ -89,28 +113,32 @@ class LocationSelectionScreen extends StatelessWidget {
 class _LocationCard extends StatelessWidget {
   final LocationOption location;
   final VoidCallback onTap;
+  final Color accentColor;
+  final Color primaryColor;
 
   const _LocationCard({
     required this.location,
     required this.onTap,
+    required this.accentColor,
+    required this.primaryColor,
   });
 
   @override
   Widget build(BuildContext context) {
     return Card(
-      elevation: 0,
+      elevation: 2,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(18),
         side: BorderSide(
-          color: Colors.grey[300]!,
-          width: 1,
+          color: accentColor,
+          width: 2,
         ),
       ),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(18),
         child: Padding(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.all(22),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
@@ -118,32 +146,40 @@ class _LocationCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF013A6E).withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(12),
+                  color: accentColor.withValues(alpha: 0.13),
+                  borderRadius: BorderRadius.circular(14),
+                  boxShadow: [
+                    BoxShadow(
+                      color: primaryColor.withValues(alpha: 0.08),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
                 ),
                 child: Icon(
                   location.icon,
-                  size: 32,
-                  color: const Color(0xFF013A6E),
+                  size: 34,
+                  color: primaryColor,
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 14),
               Text(
                 location.name,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFF013A6E),
+                style: TextStyle(
+                  fontSize: 17,
+                  fontWeight: FontWeight.bold,
+                  color: primaryColor,
+                  letterSpacing: 0.5,
                 ),
               ),
               if (location.description != null) ...[
-                const SizedBox(height: 4),
+                const SizedBox(height: 6),
                 Text(
                   location.description!,
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    fontSize: 12,
+                    fontSize: 13,
                     color: Colors.grey[600],
                   ),
                 ),

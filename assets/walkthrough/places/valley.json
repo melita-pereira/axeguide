@@ -1,13 +1,6 @@
 {
   "valley": [
     {
-      "id": "dynamic_home_valley",
-      "type": "info",
-      "text": "Loading Valley Home Screen...",
-      "tip": "You will be redirected to the Valley home screen.",
-      "options": []
-    },
-    {
       "id": "valley_intro",
       "type": "question",
       "text": "Welcome to the Annapolis Valley! Are you already settled here, or just arriving?",
@@ -120,8 +113,7 @@
       "id": "explore_kentville",
       "type": "action",
       "action": "navigateToKentvilleHomeScreen",
-      "tip": "Loads the Kentville Home Screen with services and navigation.",
-      "nextStepId": "dynamic_home_valley"
+      "tip": "Loads the Kentville Home Screen with services and navigation."
     }
   ]
 }

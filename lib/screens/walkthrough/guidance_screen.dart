@@ -23,17 +23,30 @@ class GuidanceScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text(
-          title,
-          style: const TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.w600,
-          ),
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image.asset(
+              'assets/images/logo.png',
+              height: 32,
+            ),
+            const SizedBox(width: 12),
+            Text(
+              title,
+              style: const TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF013A6E),
+                letterSpacing: 1.2,
+              ),
+            ),
+          ],
         ),
         centerTitle: true,
         automaticallyImplyLeading: false,
         elevation: 0,
-        backgroundColor: const Color(0xFF013A6E),
+        backgroundColor: Colors.white,
+        foregroundColor: const Color(0xFF013A6E),
       ),
       body: Column(
         children: [
@@ -49,17 +62,24 @@ class GuidanceScreen extends StatelessWidget {
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
                         colors: [
-                          const Color(0xFF013A6E).withValues(alpha: 0.1),
-                          const Color(0xFF013A6E).withValues(alpha: 0.05),
+                          const Color(0xFF013A6E).withValues(alpha: 0.10),
+                          const Color(0xFFC6FF00).withValues(alpha: 0.08),
                         ],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ),
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(18),
                       border: Border.all(
-                        color: const Color(0xFF013A6E).withValues(alpha: 0.2),
-                        width: 1,
+                        color: const Color(0xFF013A6E).withValues(alpha: 0.18),
+                        width: 1.2,
                       ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFF013A6E).withValues(alpha: 0.07),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
                     ),
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -68,12 +88,12 @@ class GuidanceScreen extends StatelessWidget {
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
                             color: const Color(0xFF013A6E),
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(14),
                           ),
-                          child: const Icon(
+                          child: Icon(
                             Icons.info_outline,
-                            color: Colors.white,
-                            size: 28,
+                            color: const Color(0xFFC6FF00),
+                            size: 30,
                           ),
                         ),
                         const SizedBox(width: 16),
@@ -81,26 +101,26 @@ class GuidanceScreen extends StatelessWidget {
                           child: Text(
                             content,
                             style: const TextStyle(
-                              fontSize: 16,
+                              fontSize: 17,
                               height: 1.6,
                               color: Color(0xFF2C3E50),
-                              fontWeight: FontWeight.w400,
+                              fontWeight: FontWeight.w500,
                             ),
                           ),
                         ),
                       ],
                     ),
                   ),
-                  
                   // Step-by-step instructions if provided
                   if (steps != null && steps!.isNotEmpty) ...[
                     const SizedBox(height: 32),
                     const Text(
                       'Step-by-Step Guide',
                       style: TextStyle(
-                        fontSize: 20,
+                        fontSize: 21,
                         fontWeight: FontWeight.bold,
                         color: Color(0xFF013A6E),
+                        letterSpacing: 1.1,
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -112,15 +132,15 @@ class GuidanceScreen extends StatelessWidget {
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
                           color: Colors.white,
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(14),
                           border: Border.all(
-                            color: Colors.grey.shade200,
+                            color: const Color(0xFF013A6E).withValues(alpha: 0.13),
                             width: 1.5,
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.03),
-                              blurRadius: 8,
+                              color: const Color(0xFF013A6E).withValues(alpha: 0.06),
+                              blurRadius: 6,
                               offset: const Offset(0, 2),
                             ),
                           ],
@@ -132,42 +152,27 @@ class GuidanceScreen extends StatelessWidget {
                               width: 32,
                               height: 32,
                               decoration: BoxDecoration(
-                                gradient: const LinearGradient(
-                                  colors: [Color(0xFF013A6E), Color(0xFF025A9E)],
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
-                                ),
-                                borderRadius: BorderRadius.circular(16),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: const Color(0xFF013A6E).withValues(alpha: 0.3),
-                                    blurRadius: 4,
-                                    offset: const Offset(0, 2),
-                                  ),
-                                ],
+                                color: const Color(0xFFC6FF00),
+                                borderRadius: BorderRadius.circular(10),
                               ),
-                              child: Center(
-                                child: Text(
-                                  '${index + 1}',
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 15,
-                                  ),
+                              alignment: Alignment.center,
+                              child: Text(
+                                '${index + 1}',
+                                style: const TextStyle(
+                                  color: Color(0xFF013A6E),
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
                                 ),
                               ),
                             ),
-                            const SizedBox(width: 16),
+                            const SizedBox(width: 14),
                             Expanded(
-                              child: Padding(
-                                padding: const EdgeInsets.only(top: 4),
-                                child: Text(
-                                  step,
-                                  style: const TextStyle(
-                                    fontSize: 15,
-                                    height: 1.5,
-                                    color: Color(0xFF2C3E50),
-                                  ),
+                              child: Text(
+                                step,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  color: Color(0xFF2C3E50),
+                                  fontWeight: FontWeight.w500,
                                 ),
                               ),
                             ),

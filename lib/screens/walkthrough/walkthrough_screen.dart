@@ -174,6 +174,10 @@ class _WalkthroughScreenState extends State<WalkthroughScreen> {
         body: SafeArea(
           child: Column(
             children: [
+              Padding(
+                padding: const EdgeInsets.only(top: 12, bottom: 4),
+                child: Image.asset('assets/images/logo.png', height: 38),
+              ),
               _buildProgressBar(),
               Expanded(
                 child: SingleChildScrollView(

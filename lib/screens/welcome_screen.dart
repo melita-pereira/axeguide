@@ -105,19 +105,15 @@ class _WelcomeScreenState extends State<WelcomeScreen>
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final primaryColor = theme.colorScheme.primary;
-    final isDark = theme.brightness == Brightness.dark;
-
+    final primaryColor = const Color(0xFF013A6E);
+    final accentColor = const Color(0xFFC6FF00);
     return ScrollableScaffold(
       child: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: isDark
-                ? [const Color(0xFF101820), const Color(0xFF1E2A38)]
-                : [const Color(0xFFF9FAFB), const Color(0xFFE8EEF4)],
+            colors: [Colors.white, const Color(0xFFE8EEF4)],
           ),
         ),
         child: FadeTransition(
@@ -139,16 +135,29 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                         curve: Curves.easeOutBack,
                       ),
                     ),
-                    child: Image.asset('assets/images/logo.png', height: 200),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: accentColor.withValues(alpha: 0.18),
+                            blurRadius: 24,
+                            spreadRadius: 2,
+                          ),
+                        ],
+                      ),
+                      child: Image.asset('assets/images/logo.png', height: 160),
+                    ),
                   ),
                   const SizedBox(height: 30),
                   Text(
                     'Welcome to The AxeGuide',
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      fontSize: 28,
+                      fontSize: 30,
                       fontWeight: FontWeight.bold,
                       color: primaryColor,
+                      letterSpacing: 1.1,
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -156,9 +165,9 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                     'Discover locations, learn about local places, and personalize your journey.',
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      fontSize: 16,
+                      fontSize: 17,
                       color: Colors.grey[700],
-                      height: 1.4,
+                      height: 1.5,
                     ),
                   ),
                   const SizedBox(height: 60),
@@ -173,58 +182,56 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                     style: ElevatedButton.styleFrom(
                       backgroundColor: primaryColor,
                       foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      padding: const EdgeInsets.symmetric(vertical: 18),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30),
+                        borderRadius: BorderRadius.circular(32),
+                        side: BorderSide(color: accentColor, width: 2),
                       ),
-                      elevation: 5,
-                      shadowColor: primaryColor.withAlpha((0.3 * 255).round()),
+                      elevation: 7,
+                      shadowColor: accentColor.withValues(alpha: 0.22),
                     ),
                     child: const Text(
                       'Get Started',
                       style: TextStyle(
-                        fontSize: 18,
+                        fontSize: 19,
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
+                        letterSpacing: 0.5,
                       ),
                     ),
                   ),
-
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 18),
                   TextButton(
-  onPressed: () async {
-    // mark welcome as seen
-    await UserBoxHelper.setHasSeenWelcome(true);
-
-    // Mark that user explicitly chose to skip personalization
-    await UserBoxHelper.setSkippedPersonalization(true);
-
-    // Clear any existing walkthrough progress - user chose to skip
-    await UserBoxHelper.clearWalkthroughCheckpoint();
-    await UserBoxHelper.setHasProgress(false);
-
-    // Set basic navigation preference and clear location
-    // ...existing code...
-    await UserBoxHelper.setUserLocation(null);
-    await UserBoxHelper.setNavPreference('basic');
-
-    // Navigate to location selection screen
-    if (!context.mounted) return;
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (_) => LocationSelectionScreen(
-          locations: LocationOption.mainLocations,
-        ),
-      ),
-    );
-  },
-  child: const Text(
-    'Skip Personalization',
-    style: TextStyle(fontSize: 15),
-  ),
-),
-                  // Reset Progress removed from WelcomeScreen — use Settings instead.
+                    onPressed: () async {
+                      await UserBoxHelper.setHasSeenWelcome(true);
+                      await UserBoxHelper.setSkippedPersonalization(true);
+                      await UserBoxHelper.clearWalkthroughCheckpoint();
+                      await UserBoxHelper.setHasProgress(false);
+                      await UserBoxHelper.setUserLocation(null);
+                      await UserBoxHelper.setNavPreference('basic');
+                      if (!context.mounted) return;
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => LocationSelectionScreen(
+                            locations: LocationOption.mainLocations,
+                          ),
+                        ),
+                      );
+                    },
+                    style: TextButton.styleFrom(
+                      foregroundColor: primaryColor,
+                      textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.arrow_forward, color: accentColor, size: 20),
+                        const SizedBox(width: 8),
+                        const Text('Skip Personalization'),
+                      ],
+                    ),
+                  ),
                 ],
               ),
             ),
