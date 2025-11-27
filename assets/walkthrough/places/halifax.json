@@ -1,6 +1,13 @@
 {
   "halifax": [
     {
+      "id": "dynamic_home_halifax",
+      "type": "info",
+      "text": "Loading Halifax Home Screen...",
+      "tip": "You will be redirected to the Halifax home screen.",
+      "options": []
+    },
+    {
       "id": "city_intro",
       "type": "info",
       "text": "Welcome to Halifax! A vibrant coastal city with lots to explore. Before we begin, let's set up a few basics.",
@@ -9,7 +16,6 @@
         { "label": "Continue", "nextStepId": "halifax_transport_pref" }
       ]
     },
-
     {
       "id": "halifax_transport_pref",
       "type": "question",
@@ -33,7 +39,6 @@
         }
       ]
     },
-
     {
       "id": "halifax_essentials_pref",
       "type": "question",
@@ -62,7 +67,6 @@
         }
       ]
     },
-
     {
       "id": "halifax_summary",
       "type": "info",
@@ -72,12 +76,11 @@
         { "label": "Go to Halifax Home", "nextStepId": "explore_halifax" }
       ]
     },
-
     {
       "id": "explore_halifax",
       "type": "action",
       "action": "navigateToHalifaxHomeScreen",
-      "nextStepId": "dynamic_home"
+      "nextStepId": "dynamic_home_halifax"
     }
   ]
 }

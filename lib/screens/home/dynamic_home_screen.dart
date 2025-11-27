@@ -4,6 +4,7 @@ import 'package:axeguide/utils/user_box_helper.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import '../settings_screen.dart';
+import '../walkthrough/walkthrough_screen.dart';
 import '../location_selection_screen.dart';
 import 'package:axeguide/services/hive_service.dart';
 import 'package:axeguide/services/user_mode_notifier.dart';
@@ -52,9 +53,10 @@ class _DynamicHomeScreenState extends State<DynamicHomeScreen> {
     setState(() => loading = true);
 
     final rawLoc = widget.overrideLocation ?? UserBoxHelper.userLocation;
+    // ...existing code...
     if (rawLoc == null || rawLoc.trim().isEmpty) {
       setState(() => loading = false);
-      // Redirect to location selection if no location is set
+      // ...existing code...
       if (mounted) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           Navigator.pushReplacement(
@@ -71,7 +73,31 @@ class _DynamicHomeScreenState extends State<DynamicHomeScreen> {
     }
 
     userLocation = normalizeLocation(rawLoc);
+    // ...existing code...
+
+    // Walkthrough logic: show walkthrough only if not completed/skipped for this location and not opted out
+    final walkthroughDone = UserBoxHelper.walkthroughCompletedLocations.contains(userLocation);
+    final globallyDisabled = UserBoxHelper.walkthroughGloballyDisabled;
+    final skippedPersonalization = UserBoxHelper.skippedPersonalization;
+    final hasSeenWelcome = UserBoxHelper.hasSeenWelcome;
+    // ...existing code...
+    if (!globallyDisabled && !walkthroughDone && !skippedPersonalization && !hasSeenWelcome) {
+      // ...existing code...
+      if (mounted) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (_) => WalkthroughScreen(),
+            ),
+          );
+        });
+      }
+      return;
+    }
+
     layoutForLocation = await _loadLayout(userLocation!);
+    // ...existing code...
 
     final sections =
         (layoutForLocation?['sections'] as List?)
@@ -80,6 +106,7 @@ class _DynamicHomeScreenState extends State<DynamicHomeScreen> {
 
     for (final section in sections) {
       if (section['source'] is String) {
+        // ...existing code...
         await _loadSectionList(section);
       }
     }
@@ -98,7 +125,7 @@ class _DynamicHomeScreenState extends State<DynamicHomeScreen> {
       }
       return null;
     } catch (e) {
-      debugPrint("[Home] layout load failed: $e");
+      // ...existing code...
       return null;
     }
   }
@@ -107,7 +134,7 @@ class _DynamicHomeScreenState extends State<DynamicHomeScreen> {
     final sectionTitle = (section['title'] ?? 'section').toString();
     final source = section['source'] as String;
 
-    debugPrint("[DynamicHome] Loading section: $sectionTitle with source: $source");
+    // ...existing code...
     
     listLoading[sectionTitle] = true;
     if (mounted) setState(() {});
@@ -147,7 +174,7 @@ class _DynamicHomeScreenState extends State<DynamicHomeScreen> {
           results = await _sb.fetchLocationsByTags([userLocation!]);
         }
         
-        debugPrint("[DynamicHome] Loaded ${results.length} locations for '$sectionTitle'");
+        // ...existing code...
         listData[sectionTitle] = results;
       }
       if (source == 'supabase.instagram_accounts') {
@@ -155,7 +182,7 @@ class _DynamicHomeScreenState extends State<DynamicHomeScreen> {
         listData[sectionTitle] = insta;
       }
     } catch (e, stack) {
-      debugPrint("[Home] section list load failed for $sectionTitle: $e");
+      // ...existing code...
       debugPrint("[Home] Stack trace: $stack");
       listData[sectionTitle] = [];
     } finally {
@@ -440,6 +467,7 @@ class _DynamicHomeScreenState extends State<DynamicHomeScreen> {
                 title: const Text("Set as my Home location"),
                 onTap: () async {
                   final norm = normalizeLocation(loc);
+                  debugPrint('[DynamicHomeScreen] Setting userLocation to: $norm');
                   await UserBoxHelper.setUserLocation(norm);
                   await HiveService.clearCacheForLocation(norm);
                   if (!context.mounted) return;

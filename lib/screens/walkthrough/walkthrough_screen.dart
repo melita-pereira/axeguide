@@ -637,7 +637,6 @@ class _WalkthroughScreenState extends State<WalkthroughScreen> {
 
               // If this is the residence dropdown, fetch lat/lng and store
               final valueField = config['valueField'] ?? 'id';
-              final displayField = config['displayField'] ?? 'name';
               final isResidenceDropdown = storeAs == 'user.destinationLocation' && config['source'] == 'supabase';
               if (isResidenceDropdown) {
                 // Find the selected item in dropdownItems

@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:axeguide/utils/hive_boxes.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -66,24 +65,22 @@ class WalkthroughManager {
       final decoded = jsonDecode(raw);
 
       if (decoded is Map<String, dynamic>) {
+        // Collect all step lists
+        List stepsList = [];
         if (decoded.containsKey('steps')) {
-          for (final s in decoded['steps']) {
-            _steps[s['id']] = s;
+          stepsList.addAll(decoded['steps']);
+        }
+        for (final section in decoded.values) {
+          if (section is List) {
+            stepsList.addAll(section);
           }
         }
-
-        else {
-          for (final section in decoded.values) {
-            if (section is List) {
-              for (final s in section) {
-                _steps[s['id']] = s;
-              }
-            }
-          }
+        for (final s in stepsList) {
+          _steps[s['id']] = s;
         }
       }
     } catch (e) {
-      debugPrint("[Walkthrough] Failed to load $path → $e");
+      // ...existing code...
     }
   }
 
@@ -190,14 +187,18 @@ class WalkthroughManager {
   
   void goTo(String? id, {bool addToHistory = true}) {
   if (id != null && _steps.containsKey(id)) {
+    // ...existing code...
     if (_currentStepId != null && _currentStepId != id && addToHistory) {
       _history.add(_currentStepId!);
       // Save history to Hive
       box.put('walkthrough_history', _history);
     }
     _currentStepId = id;
+    // ...existing code...
     _saveCheckpoint();
     _notify();
+  } else {
+    // ...existing code...
   }
 }
 
@@ -253,6 +254,7 @@ class WalkthroughManager {
   }
 
   void _handleAction(Map<String, dynamic> step) async {
+    // ...existing code...
     await actionHandler(step['action'], step['params']);
     goTo(step['nextStepId'], addToHistory: false);
   }

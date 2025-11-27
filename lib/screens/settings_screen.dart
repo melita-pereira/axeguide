@@ -555,6 +555,58 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
 
 
+              const SizedBox(height: 16),
+
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black12,
+                      blurRadius: 6,
+                      offset: Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text(
+                    "Enable Walkthroughs",
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF1A202C),
+                    ),
+                  ),
+                  subtitle: const Text(
+                    "Show onboarding walkthroughs for each area",
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Color(0xFF718096),
+                    ),
+                  ),
+                  value: !UserBoxHelper.walkthroughGloballyDisabled,
+                  onChanged: (value) async {
+                    await UserBoxHelper.setWalkthroughGloballyDisabled(!value);
+                    if (!context.mounted) return;
+                    setState(() {});
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          value
+                              ? "Walkthroughs enabled"
+                              : "Walkthroughs disabled",
+                        ),
+                        duration: Duration(seconds: 2),
+                      ),
+                    );
+                  },
+                  thumbColor: WidgetStateProperty.all(const Color(0xFF013A6E)),
+                ),
+              ),
+
               const SizedBox(height: 32),
 
               // User Info Section

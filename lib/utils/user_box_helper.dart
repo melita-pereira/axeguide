@@ -1,6 +1,39 @@
 import 'package:axeguide/utils/hive_boxes.dart';
 
 class UserBoxHelper {
+      static const String keyWalkthroughGloballyDisabled = 'walkthroughGloballyDisabled';
+
+      static bool get walkthroughGloballyDisabled =>
+          read<bool>(keyWalkthroughGloballyDisabled, defaultValue: false) ?? false;
+
+      static Future<void> setWalkthroughGloballyDisabled(bool value) async {
+        await write(keyWalkthroughGloballyDisabled, value);
+      }
+    // Track completed walkthroughs per location
+    static const String keyWalkthroughCompletedLocations = 'walkthroughCompletedLocations';
+    static const String keyWalkthroughOptOut = 'walkthroughOptOut';
+
+    static List<String> get walkthroughCompletedLocations =>
+        List<String>.from(read<List<dynamic>>(keyWalkthroughCompletedLocations, defaultValue: []) ?? []);
+
+    static Future<void> addWalkthroughCompletedLocation(String locationId) async {
+      final current = walkthroughCompletedLocations;
+      if (!current.contains(locationId)) {
+        current.add(locationId);
+        await write(keyWalkthroughCompletedLocations, current);
+      }
+    }
+
+    static Future<void> clearWalkthroughCompletedLocations() async {
+      await write(keyWalkthroughCompletedLocations, <String>[]);
+    }
+
+    static bool get walkthroughOptOut =>
+        read<bool>(keyWalkthroughOptOut, defaultValue: false) ?? false;
+
+    static Future<void> setWalkthroughOptOut(bool value) async {
+      await write(keyWalkthroughOptOut, value);
+    }
   static const String keyHasProgress = 'hasProgress';
   static const String keyUserMode = 'userMode';
   static const String keyUserLocation = 'userLocation';
@@ -76,8 +109,10 @@ class UserBoxHelper {
   static bool get hasSeenWelcome =>
       read<bool>(keyHasSeenWelcome, defaultValue: false) ?? false;
 
-  static Future<void> setHasSeenWelcome(bool value) =>
-      write(keyHasSeenWelcome, value);
+  static Future<void> setHasSeenWelcome(bool value) {
+    // ...existing code...
+    return write(keyHasSeenWelcome, value);
+  }
 
   static bool get hasProgress =>
       read<bool>(keyHasProgress, defaultValue: false) ?? false;
@@ -91,8 +126,10 @@ class UserBoxHelper {
   static Future<void> setUserMode(String? value) => write(keyUserMode, value);
 
   static String? get userLocation => read<String>(keyUserLocation);
-  static Future<void> setUserLocation(String? value) =>
-      write(keyUserLocation, value);
+  static Future<void> setUserLocation(String? value) {
+    // ...existing code...
+    return write(keyUserLocation, value);
+  }
 
   static String? get currentCampusLocation => read<String>('currentCampusLocation');
   static Future<void> setCurrentCampusLocation(String? value) =>
@@ -132,6 +169,8 @@ class UserBoxHelper {
   static bool get skippedPersonalization =>
       read<bool>('skippedPersonalization', defaultValue: false) ?? false;
 
-  static Future<void> setSkippedPersonalization(bool value) =>
-      write('skippedPersonalization', value);
+  static Future<void> setSkippedPersonalization(bool value) {
+    // ...existing code...
+    return write('skippedPersonalization', value);
+  }
 }

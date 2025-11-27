@@ -75,6 +75,7 @@ class LocationSelectionScreen extends StatelessWidget {
       );
     } else {
       // Save location and navigate to home
+      // ...existing code...
       UserBoxHelper.setUserLocation(location.name);
       Navigator.pushAndRemoveUntil(
         context,

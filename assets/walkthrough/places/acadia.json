@@ -1,6 +1,13 @@
 {
   "acadia": [
     {
+      "id": "dynamic_home_acadia",
+      "type": "info",
+      "text": "Loading Acadia Home Screen...",
+      "tip": "You will be redirected to the Acadia home screen.",
+      "options": []
+    },
+    {
       "id": "acadia_intro",
       "type": "question",
       "text": "Is this your first time at Acadia University?",
@@ -188,7 +195,7 @@
       "type": "action",
       "action": "navigateToAcadiaHomeScreen",
       "tip": "Loads the Acadia home screen with campus navigation, buildings, and student resources.",
-      "nextStepId": "dynamic_home"
+      "nextStepId": "dynamic_home_acadia"
     }
   ]
 }

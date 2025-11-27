@@ -204,6 +204,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
     await UserBoxHelper.setHasProgress(false);
 
     // Set basic navigation preference and clear location
+    // ...existing code...
     await UserBoxHelper.setUserLocation(null);
     await UserBoxHelper.setNavPreference('basic');
 

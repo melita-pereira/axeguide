@@ -189,6 +189,7 @@ class WalkthroughActions {
 
       case "navigateToAirportHomeScreen":
         // Clear checkpoint - walkthrough completed
+        // ...existing code...
         await UserBoxHelper.clearWalkthroughCheckpoint();
         if (!context.mounted) return;
         Navigator.pushAndRemoveUntil(
@@ -196,7 +197,6 @@ class WalkthroughActions {
           MaterialPageRoute(builder: (_) => const DynamicHomeScreen()),
           (route) => false,
         );
-
         return;
 
       case "showShuttlePointers":
@@ -383,15 +383,15 @@ class WalkthroughActions {
         );
 
       case "navigateToWolfvilleHomeScreen":
-        // Clear checkpoint - walkthrough completed
         await UserBoxHelper.clearWalkthroughCheckpoint();
-        if (!context.mounted) return;
+        if (!context.mounted) {
+          return;
+        }
         Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(builder: (_) => const DynamicHomeScreen()),
           (route) => false,
         );
-
         return;
 
       case "showNewMinasEssentials":
@@ -415,7 +415,7 @@ class WalkthroughActions {
         );
 
       case "navigateToNewMinasHomeScreen":
-        // Clear checkpoint - walkthrough completed
+        await UserBoxHelper.addWalkthroughCompletedLocation("new_minas");
         await UserBoxHelper.clearWalkthroughCheckpoint();
         if (!context.mounted) return;
         Navigator.pushAndRemoveUntil(
@@ -423,7 +423,6 @@ class WalkthroughActions {
           MaterialPageRoute(builder: (_) => const DynamicHomeScreen()),
           (route) => false,
         );
-
         return;
 
       case "navigateToAcadiaAttractionsHomeScreen":

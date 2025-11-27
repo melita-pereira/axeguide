@@ -1,6 +1,13 @@
 {
   "halifax_airport": [
     {
+      "id": "dynamic_home",
+      "type": "info",
+      "text": "Loading Halifax Airport Home Screen...",
+      "tip": "You will be redirected to the Halifax Airport home screen.",
+      "options": []
+    },
+          {
       "id": "halifax_airport_intro",
       "type": "question",
       "text": "Are you new to Canada?",
@@ -83,7 +90,6 @@
       "tip": "This will direct you to staff and resources that help new international arrivals.",
       "nextStepId": "airport_sim"
     },
-
     {
       "id": "airport_sim",
       "type": "question",
