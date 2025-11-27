@@ -77,7 +77,8 @@
         "query": {
           "table": "locations",
           "select": "id, name",
-          "area_tag_contains": "acadia"
+          "area_tag_contains": "acadia",
+          "category_id": 1
         },
         "displayField": "name",
         "valueField": "name",

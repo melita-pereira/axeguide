@@ -420,67 +420,76 @@ class WalkthroughManager {
 
   Future<List<Map<String, dynamic>>> fetchDropdownData(Map<String, dynamic> config) async {
     final source = config['source'] as String?;
-    
     if (source == 'supabase') {
-      return await _fetchFromSupabase(config['query']);
+      final results = await _fetchFromSupabase(config['query']);
+      // Sort results alphabetically by name
+      results.sort((a, b) => (a['name'] ?? '').toString().compareTo((b['name'] ?? '').toString()));
+      return results;
     }
-    
     return [];
   }
 
   Future<List<Map<String, dynamic>>> _fetchFromSupabase(Map<String, dynamic> query) async {
     try {
       final supabase = Supabase.instance.client;
-      
       final table = query['table'] as String;
       final select = query['select'] as String;
       final categoryName = query['category_name'] as String?;
       final areaTagContains = query['area_tag_contains'] as String?;
-      
-      // If filtering by category, we need to join through location_categories
-      if (categoryName != null) {
-        // First, get the category ID
+      final categoryId = query['category_id'] as int?;
+
+      // If filtering by category_id, use join table
+      if (categoryId != null) {
+        final locationCategoriesResponse = await supabase
+            .from('location_categories')
+            .select('location_id')
+            .eq('category_id', categoryId);
+        final locationIds = locationCategoriesResponse
+            .map((item) => item['location_id'] as int)
+            .toList();
+        if (locationIds.isEmpty) {
+          return [];
+        }
+        var queryBuilder = supabase
+            .from(table)
+            .select(select)
+            .inFilter('id', locationIds);
+        if (areaTagContains != null) {
+          queryBuilder = queryBuilder.ilike('area_tag', '%$areaTagContains%');
+        }
+        final response = await queryBuilder;
+        return List<Map<String, dynamic>>.from(response);
+      } else if (categoryName != null) {
         final categoryResponse = await supabase
             .from('categories')
             .select('id')
             .eq('name', categoryName)
             .single();
-        final categoryId = categoryResponse['id'] as int;
-        
-        // Get location IDs that have this category from the join table
+        final catId = categoryResponse['id'] as int;
         final locationCategoriesResponse = await supabase
             .from('location_categories')
             .select('location_id')
-            .eq('category_id', categoryId);
-        
+            .eq('category_id', catId);
         final locationIds = locationCategoriesResponse
             .map((item) => item['location_id'] as int)
             .toList();
-        
         if (locationIds.isEmpty) {
           return [];
         }
-        
-        // Now query locations with these IDs
         var queryBuilder = supabase
             .from(table)
             .select(select)
             .inFilter('id', locationIds);
-        
         if (areaTagContains != null) {
           queryBuilder = queryBuilder.ilike('area_tag', '%$areaTagContains%');
         }
-        
         final response = await queryBuilder;
         return List<Map<String, dynamic>>.from(response);
       } else {
-        // No category filter, just query locations directly
         var queryBuilder = supabase.from(table).select(select);
-        
         if (areaTagContains != null) {
           queryBuilder = queryBuilder.ilike('area_tag', '%$areaTagContains%');
         }
-        
         final response = await queryBuilder;
         return List<Map<String, dynamic>>.from(response);
       }

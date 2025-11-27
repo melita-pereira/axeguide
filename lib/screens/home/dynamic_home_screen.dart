@@ -174,11 +174,14 @@ class _DynamicHomeScreenState extends State<DynamicHomeScreen> {
           results = await _sb.fetchLocationsByTags([userLocation!]);
         }
         
-        // ...existing code...
+        // Sort locations alphabetically by name
+        results.sort((a, b) => (a['name'] ?? '').toString().compareTo((b['name'] ?? '').toString()));
         listData[sectionTitle] = results;
       }
       if (source == 'supabase.instagram_accounts') {
         final insta = await _sb.fetchInstagramAccounts();
+        // Sort Instagram accounts alphabetically by account_name
+        insta.sort((a, b) => (a['account_name'] ?? '').toString().compareTo((b['account_name'] ?? '').toString()));
         listData[sectionTitle] = insta;
       }
     } catch (e, stack) {
