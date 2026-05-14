@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:axeguide/utils/user_box_helper.dart';
 import 'package:axeguide/services/hive_service.dart';
 import 'package:axeguide/services/user_mode_notifier.dart';
+import 'package:axeguide/screens/feedback_modal.dart';
 import 'welcome_screen.dart';
 import 'package:axeguide/utils/hive_boxes.dart';
 
@@ -17,7 +18,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
       void initState() {
         super.initState();
       }
-    Future<void> _resetAccessibility(BuildContext context) async {
+    void _openFeedbackModal() {
+    showDialog(
+      context: context,
+      builder: (context) => FeedbackModal(
+        initialLocation: UserBoxHelper.userLocation,
+        onFeedbackSubmitted: () {
+          // Optional: Add analytics or other logic here
+        },
+      ),
+    );
+  }
+
+  Future<void> _resetAccessibility(BuildContext context) async {
       final navPref = await showDialog<String>(
         context: context,
         builder: (BuildContext context) => AlertDialog(
@@ -654,6 +667,41 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       value: _capitalizeFirst(UserBoxHelper.navPreference ?? 'Not set'),
                     ),
                   ],
+                ),
+              ),
+
+              const SizedBox(height: 32),
+
+              // Feedback Section
+              const Text(
+                'Help Us Improve',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF1A202C),
+                ),
+              ),
+              const SizedBox(height: 12),
+
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withAlpha((0.05 * 255).toInt()),
+                      blurRadius: 10,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: _buildResetOption(
+                  context,
+                  icon: Icons.feedback_outlined,
+                  title: 'Send Feedback',
+                  description: 'Share your thoughts and suggestions',
+                  color: Colors.blue.shade600,
+                  onTap: _openFeedbackModal,
                 ),
               ),
 
